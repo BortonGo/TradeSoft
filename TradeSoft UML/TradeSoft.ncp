@@ -121,8 +121,6 @@
     </Entities>
     <Relationships>
       <Relationship type="Association" first="2" second="0">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -135,8 +133,6 @@
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
       <Relationship type="Association" first="6" second="3">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -153,8 +149,6 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="3" second="4">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -167,8 +161,6 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="3" second="2">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -184,8 +176,6 @@
         <EndMultiplicity>0..1</EndMultiplicity>
       </Relationship>
       <Relationship type="Dependency" first="6" second="3">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -198,6 +188,8 @@
         </BendPoint>
       </Relationship>
       <Relationship type="Association" first="6" second="8">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -206,8 +198,6 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Dependency" first="8" second="3">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -220,6 +210,8 @@
         </BendPoint>
       </Relationship>
       <Relationship type="Association" first="8" second="2">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -239,91 +231,204 @@
     <Entities>
       <Entity type="Comment">
         <Text>Сценарий 1: LoadHistory (REST)</Text>
-        <Location left="728" top="243" />
+        <Location left="34" top="299" />
         <Size width="190" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>MainWindow.onLoadClicked()</Text>
-        <Location left="148" top="369" />
+        <Location left="31" top="424" />
         <Size width="176" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>вызывает MarketDataService.loadHistory(symbol, tf)</Text>
-        <Location left="357" top="369" />
+        <Location left="234" top="424" />
         <Size width="227" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>MarketDataService вызывает exchange.fetchKlines(symbol, tf)</Text>
-        <Location left="608" top="369" />
+        <Location left="489" top="424" />
         <Size width="185" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>exchange возвращает List&lt;Candle&gt;</Text>
-        <Location left="822" top="369" />
+        <Location left="702" top="424" />
         <Size width="202" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>MarketDataService создаёт/обновляет currentSeries (CandleSeries)</Text>
-        <Location left="1057" top="369" />
+        <Location left="933" top="424" />
         <Size width="220" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>MarketDataService уведомляет UI: seriesLoaded(currentSeries) (сигнал/коллбек)</Text>
-        <Location left="1311" top="369" />
+        <Location left="1183" top="424" />
         <Size width="253" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>Сценарий 2: Realtime (WS)</Text>
-        <Location left="750" top="516" />
+        <Location left="34" top="669" />
         <Size width="171" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>MainWindow включает realtime</Text>
-        <Location left="24" top="648" />
+        <Location left="34" top="779" />
         <Size width="189" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>вызывает MarketDataService.startRealtime()</Text>
-        <Location left="239" top="648" />
+        <Location left="249" top="779" />
         <Size width="194" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>MarketDataService вызывает exchange.subscribeKlines(symbol, tf)</Text>
-        <Location left="691" top="648" />
+        <Location left="701" top="779" />
         <Size width="206" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>При каждом сообщении WS: MarketDataService.onCandleUpdate(candle)</Text>
-        <Location left="935" top="648" />
+        <Location left="936" top="779" />
         <Size width="241" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>Если это та же свеча → currentSeries.updateLastCandle(candle)</Text>
-        <Location left="1200" top="612" />
+        <Location left="1239" top="725" />
         <Size width="217" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>Если свеча закрылась → currentSeries.addCandle(candle)</Text>
-        <Location left="1200" top="688" />
+        <Location left="1239" top="837" />
         <Size width="217" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>Уведомление UI: candleUpdated/ candleClosed</Text>
-        <Location left="1458" top="648" />
+        <Location left="1547" top="779" />
         <Size width="190" height="50" />
       </Entity>
       <Entity type="Comment">
         <Text>UI получает данные только через уведомления MarketDataService</Text>
-        <Location left="1338" top="107" />
+        <Location left="46" top="109" />
         <Size width="122" height="76" />
       </Entity>
       <Entity type="Comment">
         <Text>MarketDataService проверяет: есть ли currentSeries
 если нет → ошибка / игнор</Text>
-        <Location left="463" top="648" />
+        <Location left="471" top="779" />
         <Size width="200" height="64" />
       </Entity>
     </Entities>
-    <Relationships />
+    <Relationships>
+      <Relationship type="Comment" first="1" second="2">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>232</X>
+          <Y>452</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="2" second="3">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>488</X>
+          <Y>452</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="3" second="4">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>700</X>
+          <Y>449</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>677</X>
+          <Y>449</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="4" second="5">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>929</X>
+          <Y>448</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="5" second="6">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>1187</X>
+          <Y>453</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="8" second="9">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>248</X>
+          <Y>807</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="9" second="16">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>469</X>
+          <Y>808</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="16" second="10">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>698</X>
+          <Y>803</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="10" second="11">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>932</X>
+          <Y>808</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="11" second="12">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>1214</X>
+          <Y>809</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>1214</X>
+          <Y>750</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="11" second="13">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>1214</X>
+          <Y>809</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="12" second="14">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>1492</X>
+          <Y>754</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Comment" first="13" second="14">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>1493</X>
+          <Y>860</Y>
+        </BendPoint>
+      </Relationship>
+    </Relationships>
   </ProjectItem>
 </Project>

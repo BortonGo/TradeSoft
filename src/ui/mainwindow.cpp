@@ -12,14 +12,14 @@ MainWindow::MainWindow(QWidget *parent) :
     // Timeframes
     ui->comboTimeframe->clear();
 
-    for(Timeframe tf : allTimeframes()) {
+    for(const Timeframe& tf : allTimeframes()) {
         ui->comboTimeframe->addItem(toUiString(tf), static_cast<int>(tf));
     };
 
     // Some symbols
     ui->comboSymbol->clear();
 
-    for(Symbol s : someSymbols()) {
+    for(const Symbol& s : someSymbols()) {
         ui->comboSymbol->addItem(s.display(), s.id());
     }
 }
@@ -27,4 +27,9 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::on_btnLoad_clicked()
+{
+
 }
