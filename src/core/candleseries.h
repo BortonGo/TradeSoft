@@ -16,6 +16,6 @@ public:
 
     void addCandle(const Candle& c);
     void updateLastCandle(const Candle& c);
-    const Candle& last();
+    const Candle& last() const;
 };
 
