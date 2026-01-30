@@ -190,36 +190,6 @@ color: white;                /* цвет текста */</string>
                 <string notr="true">background-color: rgb(43, 43, 43);
 color: white;                /* цвет текста */</string>
                </property>
-               <item>
-                <property name="text">
-                 <string>M1</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>M5</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>M15</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>H1</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>H4</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D1</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item>

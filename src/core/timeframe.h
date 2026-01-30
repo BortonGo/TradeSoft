@@ -1,4 +1,43 @@
-#ifndef TIMEFRAME_H
-#define TIMEFRAME_H
+#pragma once
+#include <QString>
+#include <QStringList>
 
-#endif // TIMEFRAME_H
+enum class Timeframe {
+    M1,
+    M5,
+    M15,
+    H1,
+    H4,
+    D1
+};
+
+inline QString toUiString(Timeframe tf) {
+    switch (tf){
+        case Timeframe::M1 : return "M1";
+        case Timeframe::M5 : return "M5";
+        case Timeframe::M15 : return "M15";
+        case Timeframe::H1 : return "H1";
+        case Timeframe::H4 : return "H4";
+        case Timeframe::D1 : return "D1";
+    }
+    return "M1";
+}
+
+inline Timeframe timeframeFromUiString(QString str) {
+    if (str == "M1") return Timeframe::M1;
+    if (str == "M5") return Timeframe::M5;
+    if (str == "M15") return Timeframe::M15;
+    if (str == "H1") return Timeframe::H1;
+    if (str == "H4") return Timeframe::H4;
+    if (str == "D1") return Timeframe::D1;
+
+    return Timeframe::M1;
+}
+
+inline QList<Timeframe> allTimeframes() {
+    return { Timeframe::M1, Timeframe::M5, Timeframe::M15,
+            Timeframe::H1, Timeframe::H4, Timeframe::D1 };
+}
+
+
+
