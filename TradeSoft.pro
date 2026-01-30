@@ -29,8 +29,8 @@ HEADERS  += src\ui\mainwindow.h \
     src\exchange\bingxswapclient.h \
     src\exchange\fakeexchangeclient.h
 
-FORMS    += mainwindow.ui \
-    chartwidget.ui
+FORMS    += mainwindow.ui
+
 
 DISTFILES += \
     .gitignore
