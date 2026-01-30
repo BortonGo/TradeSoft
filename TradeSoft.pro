@@ -18,8 +18,7 @@ SOURCES += src\main.cpp\
     src\core\candleseries.cpp \
     src\service\marketdataservice.cpp \
     src\exchange\bingxswapclient.cpp \
-    src\exchange\fakeexchangeclient.cpp \
-    src/core/timeframe.cpp
+    src\exchange\fakeexchangeclient.cpp
 
 HEADERS  += src\ui\mainwindow.h \
     src\ui\chartwidget.h \
