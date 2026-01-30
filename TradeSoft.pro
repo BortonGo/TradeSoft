@@ -13,21 +13,24 @@ TEMPLATE = app
 
 
 SOURCES += src\main.cpp\
-        src\mainwindow.cpp \
-    src\chartwidget.cpp \
-    src\candleseries.cpp \
-    src\marketdataservice.cpp \
-    src\bingxswapclient.cpp \
-    src\fakeexchangeclient.cpp
+        src\ui\mainwindow.cpp \
+    src\ui\chartwidget.cpp \
+    src\core\candleseries.cpp \
+    src\service\marketdataservice.cpp \
+    src\exchange\bingxswapclient.cpp \
+    src\exchange\fakeexchangeclient.cpp
 
-HEADERS  += src\mainwindow.h \
-    src\chartwidget.h \
-    src\candle.h \
-    src\candleseries.h \
-    src\marketdataservice.h \
-    src\iexchangeclient.h \
-    src\bingxswapclient.h \
-    src\fakeexchangeclient.h
+HEADERS  += src\ui\mainwindow.h \
+    src\ui\chartwidget.h \
+    src\core\candle.h \
+    src\core\candleseries.h \
+    src\service\marketdataservice.h \
+    src\exchange\iexchangeclient.h \
+    src\exchange\bingxswapclient.h \
+    src\exchange\fakeexchangeclient.h
 
 FORMS    += mainwindow.ui \
     chartwidget.ui
+
+DISTFILES += \
+    .gitignore
