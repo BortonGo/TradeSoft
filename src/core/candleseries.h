@@ -13,5 +13,9 @@ public:
 
     const QString& symbol() const;
     Timeframe timeframe() const;
+
+    void addCandle(const Candle& c);
+    void updateLastCandle(const Candle& c);
+    const Candle& last();
 };
 
