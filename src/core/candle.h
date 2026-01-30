@@ -1,4 +1,14 @@
-#ifndef CANDLE_H
-#define CANDLE_H
+#pragma once
+#include <cstdint>
 
-#endif // CANDLE_H
+struct Candle {
+    int64_t timestamp;
+
+    double open;
+    double high;
+    double low;
+    double close;
+
+    double volume;
+    bool isFinal;
+};
