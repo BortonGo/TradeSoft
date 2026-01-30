@@ -1,0 +1,4 @@
+#ifndef CHARTWIDGET_H
+#define CHARTWIDGET_H
+
+#endif // CHARTWIDGET_H
