@@ -1,0 +1,329 @@
+<Project>
+  <Name>TradeSoft</Name>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>MarketData_MVP</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Class">
+        <Name>Candle</Name>
+        <Access>Public</Access>
+        <Location left="977" top="501" />
+        <Size width="166" height="196" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public long timestamp</Member>
+        <Member type="Field">public double open</Member>
+        <Member type="Field">public double hight</Member>
+        <Member type="Field">public double low</Member>
+        <Member type="Field">public double clouse</Member>
+        <Member type="Field">public double volume</Member>
+        <Member type="Field">public bool isFinal</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Enum">
+        <Name>Timeframe</Name>
+        <Access>Public</Access>
+        <Location left="1207" top="206" />
+        <Size width="162" height="163" />
+        <Collapsed>False</Collapsed>
+        <Value>M1</Value>
+        <Value>M5</Value>
+        <Value>M15</Value>
+        <Value>H1</Value>
+        <Value>H4</Value>
+        <Value>D1</Value>
+      </Entity>
+      <Entity type="Class">
+        <Name>CandleSeries</Name>
+        <Access>Public</Access>
+        <Location left="673" top="501" />
+        <Size width="215" height="179" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">private string symbol</Member>
+        <Member type="Field">private Timeframe timeframe</Member>
+        <Member type="Field">private List&lt;Candle&gt; candles</Member>
+        <Member type="Method">public void addCandle(Candle c)</Member>
+        <Member type="Method">public void updateLastCandle(Candle c)</Member>
+        <Member type="Method">public Candle last()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>MarketDataService</Name>
+        <Access>Public</Access>
+        <Location left="165" top="565" />
+        <Size width="333" height="331" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">private shared_ptr&lt;CandleSeries&gt; currentSeries</Member>
+        <Member type="Field">private shared_ptr&lt;IExchangeClient&gt; exchange</Member>
+        <Member type="Method">public void loadHistory(string symbol, Timeframe tf)</Member>
+        <Member type="Method">public void startRealtime()</Member>
+        <Member type="Method">public void stopRealtime()</Member>
+        <Member type="Method">public void onCandleUpdate(Candle c)</Member>
+        <Member type="Method">public void signal_seriesLoaded(shared_ptr&lt;CandleSeries&gt; series)</Member>
+        <Member type="Method">public void signal_candleUpdate(Candle c)</Member>
+        <Member type="Method">public void signal_candleClosed(Candle c)</Member>
+        <Member type="Method">public void signal_connectionStateChanged(string state)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Interface">
+        <Name>IExchangeClient</Name>
+        <Access>Public</Access>
+        <Location left="622" top="715" />
+        <Size width="314" height="118" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">List&lt;Candle&gt; fetchKlines(string symbol, Timeframe tf)</Member>
+        <Member type="Method">void subscribeKlines(string symbol, Timeframe tf)</Member>
+      </Entity>
+      <Entity type="Class">
+        <Name>BingXSwapClient</Name>
+        <Access>Public</Access>
+        <Location left="705" top="906" />
+        <Size width="162" height="77" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>MainWindow</Name>
+        <Access>Public</Access>
+        <Location left="165" top="147" />
+        <Size width="319" height="255" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">private MarketDataService marketData</Member>
+        <Member type="Method">public void onLoadClicked()</Member>
+        <Member type="Method">public void onSymbolChanged()</Member>
+        <Member type="Method">public void onTimeframeChanged()</Member>
+        <Member type="Method">public void slot_onError(string text)</Member>
+        <Member type="Method">public void slot_onConnectionStateChanged(string state)</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>connect signals</Text>
+        <Location left="386" top="458" />
+        <Size width="63" height="50" />
+      </Entity>
+      <Entity type="Class">
+        <Name>ChartWidget</Name>
+        <Access>Public</Access>
+        <Location left="692" top="182" />
+        <Size width="300" height="169" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">private shared_ptr&lt;CandleSeries&gt; series</Member>
+        <Member type="Method">public void slot_setSeries(shared_ptr&lt;CandleSeries&gt; series)</Member>
+        <Member type="Method">public void slot_onCandleUpdate(Candle c)</Member>
+        <Member type="Method">public void slot_onCandleClosed(Candle c)</Member>
+        <Member type="Method">public void clear()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Comment">
+        <Text>connect signals</Text>
+        <Location left="722" top="373" />
+        <Size width="63" height="50" />
+      </Entity>
+    </Entities>
+    <Relationships>
+      <Relationship type="Association" first="2" second="0">
+        <Label>
+        </Label>
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>0..*</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Realization" first="5" second="4">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+      <Relationship type="Association" first="6" second="3">
+        <Label>
+        </Label>
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>235</X>
+          <Y>427</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>235</X>
+          <Y>540</Y>
+        </BendPoint>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Association</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>1</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="3" second="4">
+        <Label>
+        </Label>
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>523</X>
+          <Y>787</Y>
+        </BendPoint>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Association</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>1</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Association" first="3" second="2">
+        <Label>
+        </Label>
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>535</X>
+          <Y>648</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>648</X>
+          <Y>592</Y>
+        </BendPoint>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Association</AssociationType>
+        <EndMultiplicity>0..1</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Dependency" first="6" second="3">
+        <Label>
+        </Label>
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>390</X>
+          <Y>431</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>390</X>
+          <Y>540</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Association" first="6" second="8">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+        <StartMultiplicity>1</StartMultiplicity>
+        <EndMultiplicity>1</EndMultiplicity>
+      </Relationship>
+      <Relationship type="Dependency" first="8" second="3">
+        <Label>
+        </Label>
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>726</X>
+          <Y>382</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>481</X>
+          <Y>540</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Association" first="8" second="2">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>862</X>
+          <Y>381</Y>
+        </BendPoint>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Association</AssociationType>
+        <StartMultiplicity>0</StartMultiplicity>
+        <EndMultiplicity>1</EndMultiplicity>
+      </Relationship>
+    </Relationships>
+  </ProjectItem>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>MarketData_Sequences</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Comment">
+        <Text>Сценарий 1: LoadHistory (REST)</Text>
+        <Location left="728" top="243" />
+        <Size width="190" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>MainWindow.onLoadClicked()</Text>
+        <Location left="148" top="369" />
+        <Size width="176" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>вызывает MarketDataService.loadHistory(symbol, tf)</Text>
+        <Location left="357" top="369" />
+        <Size width="227" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>MarketDataService вызывает exchange.fetchKlines(symbol, tf)</Text>
+        <Location left="608" top="369" />
+        <Size width="185" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>exchange возвращает List&lt;Candle&gt;</Text>
+        <Location left="822" top="369" />
+        <Size width="202" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>MarketDataService создаёт/обновляет currentSeries (CandleSeries)</Text>
+        <Location left="1057" top="369" />
+        <Size width="220" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>MarketDataService уведомляет UI: seriesLoaded(currentSeries) (сигнал/коллбек)</Text>
+        <Location left="1311" top="369" />
+        <Size width="253" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>Сценарий 2: Realtime (WS)</Text>
+        <Location left="750" top="516" />
+        <Size width="171" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>MainWindow включает realtime</Text>
+        <Location left="24" top="648" />
+        <Size width="189" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>вызывает MarketDataService.startRealtime()</Text>
+        <Location left="239" top="648" />
+        <Size width="194" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>MarketDataService вызывает exchange.subscribeKlines(symbol, tf)</Text>
+        <Location left="691" top="648" />
+        <Size width="206" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>При каждом сообщении WS: MarketDataService.onCandleUpdate(candle)</Text>
+        <Location left="935" top="648" />
+        <Size width="241" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>Если это та же свеча → currentSeries.updateLastCandle(candle)</Text>
+        <Location left="1200" top="612" />
+        <Size width="217" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>Если свеча закрылась → currentSeries.addCandle(candle)</Text>
+        <Location left="1200" top="688" />
+        <Size width="217" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>Уведомление UI: candleUpdated/ candleClosed</Text>
+        <Location left="1458" top="648" />
+        <Size width="190" height="50" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>UI получает данные только через уведомления MarketDataService</Text>
+        <Location left="1338" top="107" />
+        <Size width="122" height="76" />
+      </Entity>
+      <Entity type="Comment">
+        <Text>MarketDataService проверяет: есть ли currentSeries
+если нет → ошибка / игнор</Text>
+        <Location left="463" top="648" />
+        <Size width="200" height="64" />
+      </Entity>
+    </Entities>
+    <Relationships />
+  </ProjectItem>
+</Project>
