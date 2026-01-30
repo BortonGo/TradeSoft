@@ -28,7 +28,8 @@ HEADERS  += src\ui\mainwindow.h \
     src\exchange\iexchangeclient.h \
     src\exchange\bingxswapclient.h \
     src\exchange\fakeexchangeclient.h \
-    src/core/timeframe.h
+    src/core/timeframe.h \
+    src/core/symbol.h
 
 FORMS    += mainwindow.ui
 

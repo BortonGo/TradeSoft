@@ -120,51 +120,6 @@ color: white;                /* цвет текста */</string>
                 <string notr="true">background-color: rgb(43, 43, 43);
 color: white;                /* цвет текста */</string>
                </property>
-               <item>
-                <property name="text">
-                 <string>BTC/USDT</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>ETH/USDT</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>XRP/USDT</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>SEI/USDT</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>APEX/USDT</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>ADA/USDT</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>SOL/USDT</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>PEPE/USDT</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>TON/USDT</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item>
