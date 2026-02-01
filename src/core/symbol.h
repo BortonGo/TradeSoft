@@ -3,17 +3,17 @@
 #include <QList>
 
 struct Symbol {
-    QString base;
-    QString quote;
+    QString base_;
+    QString quote_;
 
-    Symbol(const QString& b, const QString& q) : base(b), quote(q) {}
+    Symbol(const QString& b, const QString& q) : base_(b), quote_(q) {}
 
     QString id() const {
-        return base + quote;
+        return base_ + quote_;
     }
 
     QString display() const {
-        return base + "/" + quote;
+        return base_ + "/" + quote_;
     }
 };
 

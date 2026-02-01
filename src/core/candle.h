@@ -2,13 +2,13 @@
 #include <cstdint>
 
 struct Candle {
-    int64_t timestamp;
+    int64_t timestamp_;
 
-    double open;
-    double high;
-    double low;
-    double close;
+    double open_;
+    double high_;
+    double low_;
+    double close_;
 
-    double volume;
-    bool isFinal;
+    double volume_;
+    bool isFinal_;
 };

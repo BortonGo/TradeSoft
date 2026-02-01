@@ -17,11 +17,11 @@ void CandleSeries::updateLastCandle(const Candle& c) {
 
     Candle& last = candles_.last();
 
-    last.high = std::max(last.high, c.high);
-    last.low = std::min(last.low, c.low);
-    last.close = c.close;
-    last.volume = c.volume;
-    last.isFinal = c.isFinal;
+    last.high_ = std::max(last.high_, c.high_);
+    last.low_ = std::min(last.low_, c.low_);
+    last.close_ = c.close_;
+    last.volume_ = c.volume_;
+    last.isFinal_ = c.isFinal_;
 
 }
 
