@@ -6,11 +6,13 @@
 
 class MarketDataService : public QObject
 {
+    Q_OBJECT
+
     std::shared_ptr<IExchangeClient> exchange_;
     std::shared_ptr<CandleSeries> currentSeries_;
 
 public:
-    explicit MarketDataService(std::shared_ptr<IExchangeClient> exchange);
+    explicit MarketDataService(std::shared_ptr<IExchangeClient> exchange, QObject* parent = nullptr);
 
     void loadHistory(const QString& symbolId, Timeframe tf);
 

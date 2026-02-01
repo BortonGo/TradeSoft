@@ -2,14 +2,14 @@
 #include <iostream>
 #include <QDebug>
 
-MarketDataService::MarketDataService(std::shared_ptr<IExchangeClient> exchange) : exchange_(exchange)
+MarketDataService::MarketDataService(std::shared_ptr<IExchangeClient> exchange, QObject *parent) : QObject(parent), exchange_(exchange)
 {
     Q_ASSERT(exchange_);
 }
 
 void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
     if (symbolId.isEmpty()){
-        qWarning() << "symbolId is empty!";
+        qWarning() << "[MarketDataService] symbolId is empty!";
         return;
     }
 
@@ -21,16 +21,13 @@ void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
     QList<Candle> candles = exchange_->fetchKlines(symbolId, tf);
     std::shared_ptr<CandleSeries> series = std::make_shared<CandleSeries> (symbolId, tf);
 
-    for(auto& c : candles) {
+    for(const auto& c : candles) {
         series->addCandle(c);
     }
 
     currentSeries_ = series;
 
-    signal_seriesLoaded(currentSeries_);
+    emit signal_seriesLoaded(currentSeries_);
 
 }
 
-void MarketDataService::signal_seriesLoaded(std::shared_ptr<CandleSeries> series) {
-
-}

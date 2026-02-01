@@ -1,11 +1,9 @@
-#ifndef FAKEEXCHANGECLIENT_H
-#define FAKEEXCHANGECLIENT_H
+#pragma once
+#include "iexchangeclient.h"
 
-
-class FakeExchangeClient
+class FakeExchangeClient : public IExchangeClient
 {
 public:
-    FakeExchangeClient();
+    QList<Candle> fetchKlines(const QString& symbolId, Timeframe tf) override;
 };
 
-#endif // FAKEEXCHANGECLIENT_H
