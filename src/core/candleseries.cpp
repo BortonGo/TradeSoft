@@ -5,6 +5,7 @@ CandleSeries::CandleSeries(const QString& symbolId, Timeframe tf) : symbol_(symb
 
 const QString& CandleSeries::symbol() const { return symbol_; }
 Timeframe CandleSeries::timeframe() const { return timeframe_; }
+int CandleSeries::candleCount() const { return candles_.size(); }
 
 void CandleSeries::addCandle(const Candle& c) {
     candles_.push_back(c);
