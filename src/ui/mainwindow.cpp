@@ -2,6 +2,9 @@
 #include "ui_mainwindow.h"
 #include "src/core/timeframe.h"
 #include "src/core/symbol.h"
+#include "src/service/marketdataservice.h"
+#include "src/exchange/fakeexchangeclient.h"
+#include <memory>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,6 +25,12 @@ MainWindow::MainWindow(QWidget *parent) :
     for(const Symbol& s : someSymbols()) {
         ui->comboSymbol->addItem(s.display(), s.id());
     }
+
+    //IExchangeClient
+    std::shared_ptr<IExchangeClient> ex = std::make_shared<FakeExchangeClient>();
+
+    //MarketDataService
+    MarketDataService* market = new MarketDataService(ex, this);
 }
 
 MainWindow::~MainWindow()

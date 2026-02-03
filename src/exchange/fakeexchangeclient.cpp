@@ -47,14 +47,14 @@ QList<Candle> FakeExchangeClient::fetchKlines(const QString& symbolId, Timeframe
         const double hiBase = std::max(open, close);
         const double loBase = std::min(open, close);
 
-        const double hight = hiBase + wickDist(rng);
+        const double high = hiBase + wickDist(rng);
         const double low = loBase - wickDist(rng);
 
         Candle c;
         c.timestamp_ = startPlotTime;
         c.open_ = open;
         c.close_ = close;
-        c.high_ = hight;
+        c.high_ = high;
         c.low_ = low;
         c.volume_ = volDist(rng);
         c.isFinal_ = true;
