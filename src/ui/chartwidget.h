@@ -4,8 +4,8 @@
 #include <QWidget>
 #include <QPaintEvent>
 #include <memory>
-#include "src\core\candleseries.h"
-#include "src\core\candle.h"
+#include "core\candleseries.h"
+#include "core\candle.h"
 
 class ChartWidget : public QWidget {
     Q_OBJECT

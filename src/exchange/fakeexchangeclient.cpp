@@ -1,5 +1,5 @@
 #include "fakeexchangeclient.h"
-#include "src\core\timeframe.h"
+#include "core\timeframe.h"
 #include <QDateTime>
 #include <QtGlobal>
 

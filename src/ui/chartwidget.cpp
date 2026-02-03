@@ -1,4 +1,4 @@
-#include "src\ui\chartwidget.h"
+#include "ui\chartwidget.h"
 #include <QPainter>
 
 ChartWidget::ChartWidget(QWidget* parent) : QWidget(parent) {}

@@ -1,10 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "src/core/timeframe.h"
-#include "src/core/symbol.h"
-#include "src/service/marketdataservice.h"
-#include "src/exchange/fakeexchangeclient.h"
-#include "src\ui\chartwidget.h"
+#include "core\timeframe.h"
+#include "core\symbol.h"
+#include "service\marketdataservice.h"
+#include "exchange\fakeexchangeclient.h"
+#include "ui\chartwidget.h"
 #include <memory>
 
 MainWindow::MainWindow(QWidget *parent) :

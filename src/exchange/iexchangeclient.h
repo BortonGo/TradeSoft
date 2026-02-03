@@ -1,8 +1,8 @@
 #pragma once
 #include <QString>
 #include <QList>
-#include "src\core\candle.h"
-#include "src\core\timeframe.h"
+#include "core\candle.h"
+#include "core\timeframe.h"
 
 class IExchangeClient {
 public:

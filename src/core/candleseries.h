@@ -1,5 +1,5 @@
 #pragma once
-#include "src\core\timeframe.h"
+#include "core\timeframe.h"
 #include "candle.h"
 
 class CandleSeries

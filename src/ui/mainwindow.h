@@ -1,6 +1,6 @@
 #pragma once
 #include <QMainWindow>
-#include "src\service\marketdataservice.h"
+#include "service\marketdataservice.h"
 
 namespace Ui {
 class MainWindow;
