@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //MarketDataService
     MarketDataService* market = new MarketDataService(ex, this);
+    marketData_ = market;
 }
 
 MainWindow::~MainWindow()
