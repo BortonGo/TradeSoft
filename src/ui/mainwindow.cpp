@@ -4,6 +4,7 @@
 #include "src/core/symbol.h"
 #include "src/service/marketdataservice.h"
 #include "src/exchange/fakeexchangeclient.h"
+#include "src\ui\chartwidget.h"
 #include <memory>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -32,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //MarketDataService
     MarketDataService* market = new MarketDataService(ex, this);
     marketData_ = market;
+
+    QObject::connect(marketData_, &MarketDataService::signal_seriesLoaded, ui->chartWidget, &ChartWidget::slot_setSeries);
 }
 
 MainWindow::~MainWindow()

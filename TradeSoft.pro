@@ -36,3 +36,5 @@ FORMS    += mainwindow.ui
 
 DISTFILES += \
     .gitignore
+
+INCLUDEPATH += $$PWD\src

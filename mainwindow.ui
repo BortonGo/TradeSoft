@@ -57,7 +57,7 @@ color: white;                /* цвет текста */</string>
         <property name="currentIndex">
          <number>0</number>
         </property>
-        <widget class="QWidget" name="tab_chart" native="true">
+        <widget class="QWidget" name="tab_chart">
          <property name="styleSheet">
           <string notr="true">background-color: rgb(22, 22, 22);
 
@@ -68,7 +68,7 @@ color: white;                /* цвет текста */</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0">
           <item row="2" column="0">
-           <widget class="QWidget" name="widget" native="true">
+           <widget class="ChartWidget" name="chartWidget" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -283,6 +283,14 @@ color: white;                /* цвет текста */</string>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>ChartWidget</class>
+   <extends>QWidget</extends>
+   <header>chartwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
