@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // block signals comboSymbol/Timeframne
     // make for correct work om_combo...IndexChanged
     ui->comboSymbol->blockSignals(true);
+    ui->comboTimeframe->blockSignals(true);
 
     // Timeframes
     ui->comboTimeframe->clear();
@@ -33,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // unlock signals comboSymbol/Timeframne
     ui->comboSymbol->blockSignals(false);
+    ui->comboTimeframe->blockSignals(false);
 
     //IExchangeClient
     std::shared_ptr<IExchangeClient> ex = std::make_shared<FakeExchangeClient>();
@@ -57,6 +59,13 @@ void MainWindow::on_btnLoad_clicked()
 }
 
 void MainWindow::on_comboSymbol_currentIndexChanged(int index)
+{
+    Q_UNUSED(index);
+
+    on_btnLoad_clicked();
+}
+
+void MainWindow::on_comboTimeframe_currentIndexChanged(int index)
 {
     Q_UNUSED(index);
 
