@@ -44,5 +44,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_btnLoad_clicked()
 {
-
+   const QString currentSymbol = ui->comboSymbol->currentData().toString();
+   Timeframe tf = static_cast<Timeframe>(ui->comboTimeframe->currentData().toInt());
+   marketData_->loadHistory(currentSymbol, tf);
 }
