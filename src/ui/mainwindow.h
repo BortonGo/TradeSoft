@@ -15,6 +15,8 @@ class MainWindow : public QMainWindow
 private slots:
     void on_btnLoad_clicked();
 
+    void on_comboSymbol_currentIndexChanged(int index);
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();

@@ -13,6 +13,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // block signals comboSymbol/Timeframne
+    // make for correct work om_combo...IndexChanged
+    ui->comboSymbol->blockSignals(true);
+
     // Timeframes
     ui->comboTimeframe->clear();
 
@@ -26,6 +30,9 @@ MainWindow::MainWindow(QWidget *parent) :
     for(const Symbol& s : someSymbols()) {
         ui->comboSymbol->addItem(s.display(), s.id());
     }
+
+    // unlock signals comboSymbol/Timeframne
+    ui->comboSymbol->blockSignals(false);
 
     //IExchangeClient
     std::shared_ptr<IExchangeClient> ex = std::make_shared<FakeExchangeClient>();
@@ -47,4 +54,11 @@ void MainWindow::on_btnLoad_clicked()
    const QString currentSymbol = ui->comboSymbol->currentData().toString();
    Timeframe tf = static_cast<Timeframe>(ui->comboTimeframe->currentData().toInt());
    marketData_->loadHistory(currentSymbol, tf);
+}
+
+void MainWindow::on_comboSymbol_currentIndexChanged(int index)
+{
+    Q_UNUSED(index);
+
+    on_btnLoad_clicked();
 }
