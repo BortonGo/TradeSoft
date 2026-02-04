@@ -56,14 +56,15 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
     };
 
     // step X
-    const double dx = (bars > 1) ? static_cast<double>(plot.width() / bars) : plot.width();
+    const double dx = (bars > 1) ? (static_cast<double>(plot.width()) / bars) : plot.width();
     const double bodyW = std::max(1.0, dx * 0.6);
 
     for (int k = 0; k < bars; ++k) {
         const Candle& c = candles[first + k];
-        const int xCenter = static_cast<int>(std::round(plot.left() + (k + 0.5)) * dx);
+        const int xCenter = static_cast<int>(std::round(plot.left() + (k + 0.5) * dx));
 
         const int yOpen = priceToY(c.open_);
+
         const int yClose = priceToY(c.close_);
         const int yHigh = priceToY(c.high_);
         const int yLow = priceToY(c.low_);
@@ -94,10 +95,10 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 ///
 
 void ChartWidget::slot_onCandleUpdate(Candle c) {
-
+    Q_UNUSED(c);
 }
 
 void ChartWidget::slot_onCandleClosed(Candle c) {
-
+     Q_UNUSED(c);
 }
 

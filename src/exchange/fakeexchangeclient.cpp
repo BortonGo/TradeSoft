@@ -7,18 +7,6 @@
 #include <algorithm>
 #include <cstdlib>
 
-static int64_t timeframeToMs(Timeframe tf){
-    switch(tf){
-        case Timeframe::M1: return 60LL * 1000;
-        case Timeframe::M5: return 5LL * 60 * 1000;
-        case Timeframe::M15: return 15LL * 60 * 1000;
-        case Timeframe::H1: return 60LL * 60 * 1000;
-        case Timeframe::H4: return 4LL * 60 * 60 * 1000;
-        case Timeframe::D1: return 24LL * 60 * 60 * 1000;
-    }
-    return 60LL * 1000;
-}
-
 QList<Candle> FakeExchangeClient::fetchKlines(const QString& symbolId, Timeframe tf) {
     Q_UNUSED(symbolId);
 

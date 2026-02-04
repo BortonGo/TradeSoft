@@ -19,6 +19,8 @@ private slots:
 
     void on_comboTimeframe_currentIndexChanged(int index);
 
+    void on_chkRealtime_toggled(bool checked);
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();

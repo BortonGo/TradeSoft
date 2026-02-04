@@ -71,3 +71,15 @@ void MainWindow::on_comboTimeframe_currentIndexChanged(int index)
 
     on_btnLoad_clicked();
 }
+
+void MainWindow::on_chkRealtime_toggled(bool checked)
+{
+    if (!marketData_) {
+        return;
+    }
+    if (checked) {
+        marketData_->startRealTime();
+    } else {
+        marketData_->stopRealTime();
+    }
+}
