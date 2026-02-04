@@ -26,6 +26,14 @@ void CandleSeries::updateLastCandle(const Candle& c) {
 
 }
 
-const Candle& CandleSeries::last() const{
+const Candle& CandleSeries::last() const {
     return candles_.constLast();
+}
+
+int CandleSeries::getCount() const {
+    return candles_.size();
+}
+
+const QList<Candle>& CandleSeries::getCandles() const {
+    return candles_;
 }

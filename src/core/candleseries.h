@@ -18,5 +18,8 @@ public:
     void addCandle(const Candle& c);
     void updateLastCandle(const Candle& c);
     const Candle& last() const;
+
+    int getCount() const;
+    const QList<Candle>& getCandles() const;
 };
 
