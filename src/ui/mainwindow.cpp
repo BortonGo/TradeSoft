@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
     marketData_ = market;
 
     QObject::connect(marketData_, &MarketDataService::signal_seriesLoaded, ui->chartWidget, &ChartWidget::slot_setSeries);
+    QObject::connect(marketData_, &MarketDataService::signal_candleUpdated, ui->chartWidget, &ChartWidget::slot_onCandleUpdate);
+    QObject::connect(marketData_, &MarketDataService::signal_candleClosed, ui->chartWidget, &ChartWidget::slot_onCandleClosed);
 }
 
 MainWindow::~MainWindow()

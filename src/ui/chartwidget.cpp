@@ -95,10 +95,19 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 ///
 
 void ChartWidget::slot_onCandleUpdate(Candle c) {
-    Q_UNUSED(c);
+    if (!series_) {
+        return;
+    }
+
+    series_->updateLastCandle(c);
+    update();
 }
 
 void ChartWidget::slot_onCandleClosed(Candle c) {
-     Q_UNUSED(c);
+    if (!series_) {
+        return;
+    }
+    series_->updateLastCandle(c);
+    update();
 }
 

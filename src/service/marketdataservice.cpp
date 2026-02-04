@@ -36,17 +36,23 @@ void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
 
 }
 
-void MarketDataService::startRealTime() {
-    if (currentSeries_ == nullptr) {
+void MarketDataService::startRealTime()
+{
+    if (!currentSeries_) {
         qWarning() << "[MarketDataService] currentSeries_ == nullptr";
+        return;
     }
-    if(rtTimer_ == nullptr) {
+
+    if (!rtTimer_) {
         rtTimer_ = new QTimer(this);
         rtTimer_->setInterval(300);
         connect(rtTimer_, &QTimer::timeout, this, &MarketDataService::onRtTick);
-        tickInCandle_ = 0;
-        rtTimer_->start();
     }
+
+    tickInCandle_ = 0;
+
+    if (!rtTimer_->isActive())
+        rtTimer_->start();
 }
 
 void MarketDataService::stopRealTime() {
