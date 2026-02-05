@@ -90,9 +90,33 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
 }
 
-///
-/// Реализовать позже
-///
+int ChartWidget::maxVisibleByWidth() const {
+    const int plotW = width() - leftPadding_ - rightPadding_;
+    if (plotW <= 0) {
+        return 0;
+    }
+
+    const int step = candleWidth_ + candleGap_;
+    if (step <= 0) {
+        return 0;
+    }
+
+    return std::max(1, plotW / step);
+}
+
+int ChartWidget::lastVisible() const {
+    if (!series_ || series_->getCount() <= 0) {
+        return -1;
+    }
+
+    const int count = series_->getCount();
+    const int maxVis = maxVisibleByWidth();
+    const int vis = std::min(visibleCount_, maxVis);
+
+    const int last = firstVisible_ + vis - 1;
+    return qBound(0, last, count - 1);
+}
+
 
 void ChartWidget::slot_onCandleUpdate(Candle c) {
     if (!series_) {
