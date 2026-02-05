@@ -1,11 +1,34 @@
 #include "ui\chartwidget.h"
+#include <limits>
+#include <cmath>
 #include <QPainter>
 
 ChartWidget::ChartWidget(QWidget* parent) : QWidget(parent) {}
 
-void ChartWidget::slot_setSeries(std::shared_ptr<CandleSeries> series) {
-    series_ = series;
-    update();
+static bool calcVisibleMinMax(const CandleSeries& s, int first, int last, double& outMinLow, double& outMaxHigh) {
+    if (first < 0 || (last < first)) {
+        return false;
+    }
+    outMinLow = std::numeric_limits<double>::infinity();
+    outMaxHigh = -std::numeric_limits<double>::infinity();
+
+    const QList<Candle>& candles = s.getCandles();
+
+    for (int i = first; i <= last; ++i) {
+        const Candle& c = candles[i];
+        outMinLow = std::min(outMinLow, c.low_);
+        outMaxHigh = std::max(outMaxHigh, c.high_);
+    }
+
+    if (!std::isfinite(outMinLow) || !std::isfinite(outMaxHigh)) {
+        return false;
+    }
+    if (outMaxHigh <= outMinLow) {
+        const double mid = outMinLow;
+        outMinLow = mid - 1.0;
+        outMaxHigh = mid + 1.0;
+    }
+    return true;
 }
 
 void ChartWidget::paintEvent(QPaintEvent* event) {
@@ -24,28 +47,44 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
     const auto& candles = series_->getCandles();
 
-    const int maxBars = 120;
-    const int total = candles.size();
-    const int first = std::max(0, total - maxBars);
-    const int bars = total - first;
-    if (bars <= 0) {
+    // plot-area
+    QRect plot = rect().adjusted(leftPadding_, topPadding_, -rightPadding_, -bottomPadding_);
+    if (plot.width() <= 0 || plot.height() <= 0) {
         return;
     }
 
-    // рабочая область с отступами
-    const int leftPad = 40, rightPad = 40, topPad = 10, bottomPad =20;
-    QRect plot = rect().adjusted(leftPad, topPad, -rightPad, -bottomPad);
-
-    // min/max по видимому диапазону
-    double minLow = candles[first].low_;
-    double maxHigh = candles[first].high_;
-    for (int i = first; i < total; ++i) {
-        minLow = std::min(minLow, candles[i].low_);
-        maxHigh = std::max(maxHigh, candles[i].high_);
-    }
-    if (maxHigh <= minLow) {
+    // if window dont set yet, visibleCount_ going to width
+    const int maxVis = maxVisibleByWidth();
+    if (maxVis <= 0) {
         return;
     }
+    const int vis = std::min(visibleCount_, maxVis);
+
+    const int count = series_->getCount();
+    if (count <= 0) {
+        return;
+    }
+
+    // stand right (while dont have pan/zoom)
+    firstVisible_ = std::max(0, count - vis);
+
+    const int first = firstVisible_;
+    const int last = lastVisible();
+    if (last < first) {
+        return;
+    }
+
+    // min/max
+    double minLow = 0.0;
+    double maxHigh = 0.0;
+    if (!calcVisibleMinMax(*series_, first, last, minLow, maxHigh)) {
+        return;
+    }
+
+    // padding by Y
+    const double range = maxHigh - minLow;
+    minLow -= range * 0.05;
+    maxHigh += range * 0.05;
 
     // scale Y
     const double yScale = plot.height() / (maxHigh - minLow);
@@ -56,12 +95,14 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
     };
 
     // step X
-    const double dx = (bars > 1) ? (static_cast<double>(plot.width()) / bars) : plot.width();
-    const double bodyW = std::max(1.0, dx * 0.6);
+    const int step = candleWidth_ + candleGap_;
 
-    for (int k = 0; k < bars; ++k) {
-        const Candle& c = candles[first + k];
-        const int xCenter = static_cast<int>(std::round(plot.left() + (k + 0.5) * dx));
+    for (int i = first; i <= last; ++i) {
+        const Candle& c = candles[i];
+
+        const int k = i - first;
+        const int x = plot.left() + k * step;
+        const int xCenter = x + candleWidth_ / 2;
 
         const int yOpen = priceToY(c.open_);
 
@@ -79,7 +120,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         const int topY = std::min(yOpen, yClose);
         const int botY = std::max(yOpen, yClose);
 
-        QRect body(static_cast<int>(std::round(xCenter - bodyW / 2.0)), topY, static_cast<int>(std::round(bodyW)), std::max(1, botY - topY));
+        QRect body(static_cast<int>(std::round(xCenter - candleWidth_ / 2.0)), topY, static_cast<int>(std::round(candleWidth_)), std::max(1, botY - topY));
 
         painter.fillRect(body, bull ? QColor(0,200,0) : QColor(200,0,0));
     }
@@ -117,6 +158,15 @@ int ChartWidget::lastVisible() const {
     return qBound(0, last, count - 1);
 }
 
+
+
+
+//========================================================== SLOTS ==========================================================
+
+void ChartWidget::slot_setSeries(std::shared_ptr<CandleSeries> series) {
+    series_ = series;
+    update();
+}
 
 void ChartWidget::slot_onCandleUpdate(Candle c) {
     if (!series_) {
