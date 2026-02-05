@@ -31,6 +31,7 @@ static bool calcVisibleMinMax(const CandleSeries& s, int first, int last, double
     return true;
 }
 
+//==================================================== PaintEvent ====================================================
 void ChartWidget::paintEvent(QPaintEvent* event) {
     Q_UNUSED(event);
 
@@ -58,15 +59,11 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
     if (maxVis <= 0) {
         return;
     }
-    const int vis = std::min(visibleCount_, maxVis);
 
     const int count = series_->getCount();
     if (count <= 0) {
         return;
     }
-
-    // stand right (while dont have pan/zoom)
-    firstVisible_ = std::max(0, count - vis);
 
     const int first = firstVisible_;
     const int last = lastVisible();
@@ -131,6 +128,16 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
 }
 
+
+//==================================================== ResizeEvent ====================================================
+void ChartWidget::resizeEvent(QResizeEvent *event) {
+    Q_UNUSED(event);
+    QWidget::resizeEvent(event);
+
+    normalizeViewport();
+    update();
+}
+
 int ChartWidget::maxVisibleByWidth() const {
     const int plotW = width() - leftPadding_ - rightPadding_;
     if (plotW <= 0) {
@@ -180,6 +187,12 @@ void ChartWidget::normalizeViewport() {
     } else if (firstVisible_ > maxFirst) {
         firstVisible_ = maxFirst;
     }
+
+    if (candleWidth_ < minCandleWidth_) {
+        candleWidth_ = minCandleWidth_;
+    } else if (candleWidth_ > maxCandleWidth_) {
+        candleWidth_ = maxCandleWidth_;
+    }
 }
 
 
@@ -188,6 +201,8 @@ void ChartWidget::normalizeViewport() {
 
 void ChartWidget::slot_setSeries(std::shared_ptr<CandleSeries> series) {
     series_ = series;
+    followRight_ = true;
+    normalizeViewport();
     update();
 }
 
@@ -197,6 +212,7 @@ void ChartWidget::slot_onCandleUpdate(Candle c) {
     }
 
     series_->updateLastCandle(c);
+    normalizeViewport();
     update();
 }
 
@@ -205,6 +221,7 @@ void ChartWidget::slot_onCandleClosed(Candle c) {
         return;
     }
     series_->updateLastCandle(c);
+    normalizeViewport();
     update();
 }
 

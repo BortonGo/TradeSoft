@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QPaintEvent>
+#include <QResizeEvent>
 #include <memory>
 #include "core\candleseries.h"
 #include "core\candle.h"
@@ -36,11 +37,12 @@ public:
 
 public slots:
     void slot_setSeries(std::shared_ptr<CandleSeries> series);
-    void slot_onCandleUpdate(Candle c); // написать позже реализацию
-    void slot_onCandleClosed(Candle c); // написать позже реализацию
+    void slot_onCandleUpdate(Candle c);
+    void slot_onCandleClosed(Candle c);
 
 protected:
     void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 
 };
