@@ -200,6 +200,36 @@ void ChartWidget::wheelEvent(QWheelEvent* event) {
 
 }
 
+
+//========================================================== SLOTS ==========================================================
+
+void ChartWidget::slot_setSeries(std::shared_ptr<CandleSeries> series) {
+    series_ = series;
+    followRight_ = true;
+    normalizeViewport();
+    update();
+}
+
+void ChartWidget::slot_onCandleUpdate(Candle c) {
+    if (!series_) {
+        return;
+    }
+
+    series_->updateLastCandle(c);
+    normalizeViewport();
+    update();
+}
+
+void ChartWidget::slot_onCandleClosed(Candle c) {
+    if (!series_) {
+        return;
+    }
+    series_->updateLastCandle(c);
+    normalizeViewport();
+    update();
+}
+
+//========================================================== Helpers ==========================================================
 int ChartWidget::maxVisibleByWidth() const {
     const int plotW = width() - leftPadding_ - rightPadding_;
     if (plotW <= 0) {
@@ -257,33 +287,17 @@ void ChartWidget::normalizeViewport() {
     }
 }
 
+//========================================================== Helpers to WheelEvent ==========================================================
+QRectF ChartWidget::plotRect() const {
 
-
-//========================================================== SLOTS ==========================================================
-
-void ChartWidget::slot_setSeries(std::shared_ptr<CandleSeries> series) {
-    series_ = series;
-    followRight_ = true;
-    normalizeViewport();
-    update();
 }
 
-void ChartWidget::slot_onCandleUpdate(Candle c) {
-    if (!series_) {
-        return;
-    }
+int ChartWidget::stepPx() const {
 
-    series_->updateLastCandle(c);
-    normalizeViewport();
-    update();
 }
 
-void ChartWidget::slot_onCandleClosed(Candle c) {
-    if (!series_) {
-        return;
-    }
-    series_->updateLastCandle(c);
-    normalizeViewport();
-    update();
+int ChartWidget::clampCandleWidth(int w) const {
+
 }
+
 
