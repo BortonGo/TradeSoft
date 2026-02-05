@@ -138,6 +138,62 @@ void ChartWidget::resizeEvent(QResizeEvent *event) {
     update();
 }
 
+
+//==================================================== MouseEvent ====================================================
+void ChartWidget::mousePressEvent(QMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        isPanning_ = true;
+        panLastX_ = event->pos().x();
+        panRemainder_ = 0.0;
+
+        followRight_ = false;
+        event->accept();
+        return;
+    }
+    QWidget::mousePressEvent(event);
+}
+
+void ChartWidget::mouseMoveEvent(QMouseEvent* event) {
+    if (!isPanning_ || !series_) {
+        QWidget::mouseMoveEvent(event);
+        return;
+    }
+
+    const int dx = event->pos().x() - panLastX_;
+    panLastX_ = event->pos().x();
+
+    const int step = candleWidth_ + candleGap_;
+
+    if (step <= 0) {
+        return;
+    }
+
+    // pixels to candles
+    double deltaBars = static_cast<double>(dx) / step;
+    panRemainder_ += deltaBars;
+
+    const int shift = static_cast<int>(panRemainder_);
+    if (shift != 0) {
+        firstVisible_ -= shift;
+        panRemainder_ -= shift;
+
+        normalizeViewport();
+        update();
+    }
+
+    event->accept();
+
+}
+
+void ChartWidget::mouseReleaseEvent(QMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        isPanning_ = false;
+        event->accept();
+        return;
+    }
+    QWidget::mouseReleaseEvent(event);
+}
+
 int ChartWidget::maxVisibleByWidth() const {
     const int plotW = width() - leftPadding_ - rightPadding_;
     if (plotW <= 0) {

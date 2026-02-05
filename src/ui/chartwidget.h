@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPaintEvent>
 #include <QResizeEvent>
+#include <QMouseEvent>
 #include <memory>
 #include "core\candleseries.h"
 #include "core\candle.h"
@@ -29,6 +30,10 @@ class ChartWidget : public QWidget {
 
     bool followRight_ = true;
 
+    bool isPanning_ = false;
+    int panLastX_ = 0;
+    double panRemainder_ = 0.0;
+
 public:
     explicit ChartWidget(QWidget* parent = nullptr);
     int maxVisibleByWidth() const;
@@ -44,5 +49,8 @@ protected:
     void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent *event) override;
 
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 
 };
