@@ -5,6 +5,7 @@
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <QMouseEvent>
+#include <QWheelEvent>
 #include <memory>
 #include "core\candleseries.h"
 #include "core\candle.h"
@@ -15,7 +16,7 @@ class ChartWidget : public QWidget {
     std::shared_ptr<CandleSeries> series_;
 
     int firstVisible_ = 0;
-    int visibleCount_ = 200;
+    int visibleCount_ = 500;
 
     int candleWidth_ = 6;
     int minCandleWidth_ = 2;
@@ -52,5 +53,12 @@ protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
+
+    void wheelEvent(QWheelEvent* event) override;
+
+private:
+    QRectF plotRect() const;
+    int stepPx() const;
+    int clampCandleWidth(int w) const;
 
 };

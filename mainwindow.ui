@@ -75,6 +75,12 @@ color: white;                /* цвет текста */</string>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>220</height>
+             </size>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(43, 43, 43);
 color: white;                /* цвет текста */</string>

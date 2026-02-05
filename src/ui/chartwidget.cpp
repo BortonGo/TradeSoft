@@ -194,6 +194,12 @@ void ChartWidget::mouseReleaseEvent(QMouseEvent* event) {
     QWidget::mouseReleaseEvent(event);
 }
 
+
+//==================================================== WheelEvent ====================================================
+void ChartWidget::wheelEvent(QWheelEvent* event) {
+
+}
+
 int ChartWidget::maxVisibleByWidth() const {
     const int plotW = width() - leftPadding_ - rightPadding_;
     if (plotW <= 0) {
