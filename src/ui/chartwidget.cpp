@@ -158,6 +158,29 @@ int ChartWidget::lastVisible() const {
     return qBound(0, last, count - 1);
 }
 
+void ChartWidget::normalizeViewport() {
+    if (!series_) {
+        return;
+    }
+    const int count = series_->getCount();
+    if (count == 0) {
+        return;
+    }
+
+    int vis = std::min(visibleCount_, maxVisibleByWidth());
+    if (vis <= 0) {
+        return;
+    }
+
+    int maxFirst = std::max(0, count - vis);
+    if (followRight_ == true) {
+        firstVisible_ = maxFirst;
+    } else if (firstVisible_ < 0){
+        firstVisible_ = 0;
+    } else if (firstVisible_ > maxFirst) {
+        firstVisible_ = maxFirst;
+    }
+}
 
 
 
