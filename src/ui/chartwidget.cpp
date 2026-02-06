@@ -289,7 +289,11 @@ void ChartWidget::normalizeViewport() {
 
 //========================================================== Helpers to WheelEvent ==========================================================
 QRectF ChartWidget::plotRect() const {
-
+    return QRecrF(leftPadding_,
+                  topPadding_,
+                  width() - leftPadding_ - rightPadding_,
+                  height() - topPadding_ - bottomPadding_
+                  );
 }
 
 int ChartWidget::stepPx() const {
