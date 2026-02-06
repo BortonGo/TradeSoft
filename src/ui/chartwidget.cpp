@@ -297,7 +297,7 @@ QRectF ChartWidget::plotRect() const {
 }
 
 int ChartWidget::stepPx() const {
-
+    return candleWidth_ + candleGap_;
 }
 
 int ChartWidget::clampCandleWidth(int w) const {
