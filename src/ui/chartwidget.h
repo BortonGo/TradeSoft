@@ -34,6 +34,7 @@ class ChartWidget : public QWidget {
     bool isPanning_ = false;
     int panLastX_ = 0;
     double panRemainder_ = 0.0;
+    double candleWidthAcc_ = 6.0;
 
 public:
     explicit ChartWidget(QWidget* parent = nullptr);
@@ -59,6 +60,6 @@ protected:
 private:
     QRectF plotRect() const;
     int stepPx() const;
-    int clampCandleWidth(int w) const;
+    int clampCandleWidth(int width) const;
 
 };

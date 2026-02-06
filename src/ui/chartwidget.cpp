@@ -1,9 +1,13 @@
 #include "ui\chartwidget.h"
 #include <limits>
+#include <algorithm>
 #include <cmath>
 #include <QPainter>
+#include <QDebug>
 
-ChartWidget::ChartWidget(QWidget* parent) : QWidget(parent) {}
+ChartWidget::ChartWidget(QWidget* parent) : QWidget(parent) {
+    candleWidthAcc_ = static_cast<double>(candleWidth_);
+}
 
 static bool calcVisibleMinMax(const CandleSeries& s, int first, int last, double& outMinLow, double& outMaxHigh) {
     if (first < 0 || (last < first)) {
@@ -197,7 +201,84 @@ void ChartWidget::mouseReleaseEvent(QMouseEvent* event) {
 
 //==================================================== WheelEvent ====================================================
 void ChartWidget::wheelEvent(QWheelEvent* event) {
+    if (!series_ || series_->getCount() == 0) {
+        event->ignore();
+        return;
+    }
 
+    int delta = event->angleDelta().y(); // delta > 0 -> wheel up, zoom in // delta < 0 -> wheel down, zoom out
+    if (delta == 0) {
+        delta = event->pixelDelta().y();
+    }
+    if(delta == 0) {
+        event->ignore();
+        return;
+    }
+
+    const QRectF plotArea = plotRect();
+    double cursorXInPlot = event->posF().x() - plotArea.left();
+
+    if (cursorXInPlot < 0.0) {
+        cursorXInPlot = 0;
+    } else if (cursorXInPlot > plotArea.width()) {
+        cursorXInPlot = plotArea.width();
+    }
+
+    int oldStep = stepPx();
+
+    double anchor = static_cast<double>(firstVisible_) + cursorXInPlot / static_cast<double>(oldStep); //anchor - ind candle under cursor now
+
+    // New scale
+
+    double zoomSteps = static_cast<double>(delta) / 120.0;
+    double zoomBase = 1.12; // percent of change scale by one zoomStep
+    double zoomKoef = std::pow(zoomBase, zoomSteps);
+    candleWidthAcc_ *= zoomKoef;
+
+    if (candleWidthAcc_ < minCandleWidth_) {
+        candleWidthAcc_ = minCandleWidth_;
+    }
+
+    if (candleWidthAcc_ > maxCandleWidth_) {
+        candleWidthAcc_ = maxCandleWidth_;
+    }
+
+    int newWidth = clampCandleWidth(static_cast<int>(std::lround(candleWidthAcc_)));
+    newWidth = clampCandleWidth(newWidth);
+
+    if (newWidth == candleWidth_) {
+        event->accept();
+        return;
+    }
+
+    // FollowRight (like TradingView)
+
+    double distToRight = plotArea.width() - cursorXInPlot;
+    bool nearRightEdge = distToRight < 30.0;
+
+    if(!nearRightEdge) {
+        followRight_ = false;
+    }
+
+    candleWidth_ = newWidth;
+    int newStep = stepPx();
+
+    double newFirst = anchor - cursorXInPlot / static_cast<double>(newStep);
+
+    double floored = std::floor(newFirst);
+    double frac = newFirst - floored;
+
+    firstVisible_ = static_cast<int>(floored);
+    panRemainder_ = frac + static_cast<double>(newStep);
+
+    qDebug() << "delta" << delta
+             << "width" << candleWidth_
+             << "acc" << candleWidthAcc_;
+
+
+    normalizeViewport();
+    update();
+    event->accept();
 }
 
 
@@ -289,7 +370,7 @@ void ChartWidget::normalizeViewport() {
 
 //========================================================== Helpers to WheelEvent ==========================================================
 QRectF ChartWidget::plotRect() const {
-    return QRecrF(leftPadding_,
+    return QRectF(leftPadding_,
                   topPadding_,
                   width() - leftPadding_ - rightPadding_,
                   height() - topPadding_ - bottomPadding_
