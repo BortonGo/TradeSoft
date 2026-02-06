@@ -300,8 +300,14 @@ int ChartWidget::stepPx() const {
     return candleWidth_ + candleGap_;
 }
 
-int ChartWidget::clampCandleWidth(int w) const {
-
+int ChartWidget::clampCandleWidth(int width) const {
+    if (width < minCandleWidth_) {
+        return minCandleWidth_;
+    }
+    if (width > maxCandleWidth_) {
+        return maxCandleWidth_;
+    }
+    return width;
 }
 
 
