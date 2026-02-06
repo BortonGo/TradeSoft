@@ -38,9 +38,6 @@ class ChartWidget : public QWidget {
 
 public:
     explicit ChartWidget(QWidget* parent = nullptr);
-    int maxVisibleByWidth() const;
-    int lastVisible() const;
-    void normalizeViewport();
 
 public slots:
     void slot_setSeries(std::shared_ptr<CandleSeries> series);
@@ -58,6 +55,10 @@ protected:
     void wheelEvent(QWheelEvent* event) override;
 
 private:
+    int maxVisibleByWidth() const;
+    int lastVisible() const;
+    void normalizeViewport();
+    bool isNearRightEdgeByData(int snapCandles) const;
     QRectF plotRect() const;
     int stepPx() const;
     int clampCandleWidth(int width) const;

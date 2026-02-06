@@ -181,6 +181,13 @@ void ChartWidget::mouseMoveEvent(QMouseEvent* event) {
         firstVisible_ -= shift;
         panRemainder_ -= shift;
 
+        const int SNAP_CANDLES = 2;
+
+        if(shift < 0 && isNearRightEdgeByData(SNAP_CANDLES)) {
+            followRight_ = true;
+            panRemainder_ = 0.0;
+        }
+
         normalizeViewport();
         update();
     }
@@ -366,6 +373,16 @@ void ChartWidget::normalizeViewport() {
     } else if (candleWidth_ > maxCandleWidth_) {
         candleWidth_ = maxCandleWidth_;
     }
+}
+
+bool ChartWidget::isNearRightEdgeByData(int snapCandles) const {
+    if (!series_ || series_->getCount() <= 0) {
+        return false;
+    }
+    const int lastDataIdx = series_->getCount() - 1;
+    const int dist = lastDataIdx - lastVisible();
+
+    return dist <= snapCandles;
 }
 
 //========================================================== Helpers to WheelEvent ==========================================================
