@@ -178,17 +178,31 @@ void ChartWidget::mouseMoveEvent(QMouseEvent* event) {
 
     const int shift = static_cast<int>(panRemainder_);
     if (shift != 0) {
+
+        const int prevFirst = firstVisible_;
+
         firstVisible_ -= shift;
         panRemainder_ -= shift;
 
-        const int SNAP_CANDLES = 2;
+        normalizeViewport();
 
-        if(shift < 0 && isNearRightEdgeByData(SNAP_CANDLES)) {
+        const int count = series_->getCount();
+        const int vis = std::min(visibleCount_, maxVisibleByWidth());
+        const int maxFirst = std::max(0, count - vis);
+
+        const int SNAP_CANDLES = 5;
+
+        const bool movedTowardRightEdge = (shift < 0);
+        const bool wasInHistory = (prevFirst < maxFirst - SNAP_CANDLES);
+        const bool nowNearEdge = (firstVisible_ >= maxFirst - SNAP_CANDLES);
+
+        if(movedTowardRightEdge && wasInHistory && nowNearEdge) {
             followRight_ = true;
+            firstVisible_ = maxFirst;
             panRemainder_ = 0.0;
+            normalizeViewport();
         }
 
-        normalizeViewport();
         update();
     }
 
@@ -278,11 +292,6 @@ void ChartWidget::wheelEvent(QWheelEvent* event) {
     firstVisible_ = static_cast<int>(floored);
     panRemainder_ = frac + static_cast<double>(newStep);
 
-    qDebug() << "delta" << delta
-             << "width" << candleWidth_
-             << "acc" << candleWidthAcc_;
-
-
     normalizeViewport();
     update();
     event->accept();
@@ -360,12 +369,11 @@ void ChartWidget::normalizeViewport() {
     }
 
     int maxFirst = std::max(0, count - vis);
-    if (followRight_ == true) {
+    int maxFirstAllowed = count - 1;
+    if (followRight_) {
         firstVisible_ = maxFirst;
-    } else if (firstVisible_ < 0){
-        firstVisible_ = 0;
-    } else if (firstVisible_ > maxFirst) {
-        firstVisible_ = maxFirst;
+    } else {
+        firstVisible_ = qBound(0, firstVisible_, maxFirstAllowed);
     }
 
     if (candleWidth_ < minCandleWidth_) {
@@ -373,16 +381,6 @@ void ChartWidget::normalizeViewport() {
     } else if (candleWidth_ > maxCandleWidth_) {
         candleWidth_ = maxCandleWidth_;
     }
-}
-
-bool ChartWidget::isNearRightEdgeByData(int snapCandles) const {
-    if (!series_ || series_->getCount() <= 0) {
-        return false;
-    }
-    const int lastDataIdx = series_->getCount() - 1;
-    const int dist = lastDataIdx - lastVisible();
-
-    return dist <= snapCandles;
 }
 
 //========================================================== Helpers to WheelEvent ==========================================================
