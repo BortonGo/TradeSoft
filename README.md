@@ -79,7 +79,7 @@ UI
 
 - `MarketDataService`
 - `IExchangeClient`
-- `BinanceClient` (пример)
+- `BingXClient` 
 - `ChartWidget`
 - `OrderManager`
 - `StrategyBase`
