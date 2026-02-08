@@ -126,6 +126,70 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         painter.fillRect(body, bull ? QColor(0,200,0) : QColor(200,0,0));
     }
 
+    // Y axis (price scale)
+
+    // Сколько подписей хотим(1 text on 60px)
+    const int desiredTicks = qBound(5, plot.height() / 60, 10);
+
+    const double priceRange = (maxHigh - minLow);
+    if (priceRange > 0.0 && desiredTicks > 0) {
+
+        // rawStep
+        const double rawStep = priceRange / static_cast<double>(desiredTicks);
+
+        // nice step: 1/2/5 * 10^n
+        const double pow10 = std::pow(10, std::floor(std::log10(rawStep)));
+        const double m = rawStep / pow10;
+
+        double niceM = 1.0;
+        if (m <= 1.0) {
+            niceM = 1.0;
+        } else if (m <= 2.0) {
+            niceM = 2.0;
+        } else if (m <= 5.0) {
+            niceM = 5.0;
+        } else {
+            niceM = 10.0;
+        }
+
+        const double stepPrice = niceM * pow10;
+
+        // decimals for beautiful numbers
+        int decimals = 2;
+        if (stepPrice < 1.0) {
+            decimals = static_cast<int>(std::ceil(-std::log10(stepPrice))) + 1;
+            decimals = qBound(2, decimals, 8);
+        }
+
+        // first tick
+        const double firstTick = std::ceil(minLow / stepPrice) * stepPrice;
+
+        // draw text and ticks in right padding
+        painter.setPen(QColor(180,180,180));
+
+        int lastDrawnY = std::numeric_limits<int>::min();
+
+        for (double p = firstTick; p <= maxHigh + stepPrice * 0.5; p += stepPrice) {
+            const int y = priceToY(p);
+
+            if (std::abs(y - lastDrawnY) < 14) {
+                continue;
+            }
+            lastDrawnY = y;
+
+            painter.drawLine(plot.right() - 3, y, plot.right() + 3, y);
+
+            // right text
+            const QString label = QString::number(p, 'f', decimals);
+
+            // text rectangle
+            QRect textRect(plot.right() + 6, y - 8, rightPadding_ - 8, 16);
+            painter.drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft, label);
+
+        }
+
+    }
+
     // frame
     painter.setPen(QColor(80,80,80));
     painter.drawRect(plot);
