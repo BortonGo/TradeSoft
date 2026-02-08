@@ -191,6 +191,51 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         }
     }
 
+    // Current price line
+    if (!candles.isEmpty()) {
+        const double lastPrice = candles.last().close_;
+        const int y = priceToY(lastPrice);
+
+        QPen pen(QColor(220, 220, 220));
+        pen.setStyle(Qt::DashLine);
+        painter.setPen(pen);
+        painter.drawLine(plot.left(), y, plot.right(), y);
+    }
+
+    // Current price label
+        if (!candles.isEmpty()) {
+            const double lastPrice = candles.last().close_;
+            const int y = priceToY(lastPrice);
+
+            const QString text = QString::number(lastPrice, 'f', 2);
+
+            const int padX = 6;
+            const int h = 18;
+
+            const QFontMetrics fm(painter.font());
+            const int w = fm.boundingRect(text).width() + padX * 2;
+
+            int x = plot.right() + 6;
+            int yTop = y - h / 2;
+
+            yTop = qBound(plot.top(), yTop, plot.bottom() - h);
+
+            QRect r(x, yTop, w, h);
+
+            painter.save();
+
+            // background , frame
+            painter.setPen(QColor(60, 60, 60));
+            painter.setBrush(QColor(35, 35, 35));
+            painter.drawRect(r);
+
+            // text
+            painter.setPen(QColor(230,230,230));
+            painter.drawText(r, Qt::AlignCenter, text);
+
+            painter.restore();
+    }
+
     // frame
     painter.setPen(QColor(80,80,80));
     painter.drawRect(plot);
