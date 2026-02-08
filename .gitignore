@@ -8,3 +8,4 @@ build/
 .vscode/
 cmake-build-*/
 TradeSoft.pro.user
+TradeSoft.pro
