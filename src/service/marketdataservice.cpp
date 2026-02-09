@@ -3,7 +3,7 @@
 #include <QDebug>
 
 MarketDataService::MarketDataService(std::shared_ptr<IExchangeClient> exchange, QObject *parent) :
-    QObject(parent), exchange_(exchange), rng_(std::random_device{}())
+    QObject(parent), exchange_(exchange)
 {
     Q_ASSERT(exchange_);
 }
@@ -33,6 +33,7 @@ void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
 
 
     emit signal_seriesLoaded(currentSeries_);
+    useExchangeRealtime_ = exchange_->supportsPollingRealtime();
 
 }
 
@@ -45,47 +46,21 @@ void MarketDataService::startRealTime()
 
     if (!rtTimer_) {
         rtTimer_ = new QTimer(this);
-        rtTimer_->setInterval(300);
         connect(rtTimer_, &QTimer::timeout, this, &MarketDataService::onRtTick);
     }
 
-    tickInCandle_ = 0;
+    rtTimer_->setInterval(1000);
 
     if (!rtTimer_->isActive())
         rtTimer_->start();
 }
 
 void MarketDataService::stopRealTime() {
-    if (!rtTimer_) {
-        return;
+    if (rtTimer_) {
+        rtTimer_->stop();
     }
-    rtTimer_->stop();
+    requestInFlight_ = false;
 }
-
-int MarketDataService::ticksPerCandle(Timeframe tf) const {
-    switch (tf){
-        case Timeframe::M1 : return 5;
-        case Timeframe::M5 : return 10;
-        case Timeframe::M15 : return 15;
-        case Timeframe::H1 : return 20;
-        case Timeframe::H4 : return 30;
-        case Timeframe::D1 : return 40;
-    default : return 5;
-    }
-}
-
-Candle MarketDataService::makeNextCandle(const Candle& closed) const {
-    Candle next;
-    next.timestamp_ = closed.timestamp_ + timeframeToMs(rtTimeframe_);
-    next.open_ = closed.close_;
-    next.close_ = next.open_;
-    next.high_ = next.open_;
-    next.low_  = next.open_;
-    next.volume_ = 0.0;
-    next.isFinal_ = false;
-    return next;
-}
-
 
 void MarketDataService::onRtTick()
 {
@@ -93,43 +68,51 @@ void MarketDataService::onRtTick()
         return;
     }
 
-    Candle last = currentSeries_->last();
+    // --------- BingX realtime via polling ----------
+    if (useExchangeRealtime_) {
+        if (requestInFlight_) {
+            return;
+        }
+        requestInFlight_ = true;
 
-    static const double sigma = 1.5;
-    static thread_local std::normal_distribution<double> dist(0.0, sigma);
-    static thread_local std::uniform_real_distribution<double> volDist(10.0, 200.0);
+        exchange_->fetchLastKlineAsync(rtSymbolId_, rtTimeframe_,
+            [this](bool ok, const Candle& freshIn) {
 
-    const double delta = dist(rng_);
-    const double randomSmallVolume = volDist(rng_);
+                requestInFlight_ = false;
 
-    const double newClose = last.close_ + delta;
-    last.close_ = newClose;
-    last.high_ = std::max(last.high_, newClose);
-    last.low_  = std::min(last.low_,  newClose);
-    last.volume_ += randomSmallVolume;
-    last.isFinal_ = false;
+                if (!ok || !currentSeries_ || currentSeries_->getCount() == 0) {
+                    return;
+                }
 
-    tickInCandle_++;
+                Candle fresh = freshIn;
+                Candle last = currentSeries_->last();
 
-    const int tpc = ticksPerCandle(rtTimeframe_);
-    const bool shouldClose = (tickInCandle_ >= tpc);
+                // same candle -> update
+                if (fresh.timestamp_ == last.timestamp_) {
+                    fresh.isFinal_ = false;
+                    currentSeries_->updateLastCandle(fresh);
+                    emit signal_candleUpdated(fresh);
+                    return;
+                }
 
-    if (!shouldClose) {
-        currentSeries_->updateLastCandle(last);
-        emit signal_candleUpdated(last);
+                // new candle -> close old + add new
+                if (fresh.timestamp_ > last.timestamp_) {
+                    last.isFinal_ = true;
+                    currentSeries_->updateLastCandle(last);
+                    emit signal_candleClosed(last);
+
+                    fresh.isFinal_ = false;
+                    currentSeries_->addCandle(fresh);
+                    emit signal_candleUpdated(fresh);
+                    return;
+                }
+
+                // if fresh.timestamp_ < last.timestamp_ -> ignore (old data)
+            }
+        );
+
         return;
     }
-
-    // close current candle
-    last.isFinal_ = true;
-    currentSeries_->updateLastCandle(last);
-    emit signal_candleClosed(last);
-
-    // start next candle
-    Candle next = makeNextCandle(last);
-    currentSeries_->addCandle(next);
-    emit signal_candleUpdated(next);
-
-    tickInCandle_ = 0;
 }
+
 

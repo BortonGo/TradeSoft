@@ -1,11 +1,16 @@
-#ifndef BINGXSWAPCLIENT_H
-#define BINGXSWAPCLIENT_H
+#pragma once
+#include "iexchangeclient.h"
 
+#include <QNetworkAccessManager>
 
-class BingXSwapClient
+class BingXSwapClient final : public IExchangeClient
 {
 public:
-    BingXSwapClient();
-};
+    QList<Candle> fetchKlines(const QString& symbolId, Timeframe tf) override;
 
-#endif // BINGXSWAPCLIENT_H
+    bool supportsPollingRealtime() const override { return true; }
+    void fetchLastKlineAsync(const QString& symbolId, Timeframe tf, LastKlineCallback cb) override;
+
+private:
+    QNetworkAccessManager* mgr_ = nullptr; // one per app
+};
