@@ -59,10 +59,10 @@ void MarketDataService::startRealTime()
 }
 
 void MarketDataService::stopRealTime() {
-    if (!rtTimer_) {
-        return;
+    if (rtTimer_) {
+        rtTimer_->stop();
     }
-    rtTimer_->stop();
+    requestInFlight_ = false;
 }
 
 int MarketDataService::ticksPerCandle(Timeframe tf) const {

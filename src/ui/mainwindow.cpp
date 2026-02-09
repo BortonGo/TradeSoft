@@ -47,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(marketData_, &MarketDataService::signal_seriesLoaded, ui->chartWidget, &ChartWidget::slot_setSeries);
     QObject::connect(marketData_, &MarketDataService::signal_candleUpdated, ui->chartWidget, &ChartWidget::slot_onCandleUpdate);
     QObject::connect(marketData_, &MarketDataService::signal_candleClosed, ui->chartWidget, &ChartWidget::slot_onCandleClosed);
+
+    reloadAndStart();
 }
 
 MainWindow::~MainWindow()
@@ -54,35 +56,29 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_btnLoad_clicked()
-{
-   const QString currentSymbol = ui->comboSymbol->currentData().toString();
-   Timeframe tf = static_cast<Timeframe>(ui->comboTimeframe->currentData().toInt());
-   marketData_->loadHistory(currentSymbol, tf);
-}
-
 void MainWindow::on_comboSymbol_currentIndexChanged(int index)
 {
     Q_UNUSED(index);
 
-    on_btnLoad_clicked();
+    reloadAndStart();
 }
 
 void MainWindow::on_comboTimeframe_currentIndexChanged(int index)
 {
     Q_UNUSED(index);
 
-    on_btnLoad_clicked();
+    reloadAndStart();
 }
 
-void MainWindow::on_chkRealtime_toggled(bool checked)
-{
+void MainWindow::reloadAndStart() {
     if (!marketData_) {
         return;
     }
-    if (checked) {
-        marketData_->startRealTime();
-    } else {
-        marketData_->stopRealTime();
-    }
+
+    const QString currentSymbol = ui->comboSymbol->currentData().toString();
+    const Timeframe tf = static_cast<Timeframe>(ui->comboTimeframe->currentData().toInt());
+
+    marketData_->stopRealTime();
+    marketData_->loadHistory(currentSymbol, tf);
+    marketData_->startRealTime();
 }

@@ -205,67 +205,7 @@ color: white;                /* цвет текста */</string>
               </spacer>
              </item>
              <item>
-              <layout class="QGridLayout" name="gridLayout_3">
-               <item row="0" column="0">
-                <widget class="QPushButton" name="btnLoad">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>200</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <family>MS Shell Dlg 2</family>
-                   <pointsize>13</pointsize>
-                   <weight>75</weight>
-                   <italic>false</italic>
-                   <bold>true</bold>
-                  </font>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">background-color:red;   /* фон */
-color: black;                /* цвет текста */
-background-color: rgb(255, 114, 20);</string>
-                 </property>
-                 <property name="text">
-                  <string>Load</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QCheckBox" name="chkRealtime">
-                 <property name="font">
-                  <font>
-                   <family>MS Shell Dlg 2</family>
-                   <pointsize>10</pointsize>
-                   <weight>50</weight>
-                   <italic>false</italic>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="layoutDirection">
-                  <enum>Qt::LeftToRight</enum>
-                 </property>
-                 <property name="autoFillBackground">
-                  <bool>false</bool>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">background-color: rgb(43, 43, 43);
-color: white;                /* цвет текста */</string>
-                 </property>
-                 <property name="text">
-                  <string>Check RealTime</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <layout class="QGridLayout" name="gridLayout_3"/>
              </item>
             </layout>
            </widget>
