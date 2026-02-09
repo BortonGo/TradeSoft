@@ -3,7 +3,6 @@
 #include "core\timeframe.h"
 #include "core\symbol.h"
 #include "service\marketdataservice.h"
-#include "exchange\fakeexchangeclient.h"
 #include "exchange\bingxswapclient.h"
 #include "ui\chartwidget.h"
 #include <memory>

@@ -15,8 +15,6 @@ class MarketDataService : public QObject
     QTimer* rtTimer_ = nullptr;
     QString rtSymbolId_;
     Timeframe rtTimeframe_;
-    int tickInCandle_ = 0;
-    std::mt19937 rng_;
 
     bool useExchangeRealtime_ = false;
     bool requestInFlight_ = false;
@@ -26,8 +24,6 @@ public:
     explicit MarketDataService(std::shared_ptr<IExchangeClient> exchange, QObject* parent = nullptr);
 
     void loadHistory(const QString& symbolId, Timeframe tf);
-    int ticksPerCandle(Timeframe tf) const;
-    Candle makeNextCandle(const Candle& closed) const;
     void startRealTime();
     void stopRealTime();
 
