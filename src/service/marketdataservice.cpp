@@ -98,36 +98,47 @@ void MarketDataService::onRtTick()
 
     // --------- BingX realtime via polling ----------
     if (useExchangeRealtime_) {
-        Candle fresh{};
-        if (!exchange_->fetchLastKline(rtSymbolId_, rtTimeframe_, fresh)) {
-            qWarning() << "[MarketDataService] fetchLastKline failed";
+        if (requestInFlight_) {
             return;
         }
+        requestInFlight_ = true;
 
-        Candle last = currentSeries_->last();
+        exchange_->fetchLastKlineAsync(rtSymbolId_, rtTimeframe_,
+            [this](bool ok, const Candle& freshIn) {
 
-        if (fresh.timestamp_ == last.timestamp_) {
-            // обновляем текущую свечу
-            fresh.isFinal_ = false;
-            currentSeries_->updateLastCandle(fresh);
-            emit signal_candleUpdated(fresh);
-            return;
-        }
+                requestInFlight_ = false;
 
-        if (fresh.timestamp_ > last.timestamp_) {
-            // закрываем прошлую
-            last.isFinal_ = true;
-            currentSeries_->updateLastCandle(last);
-            emit signal_candleClosed(last);
+                if (!ok || !currentSeries_ || currentSeries_->getCount() == 0) {
+                    return;
+                }
 
-            // добавляем новую
-            fresh.isFinal_ = false;
-            currentSeries_->addCandle(fresh);
-            emit signal_candleUpdated(fresh);
-            return;
-        }
+                Candle fresh = freshIn;
+                Candle last = currentSeries_->last();
 
-        // если вдруг пришло "старье"
+                // same candle -> update
+                if (fresh.timestamp_ == last.timestamp_) {
+                    fresh.isFinal_ = false;
+                    currentSeries_->updateLastCandle(fresh);
+                    emit signal_candleUpdated(fresh);
+                    return;
+                }
+
+                // new candle -> close old + add new
+                if (fresh.timestamp_ > last.timestamp_) {
+                    last.isFinal_ = true;
+                    currentSeries_->updateLastCandle(last);
+                    emit signal_candleClosed(last);
+
+                    fresh.isFinal_ = false;
+                    currentSeries_->addCandle(fresh);
+                    emit signal_candleUpdated(fresh);
+                    return;
+                }
+
+                // if fresh.timestamp_ < last.timestamp_ -> ignore (old data)
+            }
+        );
+
         return;
     }
 

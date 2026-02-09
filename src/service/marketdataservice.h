@@ -4,6 +4,11 @@
 #include <memory>
 #include <QObject>
 #include <QTimer>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QUrl>
+#include <QUrlQuery>
+
 
 class MarketDataService : public QObject
 {
@@ -19,6 +24,8 @@ class MarketDataService : public QObject
     std::mt19937 rng_;
 
     bool useExchangeRealtime_ = false;
+    bool requestInFlight_ = false;
+
 
 public:
     explicit MarketDataService(std::shared_ptr<IExchangeClient> exchange, QObject* parent = nullptr);

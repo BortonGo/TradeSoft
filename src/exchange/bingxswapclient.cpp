@@ -16,22 +16,20 @@
 
 #include <algorithm>
 
-// only for BingX api
+// --- helpers ---
 static QString tfToBingXInterval(Timeframe tf) {
     switch (tf) {
-    case Timeframe::M1: return "1m";
-    case Timeframe::M5: return "5m";
+    case Timeframe::M1:  return "1m";
+    case Timeframe::M5:  return "5m";
     case Timeframe::M15: return "15m";
-    case Timeframe::H1: return "1h";
-    case Timeframe::H4: return "4h";
-    case Timeframe::D1: return "1d";
+    case Timeframe::H1:  return "1h";
+    case Timeframe::H4:  return "4h";
+    case Timeframe::D1:  return "1d";
     default: return "1m";
     }
 }
 
-// only for BingX api
 static QString toBingXSymbol(const QString& neutralId) {
-    // "ETHUSDT" -> "ETH-USDT"
     if (neutralId.endsWith("USDT")) {
         return neutralId.left(neutralId.size() - 4) + "-USDT";
     }
@@ -47,7 +45,7 @@ static bool parseSingleKlineObj(const QJsonObject& o, Candle& c) {
     c.high_   = o.value("high").toString().toDouble();
     c.low_    = o.value("low").toString().toDouble();
     c.volume_ = o.value("volume").toString().toDouble();
-    c.isFinal_ = false; // в realtime будем решать сами
+    c.isFinal_ = false;
     return true;
 }
 
@@ -176,90 +174,102 @@ QList<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timeframe tf
     return out;
 }
 
-bool BingXSwapClient::fetchLastKline(const QString& symbolId, Timeframe tf, Candle& out) {
-    const QString symbol = toBingXSymbol(symbolId);
+// --- NEW: async realtime polling ---
+void BingXSwapClient::fetchLastKlineAsync(const QString& symbolId, Timeframe tf, LastKlineCallback cb)
+{
+    // ensure manager exists
+    if (!mgr_) {
+        QCoreApplication* app = QCoreApplication::instance();
+        if (!app) {
+            qWarning() << "[BingXSwapClient] No QCoreApplication instance!";
+            if (cb) cb(false, Candle{});
+            return;
+        }
+        mgr_ = new QNetworkAccessManager(app);
+    }
+
+    const QString symbol   = toBingXSymbol(symbolId);
     const QString interval = tfToBingXInterval(tf);
 
     QUrl url("https://open-api.bingx.com/openApi/swap/v3/quote/klines");
     QUrlQuery q;
     q.addQueryItem("symbol", symbol);
     q.addQueryItem("interval", interval);
-    q.addQueryItem("limit", "2");         // важно: 2 последних
+    q.addQueryItem("limit", "2");
     url.setQuery(q);
 
-    qDebug() << "[BingXSwapClient] GET" << url.toString();
-
-    QNetworkAccessManager mgr;
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::UserAgentHeader, "TradeSoft-MVP/1.0");
+    req.setRawHeader("Accept", "application/json");
+    req.setRawHeader("Connection", "close");
+    req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
 
-    QNetworkReply* reply = mgr.get(req);
+    QNetworkReply* reply = mgr_->get(req);
 
-    QEventLoop loop;
+    // timeout per-reply
+    QTimer* t = new QTimer(reply);
+    t->setSingleShot(true);
+    QObject::connect(t, &QTimer::timeout, reply, &QNetworkReply::abort);
+    t->start(1500);
 
-    QTimer timer;
-    timer.setSingleShot(true);
-
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-
-    timer.start(8000);
-    loop.exec();
-
-    if (!timer.isActive()) {
-        qWarning() << "[BingXSwapClient] TIMEOUT";
-        reply->abort();
-        reply->deleteLater();
-        return false;
-    }
-
-    if (reply->error() != QNetworkReply::NoError) {
-        qWarning() << "[BingXSwapClient] Network error:" << reply->errorString();
-        reply->deleteLater();
-        return false;
-    }
-
-    const QByteArray body = reply->readAll();
-    reply->deleteLater();
-
-    const QJsonDocument doc = QJsonDocument::fromJson(body);
-    if (!doc.isObject()) {
-        qWarning() << "[BingXSwapClient] Bad JSON (not object)";
-        return false;
-    }
-
-    const QJsonObject root = doc.object();
-    const int code = root.value("code").toInt(-1);
-    if (code != 0) {
-        qWarning() << "[BingXSwapClient] API code != 0:" << code << "msg:" << root.value("msg").toString();
-        return false;
-    }
-
-    const QJsonArray data = root.value("data").toArray();
-    if (data.isEmpty()) {
-        qWarning() << "[BingXSwapClient] data empty";
-        return false;
-    }
-
-    // В ответе чаще всего свечи идут "сначала новые"
-    Candle best{};
-    bool ok = false;
-
-    // найдём самую свежую по time (на всякий случай)
-    qint64 bestTs = -1;
-    for (int i = 0; i < data.size(); ++i) {
-        if (!data[i].isObject()) continue;
-        Candle tmp{};
-        if (!parseSingleKlineObj(data[i].toObject(), tmp)) continue;
-        if (tmp.timestamp_ > bestTs) {
-            bestTs = tmp.timestamp_;
-            best = tmp;
-            ok = true;
+    QObject::connect(reply, &QNetworkReply::finished, reply, [reply, cb]() {
+        // finished will run even after abort() -> treat as failure if error != NoError
+        if (reply->error() != QNetworkReply::NoError) {
+            reply->deleteLater();
+            if (cb) cb(false, Candle{});
+            return;
         }
-    }
 
-    if (!ok) return false;
-    out = best;
-    return true;
+        const QByteArray body = reply->readAll();
+        reply->deleteLater();
+
+        QJsonParseError jerr;
+        const QJsonDocument doc = QJsonDocument::fromJson(body, &jerr);
+        if (jerr.error != QJsonParseError::NoError || !doc.isObject()) {
+            if (cb) cb(false, Candle{});
+            return;
+        }
+
+        const QJsonObject root = doc.object();
+        if (root.value("code").toInt(-1) != 0) {
+            if (cb) cb(false, Candle{});
+            return;
+        }
+
+        const QJsonValue dataVal = root.value("data");
+        if (!dataVal.isArray()) {
+            if (cb) cb(false, Candle{});
+            return;
+        }
+
+        const QJsonArray data = dataVal.toArray();
+        if (data.isEmpty()) {
+            if (cb) cb(false, Candle{});
+            return;
+        }
+
+        Candle best{};
+        bool ok = false;
+        qint64 bestTs = -1;
+
+        for (int i = 0; i < data.size(); ++i) {
+            if (!data[i].isObject()) continue;
+            Candle tmp{};
+            if (!parseSingleKlineObj(data[i].toObject(), tmp)) continue;
+
+            if (tmp.timestamp_ > bestTs) {
+                bestTs = tmp.timestamp_;
+                best = tmp;
+                ok = true;
+            }
+        }
+
+        if (!ok) {
+            if (cb) cb(false, Candle{});
+            return;
+        }
+
+        if (cb) cb(true, best);
+    });
 }
 

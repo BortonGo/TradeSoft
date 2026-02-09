@@ -57,11 +57,3 @@ QList<Candle> FakeExchangeClient::fetchKlines(const QString& symbolId, Timeframe
     return out;
 }
 
-bool FakeExchangeClient::fetchLastKline(const QString& symbolId, Timeframe tf, Candle& out) {
-    auto list = fetchKlines(symbolId, tf);
-    if (list.isEmpty()) return false;
-    out = list.last();
-    return true;
-}
-
-
