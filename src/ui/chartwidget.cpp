@@ -4,6 +4,8 @@
 #include <cmath>
 #include <QPainter>
 #include <QDebug>
+#include <QDateTime>
+#include <QFontMetrics>
 
 ChartWidget::ChartWidget(QWidget* parent) : QWidget(parent) {
     candleWidthAcc_ = static_cast<double>(candleWidth_);
@@ -209,7 +211,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
             const QString text = QString::number(lastPrice, 'f', 2);
 
-            const int padX = 6;
+            const int padX = 3;
             const int h = 18;
 
             const QFontMetrics fm(painter.font());
@@ -234,6 +236,59 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             painter.drawText(r, Qt::AlignCenter, text);
 
             painter.restore();
+    }
+
+    // X axis (Time scale)
+    {
+        const int stepPx = candleWidth_ + candleGap_;
+
+        const int minLabelSpacingPx = 140;
+
+        int stepBars = static_cast<int>(std::ceil(static_cast<double>(minLabelSpacingPx) / stepPx));
+        if (stepBars < 1) {
+            stepBars = 1;
+        }
+
+        painter.save();
+        painter.setPen(QColor(180,180,180));
+
+        int lastLabelRight = std::numeric_limits<int>::min();
+
+        for (int i = first; i <= last; i+=stepBars) {
+
+            const int k = i - first;
+            const int x = plot.left() + k * step;
+            const int xCenter = x + candleWidth_ / 2;
+
+            const qint64 ts = static_cast<qint64>(candles[i].timestamp_);
+            const QDateTime dt = QDateTime::fromMSecsSinceEpoch(ts);
+
+            const QString label = dt.toString("HH:mm");
+
+            painter.drawLine(xCenter, plot.bottom(), xCenter, plot.bottom() + 4);
+
+            const QFontMetrics fm(painter.font());
+            const int textW = fm.boundingRect(label).width();
+            const int textH = fm.height();
+
+            QRect textRect(xCenter - textW / 2, plot.bottom() + 6, textW + 2, textH);
+
+            if (textRect.left() < plot.left()) {
+                textRect.moveLeft(plot.left());
+            }
+            if (textRect.right() > plot.right()) {
+                textRect.moveRight(plot.right());
+            }
+
+            if (textRect.left() <= lastLabelRight + 6) {
+                continue;
+            }
+            lastLabelRight = textRect.right();
+
+            painter.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, label);
+        }
+
+        painter.restore();
     }
 
     // frame

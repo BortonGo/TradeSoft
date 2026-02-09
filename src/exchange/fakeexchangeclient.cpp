@@ -28,6 +28,8 @@ QList<Candle> FakeExchangeClient::fetchKlines(const QString& symbolId, Timeframe
     QList<Candle> out;
     out.reserve(N);
 
+    startPlotTime = (startPlotTime / stepsMs) * stepsMs;
+
     for(int i = 0; i < N; ++i){
         const double open = startPlotPrice;
         const double close = startPlotPrice + deltaDist(rng);
@@ -39,7 +41,7 @@ QList<Candle> FakeExchangeClient::fetchKlines(const QString& symbolId, Timeframe
         const double low = loBase - wickDist(rng);
 
         Candle c;
-        c.timestamp_ = startPlotTime;
+        c.timestamp_ = startPlotTime + static_cast<int64_t>(i) * stepsMs;
         c.open_ = open;
         c.close_ = close;
         c.high_ = high;
@@ -50,7 +52,6 @@ QList<Candle> FakeExchangeClient::fetchKlines(const QString& symbolId, Timeframe
         out.push_back(c);
 
         startPlotPrice = close;
-        startPlotTime += stepsMs;
     }
 
     return out;
