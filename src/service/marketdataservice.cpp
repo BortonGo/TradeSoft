@@ -33,6 +33,7 @@ void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
 
 
     emit signal_seriesLoaded(currentSeries_);
+    useExchangeRealtime_ = exchange_->supportsPollingRealtime();
 
 }
 
@@ -45,9 +46,11 @@ void MarketDataService::startRealTime()
 
     if (!rtTimer_) {
         rtTimer_ = new QTimer(this);
-        rtTimer_->setInterval(300);
         connect(rtTimer_, &QTimer::timeout, this, &MarketDataService::onRtTick);
     }
+
+    rtTimer_->setInterval(useExchangeRealtime_ ? 1000 : 300);
+
 
     tickInCandle_ = 0;
 
@@ -93,6 +96,42 @@ void MarketDataService::onRtTick()
         return;
     }
 
+    // --------- BingX realtime via polling ----------
+    if (useExchangeRealtime_) {
+        Candle fresh{};
+        if (!exchange_->fetchLastKline(rtSymbolId_, rtTimeframe_, fresh)) {
+            qWarning() << "[MarketDataService] fetchLastKline failed";
+            return;
+        }
+
+        Candle last = currentSeries_->last();
+
+        if (fresh.timestamp_ == last.timestamp_) {
+            // обновляем текущую свечу
+            fresh.isFinal_ = false;
+            currentSeries_->updateLastCandle(fresh);
+            emit signal_candleUpdated(fresh);
+            return;
+        }
+
+        if (fresh.timestamp_ > last.timestamp_) {
+            // закрываем прошлую
+            last.isFinal_ = true;
+            currentSeries_->updateLastCandle(last);
+            emit signal_candleClosed(last);
+
+            // добавляем новую
+            fresh.isFinal_ = false;
+            currentSeries_->addCandle(fresh);
+            emit signal_candleUpdated(fresh);
+            return;
+        }
+
+        // если вдруг пришло "старье"
+        return;
+    }
+
+    // --------- old Fake realtime (твоя генерация) ----------
     Candle last = currentSeries_->last();
 
     static const double sigma = 1.5;
@@ -120,16 +159,15 @@ void MarketDataService::onRtTick()
         return;
     }
 
-    // close current candle
     last.isFinal_ = true;
     currentSeries_->updateLastCandle(last);
     emit signal_candleClosed(last);
 
-    // start next candle
     Candle next = makeNextCandle(last);
     currentSeries_->addCandle(next);
     emit signal_candleUpdated(next);
 
     tickInCandle_ = 0;
 }
+
 

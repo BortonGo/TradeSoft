@@ -38,6 +38,19 @@ static QString toBingXSymbol(const QString& neutralId) {
     return neutralId;
 }
 
+static bool parseSingleKlineObj(const QJsonObject& o, Candle& c) {
+    if (!o.contains("time")) return false;
+
+    c.timestamp_ = static_cast<qint64>(o.value("time").toVariant().toLongLong());
+    c.open_   = o.value("open").toString().toDouble();
+    c.close_  = o.value("close").toString().toDouble();
+    c.high_   = o.value("high").toString().toDouble();
+    c.low_    = o.value("low").toString().toDouble();
+    c.volume_ = o.value("volume").toString().toDouble();
+    c.isFinal_ = false; // в realtime будем решать сами
+    return true;
+}
+
 QList<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timeframe tf)
 {
     QList<Candle> out;
@@ -161,5 +174,92 @@ QList<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timeframe tf
     }
 
     return out;
+}
+
+bool BingXSwapClient::fetchLastKline(const QString& symbolId, Timeframe tf, Candle& out) {
+    const QString symbol = toBingXSymbol(symbolId);
+    const QString interval = tfToBingXInterval(tf);
+
+    QUrl url("https://open-api.bingx.com/openApi/swap/v3/quote/klines");
+    QUrlQuery q;
+    q.addQueryItem("symbol", symbol);
+    q.addQueryItem("interval", interval);
+    q.addQueryItem("limit", "2");         // важно: 2 последних
+    url.setQuery(q);
+
+    qDebug() << "[BingXSwapClient] GET" << url.toString();
+
+    QNetworkAccessManager mgr;
+    QNetworkRequest req(url);
+    req.setHeader(QNetworkRequest::UserAgentHeader, "TradeSoft-MVP/1.0");
+
+    QNetworkReply* reply = mgr.get(req);
+
+    QEventLoop loop;
+
+    QTimer timer;
+    timer.setSingleShot(true);
+
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+
+    timer.start(8000);
+    loop.exec();
+
+    if (!timer.isActive()) {
+        qWarning() << "[BingXSwapClient] TIMEOUT";
+        reply->abort();
+        reply->deleteLater();
+        return false;
+    }
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "[BingXSwapClient] Network error:" << reply->errorString();
+        reply->deleteLater();
+        return false;
+    }
+
+    const QByteArray body = reply->readAll();
+    reply->deleteLater();
+
+    const QJsonDocument doc = QJsonDocument::fromJson(body);
+    if (!doc.isObject()) {
+        qWarning() << "[BingXSwapClient] Bad JSON (not object)";
+        return false;
+    }
+
+    const QJsonObject root = doc.object();
+    const int code = root.value("code").toInt(-1);
+    if (code != 0) {
+        qWarning() << "[BingXSwapClient] API code != 0:" << code << "msg:" << root.value("msg").toString();
+        return false;
+    }
+
+    const QJsonArray data = root.value("data").toArray();
+    if (data.isEmpty()) {
+        qWarning() << "[BingXSwapClient] data empty";
+        return false;
+    }
+
+    // В ответе чаще всего свечи идут "сначала новые"
+    Candle best{};
+    bool ok = false;
+
+    // найдём самую свежую по time (на всякий случай)
+    qint64 bestTs = -1;
+    for (int i = 0; i < data.size(); ++i) {
+        if (!data[i].isObject()) continue;
+        Candle tmp{};
+        if (!parseSingleKlineObj(data[i].toObject(), tmp)) continue;
+        if (tmp.timestamp_ > bestTs) {
+            bestTs = tmp.timestamp_;
+            best = tmp;
+            ok = true;
+        }
+    }
+
+    if (!ok) return false;
+    out = best;
+    return true;
 }
 

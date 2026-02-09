@@ -18,6 +18,8 @@ class MarketDataService : public QObject
     int tickInCandle_ = 0;
     std::mt19937 rng_;
 
+    bool useExchangeRealtime_ = false;
+
 public:
     explicit MarketDataService(std::shared_ptr<IExchangeClient> exchange, QObject* parent = nullptr);
 
