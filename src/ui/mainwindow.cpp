@@ -4,6 +4,7 @@
 #include "core\symbol.h"
 #include "service\marketdataservice.h"
 #include "exchange\fakeexchangeclient.h"
+#include "exchange\bingxswapclient.h"
 #include "ui\chartwidget.h"
 #include <memory>
 
@@ -37,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboTimeframe->blockSignals(false);
 
     //IExchangeClient
-    std::shared_ptr<IExchangeClient> ex = std::make_shared<FakeExchangeClient>();
+    std::shared_ptr<IExchangeClient> ex = std::make_shared<BingXSwapClient>();
 
     //MarketDataService
     MarketDataService* market = new MarketDataService(ex, this);

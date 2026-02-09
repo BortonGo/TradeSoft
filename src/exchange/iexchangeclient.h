@@ -6,5 +6,6 @@
 
 class IExchangeClient {
 public:
+    virtual ~IExchangeClient() {}
     virtual QList<Candle> fetchKlines(const QString& symbolId, Timeframe tf) = 0;
 };

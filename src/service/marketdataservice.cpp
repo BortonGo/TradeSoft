@@ -64,7 +64,7 @@ void MarketDataService::stopRealTime() {
 
 int MarketDataService::ticksPerCandle(Timeframe tf) const {
     switch (tf){
-        case Timeframe::M1 : return 5;
+        case Timeframe::M1 : return 5; // 0.3sec * 200 = 60sec
         case Timeframe::M5 : return 10;
         case Timeframe::M15 : return 15;
         case Timeframe::H1 : return 20;
