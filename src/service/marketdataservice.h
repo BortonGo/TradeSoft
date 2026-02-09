@@ -4,11 +4,6 @@
 #include <memory>
 #include <QObject>
 #include <QTimer>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QUrl>
-#include <QUrlQuery>
-
 
 class MarketDataService : public QObject
 {
