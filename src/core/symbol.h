@@ -22,6 +22,10 @@ inline QList<Symbol> someSymbols(){
         Symbol("ETH", "USDT"),
         Symbol("BTC", "USDT"),
         Symbol("XRP", "USDT"),
-        Symbol("ADA", "USDT")
+        Symbol("ADA", "USDT"),
+        Symbol("SEI", "USDT"),
+        Symbol("APEX", "USDT"),
+        Symbol("SUI", "USDT"),
+        Symbol("LINK", "USDT")
     };
 }
