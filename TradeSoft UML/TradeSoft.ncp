@@ -169,6 +169,8 @@
     </Entities>
     <Relationships>
       <Relationship type="Association" first="2" second="0">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -181,6 +183,8 @@
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
       <Relationship type="Association" first="6" second="3">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -197,6 +201,8 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="3" second="4">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -209,6 +215,8 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="3" second="2">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -224,6 +232,8 @@
         <EndMultiplicity>0..1</EndMultiplicity>
       </Relationship>
       <Relationship type="Dependency" first="6" second="3">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -236,8 +246,6 @@
         </BendPoint>
       </Relationship>
       <Relationship type="Association" first="6" second="8">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -246,6 +254,8 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Dependency" first="8" second="3">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -258,8 +268,6 @@
         </BendPoint>
       </Relationship>
       <Relationship type="Association" first="8" second="2">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -278,90 +286,97 @@
     <Language>CSharp</Language>
     <Entities>
       <Entity type="Comment">
-        <Text>Сценарий 1: LoadHistory (REST)</Text>
-        <Location left="34" top="299" />
-        <Size width="190" height="50" />
+        <Text>Сценарий 1: Auto Load + Realtime (REST polling, async)</Text>
+        <Location left="50" top="239" />
+        <Size width="229" height="67" />
       </Entity>
       <Entity type="Comment">
-        <Text>MainWindow.onLoadClicked()</Text>
-        <Location left="31" top="424" />
-        <Size width="176" height="50" />
+        <Text>A)Триггер (авто при старте или смене комбобокса):
+
+1) MainWindow::MainWindow()/on_comboSymbol_currentIndexChanged /on_comboTimeframe_currentIndexChanged
+
+2) MainWindow::reloadAndStart()
+
+3) MarketDataService::stopRealTime() (останавливаем таймер, requestInFlight_=false)</Text>
+        <Location left="39" top="436" />
+        <Size width="272" height="230" />
       </Entity>
       <Entity type="Comment">
-        <Text>вызывает MarketDataService.loadHistory(symbol, tf)</Text>
-        <Location left="234" top="424" />
-        <Size width="227" height="50" />
+        <Text>B) История (REST, sync в fetchKlines)
+
+4) MarketDataService::loadHistory(symbol, tf)
+
+5) exchange_-&gt;fetchKlines(symbol, tf) (REST /openApi/swap/v3/quote/klines?limit=500)
+
+6)exchange возвращает QList&lt;Candle&gt;
+
+7) MarketDataService создаёт CandleSeries + addCandle(...)
+
+8) MarketDataService сохраняет currentSeries_, rtSymbolId_, rtTimeframe_
+
+9) emit signal_seriesLoaded(currentSeries_) → UI.ChartWidget::slot_setSeries(series)
+
+10) requestInFlight_ = false (reset состояния после = перезагрузки)</Text>
+        <Location left="392" top="375" />
+        <Size width="287" height="325" />
       </Entity>
       <Entity type="Comment">
-        <Text>MarketDataService вызывает exchange.fetchKlines(symbol, tf)</Text>
-        <Location left="489" top="424" />
-        <Size width="185" height="50" />
+        <Text>C) Авто-старт realtime (QTimer)
+
+11) MarketDataService::startRealTime()
+
+12) QTimer стартует (interval=1000ms) → timeout → onRtTick()</Text>
+        <Location left="770" top="477" />
+        <Size width="300" height="140" />
       </Entity>
       <Entity type="Comment">
-        <Text>exchange возвращает List&lt;Candle&gt;</Text>
-        <Location left="702" top="424" />
-        <Size width="202" height="50" />
+        <Text>D) Realtime polling (REST async, каждую секунду)
+
+13) MarketDataService::onRtTick()
+
+14) guard: if requestInFlight_ return; else requestInFlight_=true
+
+15) exchange_-&gt;fetchLastKlineAsync(symbol, tf, cb)
+(REST /quote/klines?limit=2, async через QNetworkReply finished)
+
+16) BingXSwapClient получает ответ → парсит → выбирает свежую свечу best → вызывает cb(ok, Candle)
+</Text>
+        <Location left="1154" top="437" />
+        <Size width="312" height="233" />
       </Entity>
       <Entity type="Comment">
-        <Text>MarketDataService создаёт/обновляет currentSeries (CandleSeries)</Text>
-        <Location left="933" top="424" />
-        <Size width="220" height="50" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>MarketDataService уведомляет UI: seriesLoaded(currentSeries) (сигнал/коллбек)</Text>
-        <Location left="1183" top="424" />
-        <Size width="253" height="50" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>Сценарий 2: Realtime (WS)</Text>
-        <Location left="34" top="669" />
-        <Size width="171" height="50" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>MainWindow включает realtime</Text>
-        <Location left="34" top="779" />
-        <Size width="189" height="50" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>вызывает MarketDataService.startRealtime()</Text>
-        <Location left="249" top="779" />
-        <Size width="194" height="50" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>MarketDataService вызывает exchange.subscribeKlines(symbol, tf)</Text>
-        <Location left="701" top="779" />
-        <Size width="206" height="50" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>При каждом сообщении WS: MarketDataService.onCandleUpdate(candle)</Text>
-        <Location left="936" top="779" />
-        <Size width="241" height="50" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>Если это та же свеча → currentSeries.updateLastCandle(candle)</Text>
-        <Location left="1239" top="725" />
-        <Size width="217" height="50" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>Если свеча закрылась → currentSeries.addCandle(candle)</Text>
-        <Location left="1239" top="837" />
-        <Size width="217" height="50" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>Уведомление UI: candleUpdated/ candleClosed</Text>
-        <Location left="1547" top="779" />
-        <Size width="190" height="50" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>UI получает данные только через уведомления MarketDataService</Text>
-        <Location left="46" top="109" />
-        <Size width="122" height="76" />
-      </Entity>
-      <Entity type="Comment">
-        <Text>MarketDataService проверяет: есть ли currentSeries
-если нет → ошибка / игнор</Text>
-        <Location left="471" top="779" />
-        <Size width="200" height="64" />
+        <Text>E) Применение realtime-свечи к серии (главная логика)
+
+17) cb внутри MarketDataService:
+-requestInFlight_=false
+-last = currentSeries_-&gt;last()
+-сравнение timestamp:
+
+18a) Если fresh.timestamp == last.timestamp
+
+→ currentSeries_-&gt;updateLastCandle(fresh)
+
+→ emit signal_candleUpdated(fresh)
+
+→ UI: ChartWidget::slot_onCandleUpdate(fresh)
+
+18b) Если fresh.timestamp &gt; last.timestamp
+
+→ last.isFinal_=true; updateLastCandle(last)
+
+→ emit signal_candleClosed(last)
+
+→ addCandle(fresh as isFinal=false)
+
+→ emit signal_candleUpdated(fresh)
+
+→ UI: slot_onCandleClosed(last) + slot_onCandleUpdate(fresh)
+
+18c) Если fresh.timestamp &lt; last.timestamp
+
+→ ignore (старые данные)</Text>
+        <Location left="1579" top="328" />
+        <Size width="362" height="431" />
       </Entity>
     </Entities>
     <Relationships>
@@ -369,112 +384,48 @@
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
-          <X>232</X>
-          <Y>452</Y>
+          <X>340</X>
+          <Y>547</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>363</X>
+          <Y>547</Y>
         </BendPoint>
       </Relationship>
       <Relationship type="Comment" first="2" second="3">
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
-          <X>488</X>
-          <Y>452</Y>
+          <X>713</X>
+          <Y>548</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>745</X>
+          <Y>548</Y>
         </BendPoint>
       </Relationship>
       <Relationship type="Comment" first="3" second="4">
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
-          <X>700</X>
-          <Y>449</Y>
+          <X>1095</X>
+          <Y>550</Y>
         </BendPoint>
         <BendPoint relativeToStartShape="False">
-          <X>677</X>
-          <Y>449</Y>
+          <X>1120</X>
+          <Y>550</Y>
         </BendPoint>
       </Relationship>
       <Relationship type="Comment" first="4" second="5">
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
-          <X>929</X>
-          <Y>448</Y>
-        </BendPoint>
-      </Relationship>
-      <Relationship type="Comment" first="5" second="6">
-        <StartOrientation>Horizontal</StartOrientation>
-        <EndOrientation>Horizontal</EndOrientation>
-        <BendPoint relativeToStartShape="True">
-          <X>1187</X>
-          <Y>453</Y>
-        </BendPoint>
-      </Relationship>
-      <Relationship type="Comment" first="8" second="9">
-        <StartOrientation>Horizontal</StartOrientation>
-        <EndOrientation>Horizontal</EndOrientation>
-        <BendPoint relativeToStartShape="True">
-          <X>248</X>
-          <Y>807</Y>
-        </BendPoint>
-      </Relationship>
-      <Relationship type="Comment" first="9" second="16">
-        <StartOrientation>Horizontal</StartOrientation>
-        <EndOrientation>Horizontal</EndOrientation>
-        <BendPoint relativeToStartShape="True">
-          <X>469</X>
-          <Y>808</Y>
-        </BendPoint>
-      </Relationship>
-      <Relationship type="Comment" first="16" second="10">
-        <StartOrientation>Horizontal</StartOrientation>
-        <EndOrientation>Horizontal</EndOrientation>
-        <BendPoint relativeToStartShape="True">
-          <X>698</X>
-          <Y>803</Y>
-        </BendPoint>
-      </Relationship>
-      <Relationship type="Comment" first="10" second="11">
-        <StartOrientation>Horizontal</StartOrientation>
-        <EndOrientation>Horizontal</EndOrientation>
-        <BendPoint relativeToStartShape="True">
-          <X>932</X>
-          <Y>808</Y>
-        </BendPoint>
-      </Relationship>
-      <Relationship type="Comment" first="11" second="12">
-        <StartOrientation>Horizontal</StartOrientation>
-        <EndOrientation>Horizontal</EndOrientation>
-        <BendPoint relativeToStartShape="True">
-          <X>1214</X>
-          <Y>809</Y>
+          <X>1491</X>
+          <Y>554</Y>
         </BendPoint>
         <BendPoint relativeToStartShape="False">
-          <X>1214</X>
-          <Y>750</Y>
-        </BendPoint>
-      </Relationship>
-      <Relationship type="Comment" first="11" second="13">
-        <StartOrientation>Horizontal</StartOrientation>
-        <EndOrientation>Horizontal</EndOrientation>
-        <BendPoint relativeToStartShape="True">
-          <X>1214</X>
-          <Y>809</Y>
-        </BendPoint>
-      </Relationship>
-      <Relationship type="Comment" first="12" second="14">
-        <StartOrientation>Horizontal</StartOrientation>
-        <EndOrientation>Horizontal</EndOrientation>
-        <BendPoint relativeToStartShape="True">
-          <X>1492</X>
-          <Y>754</Y>
-        </BendPoint>
-      </Relationship>
-      <Relationship type="Comment" first="13" second="14">
-        <StartOrientation>Horizontal</StartOrientation>
-        <EndOrientation>Horizontal</EndOrientation>
-        <BendPoint relativeToStartShape="True">
-          <X>1493</X>
-          <Y>860</Y>
+          <X>1551</X>
+          <Y>554</Y>
         </BendPoint>
       </Relationship>
     </Relationships>
