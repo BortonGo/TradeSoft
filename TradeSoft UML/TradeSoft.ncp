@@ -7,22 +7,22 @@
       <Entity type="Class">
         <Name>Candle</Name>
         <Access>Public</Access>
-        <Location left="977" top="501" />
+        <Location left="1348" top="839" />
         <Size width="166" height="196" />
         <Collapsed>False</Collapsed>
-        <Member type="Field">public long timestamp</Member>
-        <Member type="Field">public double open</Member>
-        <Member type="Field">public double high</Member>
-        <Member type="Field">public double low</Member>
-        <Member type="Field">public double clouse</Member>
-        <Member type="Field">public double volume</Member>
-        <Member type="Field">public bool isFinal</Member>
+        <Member type="Field">public int64_t timestamp</Member>
+        <Member type="Field">public double open_</Member>
+        <Member type="Field">public double high_</Member>
+        <Member type="Field">public double low_</Member>
+        <Member type="Field">public double clouse_</Member>
+        <Member type="Field">public double volume_</Member>
+        <Member type="Field">public bool isFinal_</Member>
         <Modifier>None</Modifier>
       </Entity>
       <Entity type="Enum">
         <Name>Timeframe</Name>
         <Access>Public</Access>
-        <Location left="1207" top="206" />
+        <Location left="1412" top="263" />
         <Size width="162" height="163" />
         <Collapsed>False</Collapsed>
         <Value>M1</Value>
@@ -35,48 +35,60 @@
       <Entity type="Class">
         <Name>CandleSeries</Name>
         <Access>Public</Access>
-        <Location left="673" top="501" />
-        <Size width="215" height="179" />
+        <Location left="1041" top="814" />
+        <Size width="215" height="281" />
         <Collapsed>False</Collapsed>
-        <Member type="Field">private string symbol</Member>
-        <Member type="Field">private Timeframe timeframe</Member>
-        <Member type="Field">private List&lt;Candle&gt; candles</Member>
+        <Member type="Field">private QString symbol_</Member>
+        <Member type="Field">private Timeframe timeframe_</Member>
+        <Member type="Field">private QList&lt;Candle&gt; candles_</Member>
         <Member type="Method">public void addCandle(Candle c)</Member>
         <Member type="Method">public void updateLastCandle(Candle c)</Member>
         <Member type="Method">public Candle last()</Member>
+        <Member type="Method">public int getCount()</Member>
+        <Member type="Method">public QList&lt;Candle&gt; getCandles()</Member>
+        <Member type="Method">public QString symbol()</Member>
+        <Member type="Method">public publicTimeframe timeframe()</Member>
+        <Member type="Method">public int candleCount()</Member>
         <Modifier>None</Modifier>
       </Entity>
       <Entity type="Class">
         <Name>MarketDataService</Name>
         <Access>Public</Access>
-        <Location left="165" top="565" />
-        <Size width="333" height="331" />
+        <Location left="536" top="859" />
+        <Size width="417" height="359" />
         <Collapsed>False</Collapsed>
-        <Member type="Field">private shared_ptr&lt;CandleSeries&gt; currentSeries</Member>
-        <Member type="Field">private shared_ptr&lt;IExchangeClient&gt; exchange</Member>
-        <Member type="Method">public void loadHistory(string symbol, Timeframe tf)</Member>
+        <Member type="Field">private shared_ptr&lt;CandleSeries&gt; currentSeries_</Member>
+        <Member type="Field">private shared_ptr&lt;IExchangeClient&gt; exchange_</Member>
+        <Member type="Field">QTimer rtTimer_ = nullptr</Member>
+        <Member type="Field">QString rtSymbolId_</Member>
+        <Member type="Field">Timeframe rtTimeframe_</Member>
+        <Member type="Field">bool useExchangeRealtime_ = false</Member>
+        <Member type="Field">bool requestInFlight_ = false</Member>
+        <Member type="Method">public void loadHistory(QString symbol, Timeframe tf)</Member>
         <Member type="Method">public void startRealtime()</Member>
         <Member type="Method">public void stopRealtime()</Member>
-        <Member type="Method">public void onCandleUpdate(Candle c)</Member>
         <Member type="Method">public void signal_seriesLoaded(shared_ptr&lt;CandleSeries&gt; series)</Member>
         <Member type="Method">public void signal_candleUpdate(Candle c)</Member>
         <Member type="Method">public void signal_candleClosed(Candle c)</Member>
         <Member type="Method">public void signal_connectionStateChanged(string state)</Member>
+        <Member type="Method">void onRtTick()</Member>
+        <Member type="Constructor">public MarketDataService(shared_ptr&lt;IExchangeClient&gt; exchange, QObject parent)</Member>
         <Modifier>None</Modifier>
       </Entity>
       <Entity type="Interface">
         <Name>IExchangeClient</Name>
         <Access>Public</Access>
-        <Location left="622" top="715" />
-        <Size width="314" height="118" />
+        <Location left="1053" top="1112" />
+        <Size width="465" height="120" />
         <Collapsed>False</Collapsed>
-        <Member type="Method">List&lt;Candle&gt; fetchKlines(string symbol, Timeframe tf)</Member>
-        <Member type="Method">void subscribeKlines(string symbol, Timeframe tf)</Member>
+        <Member type="Method">List&lt;Candle&gt; fetchKlines(QString symbol, Timeframe tf)</Member>
+        <Member type="Method">bool supportsPollingRealtime()</Member>
+        <Member type="Method">void fetchLastKlineAsync(QString symbolId, Timeframe tf, LastKlineCallback cb)</Member>
       </Entity>
       <Entity type="Class">
         <Name>BingXSwapClient</Name>
         <Access>Public</Access>
-        <Location left="705" top="906" />
+        <Location left="1220" top="1293" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -84,45 +96,79 @@
       <Entity type="Class">
         <Name>MainWindow</Name>
         <Access>Public</Access>
-        <Location left="165" top="147" />
-        <Size width="319" height="255" />
+        <Location left="536" top="343" />
+        <Size width="348" height="255" />
         <Collapsed>False</Collapsed>
-        <Member type="Field">private MarketDataService marketData</Member>
-        <Member type="Method">public void onLoadClicked()</Member>
-        <Member type="Method">public void onSymbolChanged()</Member>
-        <Member type="Method">public void onTimeframeChanged()</Member>
-        <Member type="Method">public void slot_onError(string text)</Member>
-        <Member type="Method">public void slot_onConnectionStateChanged(string state)</Member>
+        <Member type="Field">private MarketDataService marketData_ = nullptr</Member>
+        <Member type="Method">private void on_comboSymbol_currentIndexChanged(int index)</Member>
+        <Member type="Method">private void on_comboTimeframe_currentIndexChanged(int index)</Member>
+        <Member type="Method">private void reloadAndStart()</Member>
         <Modifier>None</Modifier>
       </Entity>
       <Entity type="Comment">
         <Text>connect signals</Text>
-        <Location left="386" top="458" />
+        <Location left="757" top="648" />
         <Size width="63" height="50" />
       </Entity>
       <Entity type="Class">
         <Name>ChartWidget</Name>
         <Access>Public</Access>
-        <Location left="692" top="182" />
-        <Size width="300" height="169" />
+        <Location left="985" top="156" />
+        <Size width="345" height="622" />
         <Collapsed>False</Collapsed>
-        <Member type="Field">private shared_ptr&lt;CandleSeries&gt; series</Member>
+        <Member type="Field">private shared_ptr&lt;CandleSeries&gt; series_</Member>
+        <Member type="Field">int firstVisible_ = 0</Member>
+        <Member type="Field">int visibleCount_ = 500</Member>
+        <Member type="Field">int candleWidth_ = 6</Member>
+        <Member type="Field">int minCandleWidth_ = 2</Member>
+        <Member type="Field">int maxCandleWidth_ = 20</Member>
+        <Member type="Field">int candleGap_ = 2</Member>
+        <Member type="Field">int leftPadding_ = 10</Member>
+        <Member type="Field">int rightPadding_ = 60</Member>
+        <Member type="Field">int topPadding_ = 10</Member>
+        <Member type="Field">int bottomPadding_ = 20</Member>
+        <Member type="Field">bool followRight_ = true</Member>
+        <Member type="Field">bool isPanning_ = false</Member>
+        <Member type="Field">int panLastX_ = 0</Member>
+        <Member type="Field">double panRemainder_ = 0.0</Member>
+        <Member type="Field">double candleWidthAcc_ = 6.0</Member>
         <Member type="Method">public void slot_setSeries(shared_ptr&lt;CandleSeries&gt; series)</Member>
         <Member type="Method">public void slot_onCandleUpdate(Candle c)</Member>
         <Member type="Method">public void slot_onCandleClosed(Candle c)</Member>
-        <Member type="Method">public void clear()</Member>
+        <Member type="Method">protected void paintEvent(QPaintEvent event_)</Member>
+        <Member type="Method">protected void resizeEvent(QResizeEvent event_)</Member>
+        <Member type="Method">protected void mousePressEvent(QMouseEvent event_)</Member>
+        <Member type="Method">protected void mouseMoveEvent(QMouseEvent event_)</Member>
+        <Member type="Method">protected void mouseReleaseEvent(QMouseEvent event_)</Member>
+        <Member type="Method">protected void wheelEvent(QWheelEvent event_)</Member>
+        <Member type="Method">private int maxVisibleByWidth()</Member>
+        <Member type="Method">private int lastVisible()</Member>
+        <Member type="Method">private void normalizeViewport()</Member>
+        <Member type="Method">private bool isNearRightEdgeByData(int snapCandles)</Member>
+        <Member type="Method">private QRectF plotRect()</Member>
+        <Member type="Method">private int stepPx()</Member>
+        <Member type="Method">private int clampCandleWidth(int width)</Member>
         <Modifier>None</Modifier>
       </Entity>
       <Entity type="Comment">
         <Text>connect signals</Text>
-        <Location left="722" top="373" />
+        <Location left="892" top="779" />
         <Size width="63" height="50" />
+      </Entity>
+      <Entity type="Structure">
+        <Name>Symbol</Name>
+        <Access>Public</Access>
+        <Location left="1396" top="484" />
+        <Size width="207" height="229" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">public QString base_</Member>
+        <Member type="Field">public QString quote_</Member>
+        <Member type="Method">public QString id()</Member>
+        <Member type="Method">public QString display()</Member>
       </Entity>
     </Entities>
     <Relationships>
       <Relationship type="Association" first="2" second="0">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -135,17 +181,15 @@
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
       <Relationship type="Association" first="6" second="3">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
-          <X>235</X>
-          <Y>427</Y>
+          <X>606</X>
+          <Y>623</Y>
         </BendPoint>
         <BendPoint relativeToStartShape="False">
-          <X>235</X>
-          <Y>540</Y>
+          <X>606</X>
+          <Y>834</Y>
         </BendPoint>
         <Direction>Unidirectional</Direction>
         <AssociationType>Association</AssociationType>
@@ -153,13 +197,11 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="3" second="4">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
-          <X>523</X>
-          <Y>787</Y>
+          <X>978</X>
+          <Y>1081</Y>
         </BendPoint>
         <Direction>Unidirectional</Direction>
         <AssociationType>Association</AssociationType>
@@ -167,37 +209,35 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Association" first="3" second="2">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <BendPoint relativeToStartShape="True">
-          <X>535</X>
-          <Y>648</Y>
+          <X>990</X>
+          <Y>942</Y>
         </BendPoint>
         <BendPoint relativeToStartShape="False">
-          <X>648</X>
-          <Y>592</Y>
+          <X>1016</X>
+          <Y>905</Y>
         </BendPoint>
         <Direction>Unidirectional</Direction>
         <AssociationType>Association</AssociationType>
         <EndMultiplicity>0..1</EndMultiplicity>
       </Relationship>
       <Relationship type="Dependency" first="6" second="3">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
-          <X>390</X>
-          <Y>431</Y>
+          <X>761</X>
+          <Y>627</Y>
         </BendPoint>
         <BendPoint relativeToStartShape="False">
-          <X>390</X>
-          <Y>540</Y>
+          <X>761</X>
+          <Y>834</Y>
         </BendPoint>
       </Relationship>
       <Relationship type="Association" first="6" second="8">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -206,25 +246,25 @@
         <EndMultiplicity>1</EndMultiplicity>
       </Relationship>
       <Relationship type="Dependency" first="8" second="3">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>1019</X>
+          <Y>809</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>852</X>
+          <Y>834</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Association" first="8" second="2">
         <Label>
         </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
-          <X>726</X>
-          <Y>382</Y>
-        </BendPoint>
-        <BendPoint relativeToStartShape="False">
-          <X>481</X>
-          <Y>540</Y>
-        </BendPoint>
-      </Relationship>
-      <Relationship type="Association" first="8" second="2">
-        <StartOrientation>Vertical</StartOrientation>
-        <EndOrientation>Vertical</EndOrientation>
-        <BendPoint relativeToStartShape="True">
-          <X>862</X>
-          <Y>381</Y>
+          <X>1155</X>
+          <Y>808</Y>
         </BendPoint>
         <Direction>Unidirectional</Direction>
         <AssociationType>Association</AssociationType>
