@@ -21,11 +21,18 @@ inline QList<Symbol> someSymbols(){
     return {
         Symbol("ETH", "USDT"),
         Symbol("BTC", "USDT"),
+        Symbol("BNB", "USDT"),
         Symbol("XRP", "USDT"),
         Symbol("ADA", "USDT"),
         Symbol("SEI", "USDT"),
-        Symbol("APEX", "USDT"),
         Symbol("SUI", "USDT"),
-        Symbol("LINK", "USDT")
+        Symbol("APEX", "USDT"),
+        Symbol("LINK", "USDT"),
+        Symbol("TONCOIN", "USDT"),
+        Symbol("ENA", "USDT"),
+        Symbol("STRK", "USDT"),
+        Symbol("ZK", "USDT"),
+        Symbol("ZEC", "USDT"),
+        Symbol("XAUT", "USDT")
     };
 }
