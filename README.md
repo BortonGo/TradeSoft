@@ -38,7 +38,7 @@
 
 <img width="1112" height="1259" alt="MarketData_MVP" src="https://github.com/user-attachments/assets/21c15074-9582-4a87-b616-7a7fb7be0254" />
 
-<img width="1751" height="823" alt="MarketData_Sequences" src="https://github.com/user-attachments/assets/99420dd7-18b1-477e-b1e3-cd886b6e99c7" />
+<img width="1947" height="565" alt="MarketData_Sequences" src="https://github.com/user-attachments/assets/3af04afe-bcee-476f-b96a-525737234cc3" />
 
 
 ### High-Level Architecture
