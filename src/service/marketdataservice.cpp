@@ -35,6 +35,7 @@ void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
     emit signal_seriesLoaded(currentSeries_);
     useExchangeRealtime_ = exchange_->supportsPollingRealtime();
 
+    requestInFlight_ = false;
 }
 
 void MarketDataService::startRealTime()
