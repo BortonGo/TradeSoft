@@ -36,7 +36,7 @@
 
 На этапе MVP проект строится вокруг модульной архитектуры. UML-диаграммы используются для фиксации текущего дизайна и могут меняться по мере развития системы.
 
-<img width="1249" height="881" alt="MarketData_MVP" src="https://github.com/user-attachments/assets/67d98818-0eea-4272-bae0-6de56b77f0a7" />
+<img width="1112" height="1259" alt="MarketData_MVP" src="https://github.com/user-attachments/assets/21c15074-9582-4a87-b616-7a7fb7be0254" />
 
 <img width="1751" height="823" alt="MarketData_Sequences" src="https://github.com/user-attachments/assets/99420dd7-18b1-477e-b1e3-cd886b6e99c7" />
 
