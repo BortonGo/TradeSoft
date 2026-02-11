@@ -53,11 +53,18 @@ inline QList<Timeframe> allTimeframes() {
 }
 
 inline bool timeframeIsIntraday(Timeframe tf) {
-    return tf = Timeframe::M1
-            || tf = Timeframe::M5
-            || tf = Timeframe::M15
-            || tf = Timeframe::H1
-            || tf = Timeframe::H4;
+    return tf == Timeframe::M1
+            || tf == Timeframe::M5
+            || tf == Timeframe::M15
+            || tf == Timeframe::H1
+            || tf == Timeframe::H4;
+}
+
+inline bool timeframeShowTimeAcrossDays(Timeframe tf) {
+    return tf == Timeframe::M1
+        || tf == Timeframe::M5
+        || tf == Timeframe::M15
+        || tf == Timeframe::H1;
 }
 
 

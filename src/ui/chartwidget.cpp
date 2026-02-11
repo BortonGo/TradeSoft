@@ -248,9 +248,9 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
     {
         const int stepPx = candleWidth_ + candleGap_;
 
-        const int minLabelSpacingPx = 140;
+        const int minMinorLabelSpacingPx = 140;
 
-        int stepBars = static_cast<int>(std::ceil(static_cast<double>(minLabelSpacingPx) / stepPx));
+        int stepBars = static_cast<int>(std::ceil(static_cast<double>(minMinorLabelSpacingPx) / stepPx));
         if (stepBars < 1) {
             stepBars = 1;
         }
@@ -258,23 +258,60 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         painter.save();
         painter.setPen(QColor(180,180,180));
 
-        int lastLabelRight = std::numeric_limits<int>::min();
+        int lastMinorRight = std::numeric_limits<int>::min();
+        int lastMajorRight = std::numeric_limits<int>::min();
 
-        for (int i = first; i <= last; i+=stepBars) {
+        auto toDt = [](qint64 ms){
+            return QDateTime::fromMSecsSinceEpoch(ms, Qt::UTC);
+        };
+
+        const QFontMetrics fm(painter.font());
+
+        QDateTime prevDt;
+
+        // Pass 1: Major
+        for (int i = first; i <= last; ++i) {
+
+            const qint64 ts = static_cast<qint64>(candles[i].timestamp_);
+
+            const QDateTime dt = toDt(ts);
+
+            bool majorYear = false;
+            bool majorMonth = false;
+            bool majorDay = false;
+
+            if (i > first) {
+                const QDate pd = prevDt.date();
+                const QDate cd = dt.date();
+
+                if (currentTf_ == Timeframe::D1) {
+                    majorYear = (pd.year() != cd.year());
+                    majorMonth = (!majorYear && (pd.month() != cd.month()));
+                } else if (timeframeIsIntraday(currentTf_)) {
+                    majorDay = (pd != cd);
+                }
+            }
+
+            prevDt = dt;
+
+            if (!(majorYear || majorMonth || majorDay)) {
+                continue;
+            }
 
             const int k = i - first;
             const int x = plot.left() + k * step;
             const int xCenter = x + candleWidth_ / 2;
 
-            const qint64 ts = static_cast<qint64>(candles[i].timestamp_);
-            const QDateTime dt = QDateTime::fromMSecsSinceEpoch(ts);
+            QString label;
+            if (majorYear) {
+                label = dt.toString("yyyy");
+            } else if (majorMonth) {
+                label = dt.toString("MMM yyyy");
+            } else {
+                label = dt.toString("dd MMM");
+            }
 
-            const QString label = dt.toString("HH:mm");
-
-            painter.drawLine(xCenter, plot.bottom(), xCenter, plot.bottom() + 4);
-
-            const QFontMetrics fm(painter.font());
-            const int textW = fm.boundingRect(label).width();
+            const int textW = fm.width(label);
             const int textH = fm.height();
 
             QRect textRect(xCenter - textW / 2, plot.bottom() + 6, textW + 2, textH);
@@ -286,13 +323,60 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
                 textRect.moveRight(plot.right());
             }
 
-            if (textRect.left() <= lastLabelRight + 6) {
+            if (textRect.left() <= lastMajorRight + 6) {
                 continue;
             }
-            lastLabelRight = textRect.right();
+            lastMajorRight = textRect.right();
 
+            const int tickLen = majorYear ? 12 : (majorMonth ? 10 : 8);
+
+            painter.drawLine(xCenter, plot.bottom(), xCenter, plot.bottom() + tickLen);
             painter.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, label);
         }
+
+        // Pass 2: Minor
+        for (int i = first; i <= last; i += stepBars) {
+
+               const int k = i - first;
+               const int x = plot.left() + k * step;
+               const int xCenter = x + candleWidth_ / 2;
+
+               const qint64 ts = static_cast<qint64>(candles[i].timestamp_);
+               const QDateTime dt = toDt(ts);
+
+               QString label;
+               if (currentTf_ == Timeframe::D1) {
+                   label = dt.toString("dd");
+               } else {
+                   label = dt.toString("HH:mm");
+               }
+
+               const int textW = fm.width(label);
+               const int textH = fm.height();
+
+               QRect textRect(xCenter - textW / 2, plot.bottom() + 6, textW + 2, textH);
+
+               if (textRect.left() < plot.left())  textRect.moveLeft(plot.left());
+               if (textRect.right() > plot.right()) textRect.moveRight(plot.right());
+
+               // 1) не рисуем, если налезает на предыдущий minor
+               if (textRect.left() <= lastMinorRight + 6) {
+                   continue;
+               }
+
+               // Для M1..H1: хотим видеть HH:mm по всем дням, major не должен "глушить" время.
+               // Для H4 и D1: оставляем как сейчас — major может подавлять minor рядом с ним.
+               if (timeframeShowTimeAcrossDays(currentTf_)) {
+                   if (textRect.left() <= lastMajorRight + 6) {
+                       continue;
+                   }
+               }
+
+               lastMinorRight = textRect.right();
+
+               painter.drawLine(xCenter, plot.bottom(), xCenter, plot.bottom() + 4);
+               painter.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, label);
+           }
 
         painter.restore();
     }
