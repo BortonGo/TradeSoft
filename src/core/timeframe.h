@@ -52,5 +52,12 @@ inline QList<Timeframe> allTimeframes() {
             Timeframe::H1, Timeframe::H4, Timeframe::D1 };
 }
 
+inline bool timeframeIsIntraday(Timeframe tf) {
+    return tf = Timeframe::M1
+            || tf = Timeframe::M5
+            || tf = Timeframe::M15
+            || tf = Timeframe::H1
+            || tf = Timeframe::H4;
+}
 
 
