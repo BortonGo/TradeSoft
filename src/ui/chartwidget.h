@@ -9,11 +9,13 @@
 #include <memory>
 #include "core\candleseries.h"
 #include "core\candle.h"
+#include "core\timeframe.h"
 
 class ChartWidget : public QWidget {
     Q_OBJECT
 
     std::shared_ptr<CandleSeries> series_;
+    Timeframe currentTf_ = Timeframe::M1;
 
     int firstVisible_ = 0;
     int visibleCount_ = 500;
@@ -38,6 +40,7 @@ class ChartWidget : public QWidget {
 
 public:
     explicit ChartWidget(QWidget* parent = nullptr);
+    void setTimeframe(Timeframe tf);
 
 public slots:
     void slot_setSeries(std::shared_ptr<CandleSeries> series);

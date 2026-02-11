@@ -37,6 +37,12 @@ static bool calcVisibleMinMax(const CandleSeries& s, int first, int last, double
     return true;
 }
 
+void ChartWidget::setTimeframe(Timeframe tf)
+{
+    currentTf_ = tf;
+    update();
+}
+
 //==================================================== PaintEvent ====================================================
 void ChartWidget::paintEvent(QPaintEvent* event) {
     Q_UNUSED(event);
