@@ -210,7 +210,7 @@ void BingXSwapClient::fetchLastKlineAsync(const QString& symbolId, Timeframe tf,
     QTimer* t = new QTimer(reply);
     t->setSingleShot(true);
     QObject::connect(t, &QTimer::timeout, reply, &QNetworkReply::abort);
-    t->start(1500);
+    t->start(5000);
 
     QObject::connect(reply, &QNetworkReply::finished, reply, [reply, cb]() {
         // finished will run even after abort() -> treat as failure if error != NoError
