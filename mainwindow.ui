@@ -35,8 +35,8 @@ QTabBar::tab:selected {
 
 QPushButton {
     background-color: rgb(40, 40, 40);
-    border: 1px solid #555;
-    padding: 6px 14px;
+    border: 2px solid rgb(22, 22, 22);
+    padding: 1px 1px;
 }
 </string>
   </property>
@@ -73,7 +73,7 @@ color: white;                /* цвет текста */</string>
              <string notr="true">background-color: rgb(43, 43, 43);
 color: white;                /* цвет текста */</string>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0">
+            <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
              <property name="spacing">
               <number>7</number>
              </property>
@@ -129,7 +129,6 @@ color: white;                /* цвет текста */</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(43, 43, 43);
-
 color: white;                /* цвет текста */</string>
                </property>
               </widget>
@@ -159,7 +158,7 @@ color: white;                /* цвет текста */</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>11</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="layoutDirection">
@@ -195,9 +194,6 @@ color: white;                /* цвет текста */
                 </size>
                </property>
               </spacer>
-             </item>
-             <item>
-              <layout class="QGridLayout" name="gridLayout_3"/>
              </item>
             </layout>
            </widget>
