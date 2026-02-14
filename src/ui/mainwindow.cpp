@@ -81,3 +81,8 @@ void MainWindow::reloadAndStart() {
     marketData_->loadHistory(currentSymbol, tf);
     marketData_->startRealTime();
 }
+
+void MainWindow::on_btnIndicators_clicked()
+{
+    // Реализовать позже
+}
