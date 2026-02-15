@@ -46,8 +46,13 @@ MainWindow::MainWindow(QWidget *parent) :
     marketData_ = market;
 
     QObject::connect(marketData_, &MarketDataService::signal_seriesLoaded, ui->chartWidget, &ChartWidget::slot_setSeries);
+
     QObject::connect(marketData_, &MarketDataService::signal_candleUpdated, ui->chartWidget, &ChartWidget::slot_onCandleUpdate);
     QObject::connect(marketData_, &MarketDataService::signal_candleClosed, ui->chartWidget, &ChartWidget::slot_onCandleClosed);
+
+    indicatorService_ = new IndicatorService(marketData_, this);
+
+    QObject::connect(indicatorService_, &IndicatorService::signal_overlayLinesUpdated, ui->chartWidget, &ChartWidget::setIndicatorLines);
 
     reloadAndStart();
 }
@@ -88,13 +93,10 @@ void MainWindow::on_btnIndicators_clicked()
 {
     IndicatorDialog dlg(this);
 
-    if(dlg.exec() == QDialog::Accepted) {
-        const auto r =dlg.result();
-        qDebug() << "Indicators: "
-               << "EMA20: " << r.ema20
-               << "EMA50: " << r.ema50
-               << "DON20: " << r.donchain20
-               << "RSI14: " << r.rsi14
-               << "ATR14: " << r.atr14;
-    }
+        // восстановление состояния чекбоксов
+        dlg.setConfig(indicatorService_->config());
+
+        if (dlg.exec() == QDialog::Accepted) {
+            indicatorService_->applyConfig(dlg.config());
+        }
 }

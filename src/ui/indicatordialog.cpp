@@ -17,12 +17,23 @@ IndicatorDialog::~IndicatorDialog()
     delete ui;
 }
 
-IndicatorDialog::IndicatorDialogResult IndicatorDialog::result() const{
-    IndicatorDialogResult r;
-    r.ema20 = ui->chkEma50->isChecked();
-    r.ema50 = ui->chkEma50->isChecked();
-    r.donchain20 = ui->chkDonchian20->isChecked();
-    r.rsi14 = ui->chkRsi14->isChecked();
-    r.atr14 = ui->chkAtr14->isChecked();
-    return r;
+void IndicatorDialog::setConfig(const IndicatorConfig& cfg)
+{
+    ui->chkEma20->setChecked(cfg.ema20);
+    ui->chkEma50->setChecked(cfg.ema50);
+    ui->chkDonchian20->setChecked(cfg.donchian20);
+    ui->chkRsi14->setChecked(cfg.rsi14);
+    ui->chkAtr14->setChecked(cfg.atr14);
 }
+
+IndicatorConfig IndicatorDialog::config() const
+{
+    IndicatorConfig cfg;
+    cfg.ema20 = ui->chkEma20->isChecked();
+    cfg.ema50 = ui->chkEma50->isChecked();
+    cfg.donchian20 = ui->chkDonchian20->isChecked();
+    cfg.rsi14 = ui->chkRsi14->isChecked();
+    cfg.atr14 = ui->chkAtr14->isChecked();
+    return cfg;
+}
+

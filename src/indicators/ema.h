@@ -1,11 +1,10 @@
-#ifndef EMA_H
-#define EMA_H
-
+#pragma once
+#include <QVector>
+#include <QList>
+#include "core/candle.h"
 
 class EMA
 {
 public:
-    EMA();
+    static QVector<double> calculate(const QList<Candle>& candles, int period);
 };
-
-#endif // EMA_H

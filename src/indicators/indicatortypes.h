@@ -1,7 +1,10 @@
 #pragma once
 #include <QString>
 #include <QVector>
+#include <QtGlobal>
 #include <cmath>
+#include <limits>
+#include <type_traits>
 
 enum class IndicatorId {
     EMA20,
@@ -11,12 +14,18 @@ enum class IndicatorId {
     ATR14
 };
 
+inline uint qHash(IndicatorId key, uint seed = 0) noexcept
+{
+    using U = typename std::underlying_type<IndicatorId>::type;
+    return ::qHash(static_cast<U>(key), seed);
+}
+
 struct IndicatorLine {
     IndicatorId id_;
     QString name_;
-    QVector<double> values;
+    QVector<double> values_;
 };
 
 inline double indNaN() {
-    std::numeric_limits<double>::quiet_NaN();
+    return std::numeric_limits<double>::quiet_NaN();
 }

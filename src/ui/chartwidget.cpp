@@ -37,9 +37,13 @@ static bool calcVisibleMinMax(const CandleSeries& s, int first, int last, double
     return true;
 }
 
-void ChartWidget::setTimeframe(Timeframe tf)
-{
+void ChartWidget::setTimeframe(Timeframe tf) {
     currentTf_ = tf;
+    update();
+}
+
+void ChartWidget::setIndicatorLines(const QVector<IndicatorLine>& lines) {
+    indicatorLines_ = lines;
     update();
 }
 
@@ -133,6 +137,44 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
         painter.fillRect(body, bull ? QColor(0,200,0) : QColor(200,0,0));
     }
+
+    // Indicators overlay (EMA)
+    if (!indicatorLines_.isEmpty()) {
+        painter.save();
+        painter.setRenderHint(QPainter::Antialiasing, true);
+
+        for (const auto& line : indicatorLines_) {
+            // простые цвета, чтобы различать линии
+            QPen pen;
+            if (line.id_ == IndicatorId::EMA20) pen = QPen(QColor(255, 200, 0), 1);
+            else                               pen = QPen(QColor(0, 180, 255), 1);
+            painter.setPen(pen);
+
+            QPolygonF poly;
+            poly.reserve(last - first + 1);
+
+            const int n = line.values_.size();
+            for (int i = first; i <= last; ++i) {
+                if (i < 0 || i >= n) continue;
+
+                const double v = line.values_[i];
+                if (std::isnan(v)) continue;
+
+                const int k = i - first;
+                const int x = plot.left() + k * step + candleWidth_ / 2;
+                const int y = priceToY(v);
+
+                poly << QPointF(x, y);
+            }
+
+            if (poly.size() >= 2) {
+                painter.drawPolyline(poly);
+            }
+        }
+
+        painter.restore();
+    }
+
 
     // Y axis (price scale)
     {
