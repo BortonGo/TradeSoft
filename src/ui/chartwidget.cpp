@@ -148,7 +148,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             QPen pen;
             switch (line.id_){
             case IndicatorId::EMA9 :
-                pen = QPen(QColor(255, 0, 0), 1);
+                pen = QPen(QColor(139, 0, 255), 1);
                 break;
             case IndicatorId::EMA20 :
                 pen = QPen(QColor(255, 200, 0), 1);
@@ -157,13 +157,6 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
                 pen = QPen(QColor(0, 180, 255), 1);
                 break;
             }
-
-            /*if (line.id_ == IndicatorId::EMA20) {
-                pen = QPen(QColor(255, 200, 0), 1);
-            }
-            else {
-                pen = QPen(QColor(0, 180, 255), 1);
-            }*/
 
             painter.setPen(pen);
 
