@@ -23,7 +23,7 @@ IndicatorConfig IndicatorService::config() const {
 void IndicatorService::applyConfig(const IndicatorConfig& cfg)
 {
     cfg_ = cfg;
-
+    engine_.setEnabled(IndicatorId::EMA9, cfg_.ema9);
     engine_.setEnabled(IndicatorId::EMA20, cfg_.ema20);
     engine_.setEnabled(IndicatorId::EMA50, cfg_.ema50);
     // остальные позже

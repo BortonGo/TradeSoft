@@ -22,6 +22,14 @@ void IndicatorEngine::rebuild(const CandleSeries& series) {
         return;
     }
 
+    if (isEnabled(IndicatorId::EMA9)) {
+        IndicatorLine line;
+        line.id_ = IndicatorId::EMA9;
+        line.name_ = "EMA 9";
+        line.values_ = EMA::calculate(c, 9);
+        lines_.push_back(std::move(line));
+    }
+
     if (isEnabled(IndicatorId::EMA20)) {
         IndicatorLine line;
         line.id_ = IndicatorId::EMA20;

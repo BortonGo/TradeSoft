@@ -146,12 +146,25 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         for (const auto& line : indicatorLines_) {
             // простые цвета, чтобы различать линии
             QPen pen;
-            if (line.id_ == IndicatorId::EMA20) {
+            switch (line.id_){
+            case IndicatorId::EMA9 :
+                pen = QPen(QColor(255, 0, 0), 1);
+                break;
+            case IndicatorId::EMA20 :
+                pen = QPen(QColor(255, 200, 0), 1);
+                break;
+            case IndicatorId::EMA50 :
+                pen = QPen(QColor(0, 180, 255), 1);
+                break;
+            }
+
+            /*if (line.id_ == IndicatorId::EMA20) {
                 pen = QPen(QColor(255, 200, 0), 1);
             }
             else {
                 pen = QPen(QColor(0, 180, 255), 1);
-            }
+            }*/
+
             painter.setPen(pen);
 
             QPolygonF poly;

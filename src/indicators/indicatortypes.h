@@ -7,6 +7,7 @@
 #include <type_traits>
 
 enum class IndicatorId {
+    EMA9,
     EMA20,
     EMA50,
     DON20,
