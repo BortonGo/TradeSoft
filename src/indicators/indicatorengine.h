@@ -16,8 +16,5 @@ public:
     void rebuild(const CandleSeries& series);
 
     QVector<IndicatorLine> overlayLines() const;
-
-private:
-    QVector<double> calcEma(const QList<Candle>& candles, int period);
 };
 

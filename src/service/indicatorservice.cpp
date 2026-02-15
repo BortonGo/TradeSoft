@@ -16,14 +16,6 @@ IndicatorService::IndicatorService(MarketDataService* mds, QObject* parent)
             this, &IndicatorService::onCandleClosed);
 }
 
-void IndicatorService::applyDialogResultFlags(bool ema20, bool ema50, bool /*donchian20*/, bool /*rsi14*/, bool /*atr14*/)
-{
-    engine_.setEnabled(IndicatorId::EMA20, ema20);
-    engine_.setEnabled(IndicatorId::EMA50, ema50);
-
-    rebuildAndEmit();
-}
-
 IndicatorConfig IndicatorService::config() const {
     return cfg_;
 }
@@ -39,7 +31,6 @@ void IndicatorService::applyConfig(const IndicatorConfig& cfg)
     rebuildAndEmit();
 }
 
-
 void IndicatorService::onSeriesLoaded(std::shared_ptr<CandleSeries> s)
 {
     series_ = s;
@@ -50,6 +41,12 @@ void IndicatorService::onCandleUpdated(Candle /*c*/)
 {
     // MVP: просто пересчёт (500 свечей раз в 1с — ок)
     rebuildAndEmit();
+    /* Дальше должно быть что-то типо:
+     * при обновлении текущей свечи → обновляется только последняя точка индикатора
+     * при закрытии свечи → добавляется новая точка индикатора
+     *
+     * updateLastPoint()
+     * addNewPoint()  */
 }
 
 void IndicatorService::onCandleClosed(Candle /*c*/)

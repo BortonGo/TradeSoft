@@ -146,8 +146,12 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         for (const auto& line : indicatorLines_) {
             // простые цвета, чтобы различать линии
             QPen pen;
-            if (line.id_ == IndicatorId::EMA20) pen = QPen(QColor(255, 200, 0), 1);
-            else                               pen = QPen(QColor(0, 180, 255), 1);
+            if (line.id_ == IndicatorId::EMA20) {
+                pen = QPen(QColor(255, 200, 0), 1);
+            }
+            else {
+                pen = QPen(QColor(0, 180, 255), 1);
+            }
             painter.setPen(pen);
 
             QPolygonF poly;
@@ -174,7 +178,6 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
         painter.restore();
     }
-
 
     // Y axis (price scale)
     {

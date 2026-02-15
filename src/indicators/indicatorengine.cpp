@@ -43,34 +43,3 @@ QVector<IndicatorLine> IndicatorEngine::overlayLines() const {
     return lines_;
 }
 
-QVector<double> IndicatorEngine::calcEma(const QList<Candle>& candles, int period) {
-    const int n = candles.size();
-
-    QVector<double> out(n, std::numeric_limits<double>::quiet_NaN());
-    if (n <=0 || period <= 0) {
-        return out;
-    }
-
-    if (n < period) {
-        return out;
-    }
-
-    // start SMA
-    double sum = 0.0;
-    for (int i = 0; i < period; ++i) {
-        sum += candles[i].close_;
-    }
-
-    double ema =sum / period;
-    out[period - 1] = ema;
-
-    // EMA
-    const double k = 2.0 / (period + 1);
-    for (int i = period; i < n; ++i) {
-        const double price = candles[i].close_;
-        ema = ema + k * (price - ema);
-        out[i] = ema;
-    }
-
-    return out;
-}

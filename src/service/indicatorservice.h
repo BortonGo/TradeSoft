@@ -17,8 +17,6 @@ class IndicatorService : public QObject
 public:
     explicit IndicatorService(MarketDataService* mds, QObject* parent = nullptr);
 
-    void applyDialogResultFlags(bool ema20, bool ema50, bool donchian20, bool rsi14, bool atr14);
-
     IndicatorConfig config() const;
     void applyConfig(const IndicatorConfig& cfg);
 
