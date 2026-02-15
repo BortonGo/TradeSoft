@@ -17,6 +17,8 @@ private slots:
 
     void on_comboTimeframe_currentIndexChanged(int index);
 
+    void on_btnIndicators_clicked();
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();

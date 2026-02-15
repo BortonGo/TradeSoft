@@ -5,6 +5,8 @@
 #include "service\marketdataservice.h"
 #include "exchange\bingxswapclient.h"
 #include "ui\chartwidget.h"
+#include "ui\indicatordialog.h"
+
 #include <memory>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -84,5 +86,15 @@ void MainWindow::reloadAndStart() {
 
 void MainWindow::on_btnIndicators_clicked()
 {
-    // Реализовать позже
+    IndicatorDialog dlg(this);
+
+    if(dlg.exec() == QDialog::Accepted) {
+        const auto r =dlg.result();
+        qDebug() << "Indicators: "
+               << "EMA20: " << r.ema20
+               << "EMA50: " << r.ema50
+               << "DON20: " << r.donchain20
+               << "RSI14: " << r.rsi14
+               << "ATR14: " << r.atr14;
+    }
 }
