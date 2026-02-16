@@ -45,6 +45,29 @@ void IndicatorEngine::rebuild(const CandleSeries& series) {
         line.values_ = EMA::calculate(c, 50);
         lines_.push_back(std::move(line));
     }
+
+    if (isEnabled(IndicatorId::DON20)) {
+
+        auto dc = Donchian::calculate(c, 20);
+
+        IndicatorLine upper;
+        upper.id_ = IndicatorId::DON20UPPER;
+        upper.name_ = "Donchian 20 upper";
+        upper.values_ = Donchian::calculate(c, 20);
+        lines_.push_back(std::move(upper));
+
+        IndicatorLine lower;
+        lower.id_ = IndicatorId::DON20LOWER;
+        lower.name_ = "Donchian 20 lower";
+        lower.values_ = Donchian::calculate(c, 20);
+        lines_.push_back(std::move(lower));
+
+        IndicatorLine middle;
+        middle.id_ = IndicatorId::DON20MIDDLE;
+        middle.name_ = "Donchian 20 middle";
+        middle.values_ = Donchian::calculate(c, 20);
+        lines_.push_back(std::move(middle));
+    }
 }
 
 QVector<IndicatorLine> IndicatorEngine::overlayLines() const {

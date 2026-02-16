@@ -1,7 +1,8 @@
 #pragma once
 #include "indicatortypes.h"
 #include "src/core/candleseries.h"
-#include "indicators/ema.h"
+#include "ema.h"
+#include "donchian.h"
 #include <QSet>
 
 class IndicatorEngine
