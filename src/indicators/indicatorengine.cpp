@@ -16,7 +16,7 @@ bool IndicatorEngine::isEnabled(IndicatorId Id) const {
 void IndicatorEngine::rebuild(const CandleSeries& series) {
     lines_.clear();
 
-    const QList<Candle> c = series.getCandles();
+    const QList<Candle>& c = series.getCandles();
     const int n = c.size();
     if (n <= 0) {
         return;
@@ -53,19 +53,19 @@ void IndicatorEngine::rebuild(const CandleSeries& series) {
         IndicatorLine upper;
         upper.id_ = IndicatorId::DON20UPPER;
         upper.name_ = "Donchian 20 upper";
-        upper.values_ = Donchian::calculate(c, 20);
+        upper.values_ = dc.upper;
         lines_.push_back(std::move(upper));
 
         IndicatorLine lower;
         lower.id_ = IndicatorId::DON20LOWER;
         lower.name_ = "Donchian 20 lower";
-        lower.values_ = Donchian::calculate(c, 20);
+        lower.values_ = dc.lower;
         lines_.push_back(std::move(lower));
 
         IndicatorLine middle;
         middle.id_ = IndicatorId::DON20MIDDLE;
         middle.name_ = "Donchian 20 middle";
-        middle.values_ = Donchian::calculate(c, 20);
+        middle.values_ = dc.middle;
         lines_.push_back(std::move(middle));
     }
 }

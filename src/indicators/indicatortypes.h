@@ -11,6 +11,9 @@ enum class IndicatorId {
     EMA20,
     EMA50,
     DON20,
+    DON20UPPER,
+    DON20LOWER,
+    DON20MIDDLE,
     RSI14,
     ATR14
 };

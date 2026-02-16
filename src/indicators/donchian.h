@@ -12,6 +12,6 @@ public:
         QVector<double> middle;
     };
 
-    static QVector<double> calculate(const QList<Candle>& candles, int period);
+    static DonchianResult calculate(const QList<Candle>& candles, int period);
 };
 

@@ -1,31 +1,38 @@
 #include "donchian.h"
+#include <limits>
+#include <algorithm>
 
-static QVector<double> Donchian::calculate(const QList<Candle>& candles, int period) {
+Donchian::DonchianResult Donchian::calculate(const QList<Candle>& candles, int period)
+{
     const int n = candles.size();
 
-    DonchianResult result;
-    result.upper = QVector<double>(n, std::numeric_limits<double>::quiet_NaN());
-    result.lower = QVector<double>(n, std::numeric_limits<double>::quiet_NaN());
-    result.middle = QVector<double>(n, std::numeric_limits<double>::quiet_NaN());
+    DonchianResult r;
+    r.upper  = QVector<double>(n, std::numeric_limits<double>::quiet_NaN());
+    r.lower  = QVector<double>(n, std::numeric_limits<double>::quiet_NaN());
+    r.middle = QVector<double>(n, std::numeric_limits<double>::quiet_NaN());
 
-    if (n < period || period <= 0) {
-        return result;
+    if (n <= 0 || period <= 0 || n < period) {
+        return r;
     }
 
-
+    // первая точка, где можно посчитать окно period: i = period-1
     for (int i = period - 1; i < n; ++i) {
-        double highest = candles[i].high_;
-        double lowest = candles[i].low_;
 
-        for (int j = i - period; j <= i; ++i) {
-            highest = std::max(highest, candles[i].high_);
-            lowest = std::min(highest, candles[i].low_);
+        double hi = candles[i].high_;
+        double lo = candles[i].low_;
+
+        const int j0 = i - period + 1;   // гарантированно >= 0
+        for (int j = j0; j <= i; ++j) {  // гарантированно <= n-1
+            hi = std::max(hi, candles[j].high_);
+            lo = std::min(lo, candles[j].low_);
+            Q_ASSERT(i >= 0 && i < n);
+            Q_ASSERT(i - period + 1 >= 0);
         }
 
-        result.upper[i] = highest;
-        result.lower[i] = lowest;
-        result.middle[i] = (highest + lowest) / 2.0;
+        r.upper[i]  = hi;
+        r.lower[i]  = lo;
+        r.middle[i] = 0.5 * (hi + lo);
     }
 
-    return result;
+    return r;
 }

@@ -156,6 +156,15 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             case IndicatorId::EMA50 :
                 pen = QPen(QColor(0, 180, 255), 1);
                 break;
+            case IndicatorId::DON20UPPER :
+                pen = QPen(QColor(0, 180, 255), 1);
+                break;
+            case IndicatorId::DON20LOWER :
+                pen = QPen(QColor(0, 180, 255), 1);
+                break;
+            case IndicatorId::DON20MIDDLE :
+                pen = QPen(QColor(0, 180, 255), 1);
+                break;
             }
 
             painter.setPen(pen);
@@ -661,30 +670,28 @@ int ChartWidget::lastVisible() const {
 }
 
 void ChartWidget::normalizeViewport() {
-    if (!series_) {
-        return;
-    }
+    if (!series_) return;
+
     const int count = series_->getCount();
-    if (count == 0) {
-        return;
-    }
+    if (count <= 0) return;
 
-    int vis = std::min(visibleCount_, maxVisibleByWidth());
-    if (vis <= 0) {
-        return;
-    }
+    const int maxVis = maxVisibleByWidth();
+    const int vis = std::max(1, std::min(visibleCount_, maxVis));
 
-    int maxFirst = std::max(0, count - vis);
-    int maxFirstAllowed = count - 1;
+    const int maxFirst = std::max(0, count - vis);
+
     if (followRight_) {
         firstVisible_ = maxFirst;
+        panRemainder_ = 0.0;
     } else {
-        firstVisible_ = qBound(0, firstVisible_, maxFirstAllowed);
+        firstVisible_ = qBound(0, firstVisible_, maxFirst);
     }
 
+    // clamp candle width
     if (candleWidth_ < minCandleWidth_) {
         candleWidth_ = minCandleWidth_;
-    } else if (candleWidth_ > maxCandleWidth_) {
+    }
+    else if (candleWidth_ > maxCandleWidth_) {
         candleWidth_ = maxCandleWidth_;
     }
 }
