@@ -290,7 +290,6 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
         // если панель пустая — вообще не рисуем
         if (!rsi && !atr) {
-            // nothing
         } else {
             painter.save();
 
@@ -298,7 +297,6 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             painter.setPen(QColor(60, 60, 60));
             painter.drawRect(plotInd);
 
-            // RSI: fixed scale [0..100]
             if (rsi) {
                 auto rsiToY = [&](double v) -> int {
                     v = std::max(0.0, std::min(100.0, v));
@@ -311,7 +309,6 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
                 painter.drawLine(plotInd.left(), rsiToY(70), plotInd.right(), rsiToY(70));
                 painter.drawLine(plotInd.left(), rsiToY(30), plotInd.right(), rsiToY(30));
 
-                // RSI polyline
                 painter.setPen(QPen(QColor(180, 120, 255), 1));
 
                 QPolygonF poly;
@@ -325,7 +322,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
                     const int k = i - first;
                     const double x = plotPrice.left() + k * step + candleWidth_ / 2.0;
-                    const double y = rsiToY(v);              // ✅ ВОТ ТУТ ВАЖНО
+                    const double y = rsiToY(v);
                     poly << QPointF(x, y);
                 }
 
@@ -334,12 +331,52 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
                 }
             }
 
-            // ATR (пока можно не рисовать — позже)
-            // if (atr) { ... }
+            if (atr) {
+                double mn = std::numeric_limits<double>::infinity();
+                double mx = -std::numeric_limits<double>::infinity();
+
+                const int n = atr->values_.size();
+                for (int i = first; i <= last; ++i) {
+                    if (i < 0 || i >= n) continue;
+
+                    const double v = atr->values_[i];
+                    if (std::isnan(v)) continue;
+
+                    mn = std::min(mn, v);
+                    mx = std::max(mx, v);
+                }
+
+                if (std::isfinite(mn) && std::isfinite(mx) && mx > mn) {
+                    painter.setPen(QPen(QColor(0, 180, 255), 1));
+
+                    auto atrToY = [&](double v) -> int {
+                        const double t = (mx - v) / (mx - mn);
+                        return static_cast<int>(std::round(plotInd.top() + t * plotInd.height()));
+                    };
+
+                    QPolygonF poly;
+                    for (int i = first; i <= last; ++i) {
+                        if (i < 0 || i >= n) continue;
+
+                        const double v = atr->values_[i];
+                        if (std::isnan(v)) continue;
+
+                        const int k = i - first;
+                        const double x = plotPrice.left() + k * step + candleWidth_ / 2.0;
+                        const double y = atrToY(v);
+                        poly << QPointF(x, y);
+                    }
+
+                    if (poly.size() >= 2) {
+                        painter.drawPolyline(poly);
+                    }
+                }
+            }
 
             painter.restore();
         }
     }
+
 
 
     // Y axis (price scale)
