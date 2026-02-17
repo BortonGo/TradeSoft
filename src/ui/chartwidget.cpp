@@ -274,6 +274,72 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         painter.restore();
     }
 
+    // RSI and ATR
+    {
+        const IndicatorLine* rsi = nullptr;
+        const IndicatorLine* atr = nullptr;
+
+        // 1) find pointers
+        for (const auto& line : indicatorLines_) {
+            if (line.id_ == IndicatorId::RSI14) {
+                rsi = &line;
+            } else if (line.id_ == IndicatorId::ATR14) {
+                atr = &line;
+            }
+        }
+
+        // если панель пустая — вообще не рисуем
+        if (!rsi && !atr) {
+            // nothing
+        } else {
+            painter.save();
+
+            // background frame
+            painter.setPen(QColor(60, 60, 60));
+            painter.drawRect(plotInd);
+
+            // RSI: fixed scale [0..100]
+            if (rsi) {
+                auto rsiToY = [&](double v) -> int {
+                    v = std::max(0.0, std::min(100.0, v));
+                    const double t = (100.0 - v) / 100.0;
+                    return static_cast<int>(std::round(plotInd.top() + t * plotInd.height()));
+                };
+
+                // 30/70 lines
+                painter.setPen(QColor(80, 80, 80));
+                painter.drawLine(plotInd.left(), rsiToY(70), plotInd.right(), rsiToY(70));
+                painter.drawLine(plotInd.left(), rsiToY(30), plotInd.right(), rsiToY(30));
+
+                // RSI polyline
+                painter.setPen(QPen(QColor(180, 120, 255), 1));
+
+                QPolygonF poly;
+                const int n = rsi->values_.size();
+
+                for (int i = first; i <= last; ++i) {
+                    if (i < 0 || i >= n) continue;
+
+                    const double v = rsi->values_[i];
+                    if (std::isnan(v)) continue;
+
+                    const int k = i - first;
+                    const double x = plotPrice.left() + k * step + candleWidth_ / 2.0;
+                    const double y = rsiToY(v);              // ✅ ВОТ ТУТ ВАЖНО
+                    poly << QPointF(x, y);
+                }
+
+                if (poly.size() >= 2) {
+                    painter.drawPolyline(poly);
+                }
+            }
+
+            // ATR (пока можно не рисовать — позже)
+            // if (atr) { ... }
+
+            painter.restore();
+        }
+    }
 
 
     // Y axis (price scale)
