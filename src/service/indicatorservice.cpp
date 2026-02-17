@@ -29,7 +29,7 @@ void IndicatorService::applyConfig(const IndicatorConfig& cfg)
 
     engine_.setEnabled(IndicatorId::DON20, cfg_.donchian20);
     engine_.setEnabled(IndicatorId::RSI14, cfg_.rsi14);
-    engine_.setEnabled(IndicatorId::RSI14, cfg_.atr14);
+    engine_.setEnabled(IndicatorId::ATR14, cfg_.atr14);
 
     rebuildAndEmit();
 }

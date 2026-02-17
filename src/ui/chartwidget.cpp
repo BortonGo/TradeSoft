@@ -64,10 +64,36 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
     const auto& candles = series_->getCandles();
 
-    // plot-area
+    // plot-area base
     QRect plot = rect().adjusted(leftPadding_, topPadding_, -rightPadding_, -bottomPadding_);
-    if (plot.width() <= 0 || plot.height() <= 0) {
-        return;
+    if (plot.width() <= 0 || plot.height() <= 0) return;
+
+    // Detect if we need bottom indicator panel (RSI/ATR)
+    bool needBottomPanel = false;
+    for (const auto& line : indicatorLines_) {
+        if (line.id_ == IndicatorId::RSI14 || line.id_ == IndicatorId::ATR14) {
+            needBottomPanel = true;
+            break;
+        }
+    }
+
+    // Split plot only if needed
+    QRect plotPrice = plot;
+    QRect plotInd; // empty by default
+
+    if (needBottomPanel) {
+        const int gap = 6;
+        const int indH = std::max(80, plot.height() / 4);  // 25%, but not too small
+
+        plotInd = QRect(plot.left(),
+                        plot.bottom() - indH,
+                        plot.width(),
+                        indH);
+
+        plotPrice = QRect(plot.left(),
+                          plot.top(),
+                          plot.width(),
+                          plot.height() - indH - gap);
     }
 
     // if window dont set yet, visibleCount_ going to width
@@ -100,10 +126,10 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
     maxHigh += range * 0.05;
 
     // scale Y
-    const double yScale = plot.height() / (maxHigh - minLow);
+    const double yScale = plotPrice.height() / (maxHigh - minLow);
 
     auto priceToY = [&](double price) -> int {
-        const double y = plot.top() + (maxHigh - price) * yScale;
+        const double y = plotPrice.top() + (maxHigh - price) * yScale;
         return static_cast<int>(std::round(y));
     };
 
@@ -114,7 +140,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         const Candle& c = candles[i];
 
         const int k = i - first;
-        const int x = plot.left() + k * step;
+        const int x = plotPrice.left() + k * step;
         const int xCenter = x + candleWidth_ / 2;
 
         const int yOpen = priceToY(c.open_);
@@ -178,7 +204,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
                 }
 
                 const int k = i - first;
-                const double x = plot.left() + k * step + candleWidth_ / 2.0;
+                const double x = plotPrice.left() + k * step + candleWidth_ / 2.0;
                 const double yUp = priceToY(up);
                 const double yLo = priceToY(lo);
 
@@ -242,7 +268,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
                 }
 
                 const int k = i - first;
-                const int x = plot.left() + k * step + candleWidth_ / 2;
+                const int x = plotPrice.left() + k * step + candleWidth_ / 2;
                 const int y = priceToY(v);
                 poly << QPointF(x, y);
             }
@@ -253,10 +279,12 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         painter.restore();
     }
 
+
+
     // Y axis (price scale)
     {
         // Сколько подписей хотим(1 text on 60px)
-        const int desiredTicks = qBound(5, plot.height() / 60, 10);
+        const int desiredTicks = qBound(5, plotPrice.height() / 60, 10);
 
         const double priceRange = (maxHigh - minLow);
         if (priceRange > 0.0 && desiredTicks > 0) {
@@ -304,13 +332,13 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
                 }
                 lastDrawnY = y;
 
-                painter.drawLine(plot.right() - 3, y, plot.right() + 3, y);
+                painter.drawLine(plotPrice.right() - 3, y, plotPrice.right() + 3, y);
 
                 // right text
                 const QString label = QString::number(p, 'f', decimals);
 
                 // text rectangle
-                QRect textRect(plot.right() + 6, y - 8, rightPadding_ - 8, 16);
+                QRect textRect(plotPrice.right() + 6, y - 8, rightPadding_ - 8, 16);
                 painter.drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft, label);
 
             }
@@ -326,7 +354,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         QPen pen(QColor(220, 220, 220));
         pen.setStyle(Qt::DashLine);
         painter.setPen(pen);
-        painter.drawLine(plot.left(), y, plot.right(), y);
+        painter.drawLine(plotPrice.left(), y, plotPrice.right(), y);
     }
 
     // Current price label
@@ -342,10 +370,10 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             const QFontMetrics fm(painter.font());
             const int w = fm.boundingRect(text).width() + padX * 2;
 
-            int x = plot.right() + 6;
+            int x = plotPrice.right() + 6;
             int yTop = y - h / 2;
 
-            yTop = qBound(plot.top(), yTop, plot.bottom() - h);
+            yTop = qBound(plotPrice.top(), yTop, plotPrice.bottom() - h);
 
             QRect r(x, yTop, w, h);
 
@@ -418,7 +446,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             }
 
             const int k = i - first;
-            const int x = plot.left() + k * step;
+            const int x = plotPrice.left() + k * step;
             const int xCenter = x + candleWidth_ / 2;
 
             QString label;
@@ -433,13 +461,13 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             const int textW = fm.width(label);
             const int textH = fm.height();
 
-            QRect textRect(xCenter - textW / 2, plot.bottom() + 6, textW + 2, textH);
+            QRect textRect(xCenter - textW / 2, plotPrice.bottom() + 6, textW + 2, textH);
 
-            if (textRect.left() < plot.left()) {
-                textRect.moveLeft(plot.left());
+            if (textRect.left() < plotPrice.left()) {
+                textRect.moveLeft(plotPrice.left());
             }
-            if (textRect.right() > plot.right()) {
-                textRect.moveRight(plot.right());
+            if (textRect.right() > plotPrice.right()) {
+                textRect.moveRight(plotPrice.right());
             }
 
             if (textRect.left() <= lastMajorRight + 6) {
@@ -449,7 +477,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
             const int tickLen = majorYear ? 12 : (majorMonth ? 10 : 8);
 
-            painter.drawLine(xCenter, plot.bottom(), xCenter, plot.bottom() + tickLen);
+            painter.drawLine(xCenter, plotPrice.bottom(), xCenter, plotPrice.bottom() + tickLen);
             painter.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, label);
         }
 
@@ -457,7 +485,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         for (int i = first; i <= last; i += stepBars) {
 
             const int k = i - first;
-            const int x = plot.left() + k * step;
+            const int x = plotPrice.left() + k * step;
             const int xCenter = x + candleWidth_ / 2;
 
             const qint64 ts = static_cast<qint64>(candles[i].timestamp_);
@@ -473,13 +501,13 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             const int textW = fm.width(label);
             const int textH = fm.height();
 
-            QRect textRect(xCenter - textW / 2, plot.bottom() + 6, textW + 2, textH);
+            QRect textRect(xCenter - textW / 2, plotPrice.bottom() + 6, textW + 2, textH);
 
-            if (textRect.left() < plot.left())  {
-                textRect.moveLeft(plot.left());
+            if (textRect.left() < plotPrice.left())  {
+                textRect.moveLeft(plotPrice.left());
             }
-            if (textRect.right() > plot.right()) {
-                textRect.moveRight(plot.right());
+            if (textRect.right() > plotPrice.right()) {
+                textRect.moveRight(plotPrice.right());
             }
 
             // 1) не рисуем, если налезает на предыдущий minor
@@ -497,7 +525,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
             lastMinorRight = textRect.right();
 
-            painter.drawLine(xCenter, plot.bottom(), xCenter, plot.bottom() + 4);
+            painter.drawLine(xCenter, plotPrice.bottom(), xCenter, plotPrice.bottom() + 4);
             painter.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, label);
         }
 
@@ -506,7 +534,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
     // frame
     painter.setPen(QColor(80,80,80));
-    painter.drawRect(plot);
+    painter.drawRect(plotPrice);
 
 }
 
