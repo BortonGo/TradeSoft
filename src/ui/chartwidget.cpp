@@ -869,7 +869,9 @@ void ChartWidget::normalizeViewport() {
     const int vis = std::max(1, std::min(visibleCount_, maxVis));
 
     const int maxFirstData = std::max(0, count - vis);
-    const int maxFirst = maxFirstData + kFutureBars;
+
+    const int FUTURE_BARS = 100;
+    const int maxFirst = maxFirstData + FUTURE_BARS;
 
     if (followRight_) {
         firstVisible_ = maxFirstData;   // followRight = строго к последним данным, без пустоты
