@@ -1,11 +1,9 @@
-#ifndef ATR_H
-#define ATR_H
+#pragma once
+#include <QVector>
+#include <QList>
+#include "core/candle.h"
 
-
-class ATR
-{
+class ATR {
 public:
-    ATR();
+    static QVector<double> calculate(const QList<Candle>& candles, int period);
 };
-
-#endif // ATR_H

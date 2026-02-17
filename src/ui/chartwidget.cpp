@@ -253,7 +253,6 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         painter.restore();
     }
 
-
     // Y axis (price scale)
     {
         // Сколько подписей хотим(1 text on 60px)

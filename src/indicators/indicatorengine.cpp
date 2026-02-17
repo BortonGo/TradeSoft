@@ -81,7 +81,7 @@ void IndicatorEngine::rebuild(const CandleSeries& series) {
         IndicatorLine line;
         line.id_ = IndicatorId::ATR14;
         line.name_ = "ATR 14";
-        line.values_ = RSI::calculate(c, 14);
+        line.values_ = ATR::calculate(c, 14);
         lines_.push_back(std::move(line));
     }
 }

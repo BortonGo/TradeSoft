@@ -4,6 +4,7 @@
 #include "ema.h"
 #include "donchian.h"
 #include "rsi.h"
+#include "atr.h"
 #include <QSet>
 
 class IndicatorEngine
