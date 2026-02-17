@@ -66,7 +66,9 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
     // plot-area base
     QRect plot = rect().adjusted(leftPadding_, topPadding_, -rightPadding_, -bottomPadding_);
-    if (plot.width() <= 0 || plot.height() <= 0) return;
+    if (plot.width() <= 0 || plot.height() <= 0) {
+        return;
+    }
 
     // Detect if we need bottom indicator panel (RSI/ATR)
     bool needBottomPanel = false;
@@ -79,21 +81,14 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
     // Split plot only if needed
     QRect plotPrice = plot;
-    QRect plotInd; // empty by default
+    QRect plotInd;
 
     if (needBottomPanel) {
         const int gap = 6;
-        const int indH = std::max(80, plot.height() / 4);  // 25%, but not too small
+        const int indH = std::max(80, plot.height() / 4);  // 25%
 
-        plotInd = QRect(plot.left(),
-                        plot.bottom() - indH,
-                        plot.width(),
-                        indH);
-
-        plotPrice = QRect(plot.left(),
-                          plot.top(),
-                          plot.width(),
-                          plot.height() - indH - gap);
+        plotInd = QRect(plot.left(), plot.bottom() - indH, plot.width(), indH);
+        plotPrice = QRect(plot.left(), plot.top(), plot.width(), plot.height() - indH - gap);
     }
 
     // if window dont set yet, visibleCount_ going to width
