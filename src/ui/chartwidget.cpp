@@ -159,7 +159,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         painter.fillRect(body, bull ? QColor(0,200,0) : QColor(200,0,0));
     }
 
-    // Indicators overlay (EMA + Donchian)
+    // Indicators overlay
     if (!indicatorLines_.isEmpty()) {
         painter.save();
         painter.setRenderHint(QPainter::Antialiasing, true);
@@ -271,10 +271,10 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         }
 
         painter.restore();
-    }
+
 
     // RSI and ATR
-    {
+
         const IndicatorLine* rsi = nullptr;
         const IndicatorLine* atr = nullptr;
 
@@ -868,14 +868,16 @@ void ChartWidget::normalizeViewport() {
     const int maxVis = maxVisibleByWidth();
     const int vis = std::max(1, std::min(visibleCount_, maxVis));
 
-    const int maxFirst = std::max(0, count - vis);
+    const int maxFirstData = std::max(0, count - vis);
+    const int maxFirst = maxFirstData + kFutureBars;
 
     if (followRight_) {
-        firstVisible_ = maxFirst;
+        firstVisible_ = maxFirstData;   // followRight = строго к последним данным, без пустоты
         panRemainder_ = 0.0;
     } else {
         firstVisible_ = qBound(0, firstVisible_, maxFirst);
     }
+
 
     // clamp candle width
     if (candleWidth_ < minCandleWidth_) {

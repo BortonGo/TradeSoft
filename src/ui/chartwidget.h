@@ -12,6 +12,8 @@
 #include "core\timeframe.h"
 #include "indicators\indicatortypes.h"
 
+static constexpr int kFutureBars = 100;
+
 class ChartWidget : public QWidget {
     Q_OBJECT
 
@@ -71,3 +73,5 @@ private:
     int clampCandleWidth(int width) const;
 
 };
+
+
