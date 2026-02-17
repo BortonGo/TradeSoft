@@ -243,8 +243,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
                 break;
 
             default:
-                pen = QPen(QColor(200,200,200), 1);
-                break;
+                continue;
             }
 
             painter.setPen(pen);
@@ -376,8 +375,6 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             painter.restore();
         }
     }
-
-
 
     // Y axis (price scale)
     {
