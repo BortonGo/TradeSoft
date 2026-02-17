@@ -73,7 +73,15 @@ void IndicatorEngine::rebuild(const CandleSeries& series) {
         IndicatorLine line;
         line.id_ = IndicatorId::RSI14;
         line.name_ = "RSI 14";
-        line.values_ = RSI::calculate(c, 50);
+        line.values_ = RSI::calculate(c, 14);
+        lines_.push_back(std::move(line));
+    }
+
+    if (isEnabled(IndicatorId::ATR14)) {
+        IndicatorLine line;
+        line.id_ = IndicatorId::ATR14;
+        line.name_ = "ATR 14";
+        line.values_ = RSI::calculate(c, 14);
         lines_.push_back(std::move(line));
     }
 }
