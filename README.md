@@ -121,7 +121,7 @@ UI
 
 ### Этап 3 — Аналитика
 - [x] SMA / EMA
-- [ ] RSI / MACD
+- [x] RSI / MACD
 - [ ] Уровни
 - [ ] Объёмы
 
@@ -142,7 +142,7 @@ UI
 
 ## Скриншоты
 
-<img width="1913" height="976" alt="image" src="https://github.com/user-attachments/assets/18d8bec9-53ae-4f2b-a461-bff73494a3e7" />
+<img width="1898" height="979" alt="image" src="https://github.com/user-attachments/assets/a520a6bb-b25c-4db3-b859-1863ea2d97bb" />
 
 ---
 
