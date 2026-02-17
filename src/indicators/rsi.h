@@ -1,11 +1,11 @@
-#ifndef RSI_H
-#define RSI_H
-
+#pragma once
+#include <QVector>
+#include <QList>
+#include "core/candle.h"
 
 class RSI
 {
 public:
-    RSI();
+    static QVector<double> calculate(const QList<Candle>& candles, int period);
 };
 
-#endif // RSI_H

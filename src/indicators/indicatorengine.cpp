@@ -68,6 +68,14 @@ void IndicatorEngine::rebuild(const CandleSeries& series) {
         middle.values_ = dc.middle;
         lines_.push_back(std::move(middle));
     }
+
+    if (isEnabled(IndicatorId::RSI14)) {
+        IndicatorLine line;
+        line.id_ = IndicatorId::RSI14;
+        line.name_ = "RSI 14";
+        line.values_ = RSI::calculate(c, 50);
+        lines_.push_back(std::move(line));
+    }
 }
 
 QVector<IndicatorLine> IndicatorEngine::overlayLines() const {

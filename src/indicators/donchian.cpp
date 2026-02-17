@@ -15,18 +15,15 @@ Donchian::DonchianResult Donchian::calculate(const QList<Candle>& candles, int p
         return r;
     }
 
-    // первая точка, где можно посчитать окно period: i = period-1
     for (int i = period - 1; i < n; ++i) {
 
         double hi = candles[i].high_;
         double lo = candles[i].low_;
 
-        const int j0 = i - period + 1;   // гарантированно >= 0
-        for (int j = j0; j <= i; ++j) {  // гарантированно <= n-1
+        const int j0 = i - period + 1;
+        for (int j = j0; j <= i; ++j) {
             hi = std::max(hi, candles[j].high_);
             lo = std::min(lo, candles[j].low_);
-            Q_ASSERT(i >= 0 && i < n);
-            Q_ASSERT(i - period + 1 >= 0);
         }
 
         r.upper[i]  = hi;

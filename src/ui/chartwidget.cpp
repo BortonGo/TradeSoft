@@ -138,32 +138,91 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         painter.fillRect(body, bull ? QColor(0,200,0) : QColor(200,0,0));
     }
 
-    // Indicators overlay (EMA)
+    // Indicators overlay (EMA + Donchian)
     if (!indicatorLines_.isEmpty()) {
         painter.save();
         painter.setRenderHint(QPainter::Antialiasing, true);
 
+        // 1) найти Donchian upper/lower
+        const IndicatorLine* donUpper = nullptr;
+        const IndicatorLine* donLower = nullptr;
+
         for (const auto& line : indicatorLines_) {
-            // простые цвета, чтобы различать линии
+            if (line.id_ == IndicatorId::DON20UPPER) {
+                donUpper = &line;
+            } else if (line.id_ == IndicatorId::DON20LOWER) {
+                donLower = &line;
+            }
+        }
+
+        // 2) fill Donchian channel
+        if (donUpper && donLower) {
+            const int nU = donUpper->values_.size();
+            const int nL = donLower->values_.size();
+            const int n = std::min(nU, nL);
+
+            QVector<QPointF> upperPts;
+            QVector<QPointF> lowerPts;
+            upperPts.reserve(last - first + 1);
+            lowerPts.reserve(last - first + 1);
+
+            for (int i = first; i <= last; ++i) {
+                if (i < 0 || i >= n) {
+                    continue;
+                }
+
+                const double up = donUpper->values_[i];
+                const double lo = donLower->values_[i];
+                if (std::isnan(up) || std::isnan(lo)) {
+                    continue;
+                }
+
+                const int k = i - first;
+                const double x = plot.left() + k * step + candleWidth_ / 2.0;
+                const double yUp = priceToY(up);
+                const double yLo = priceToY(lo);
+
+                upperPts.push_back(QPointF(x, yUp));
+                lowerPts.push_back(QPointF(x, yLo));
+            }
+
+            if (upperPts.size() >= 2 && lowerPts.size() >= 2) {
+                QPainterPath area;
+                area.moveTo(upperPts[0]);
+                for (int i = 1; i < upperPts.size(); ++i)
+                    area.lineTo(upperPts[i]);
+
+                // закрываем контур по нижней линии в обратном порядке
+                for (int i = lowerPts.size() - 1; i >= 0; --i)
+                    area.lineTo(lowerPts[i]);
+
+                area.closeSubpath();
+
+                // кисть (полупрозрачная)
+                QColor fillColor(0, 180, 255, 30);  // alpha = 40 можно менять
+                painter.fillPath(area, QBrush(fillColor));
+            }
+        }
+
+        // 3) рисуем линии поверх
+        for (const auto& line : indicatorLines_) {
             QPen pen;
-            switch (line.id_){
-            case IndicatorId::EMA9 :
-                pen = QPen(QColor(139, 0, 255), 1);
-                break;
-            case IndicatorId::EMA20 :
-                pen = QPen(QColor(255, 200, 0), 1);
-                break;
-            case IndicatorId::EMA50 :
+            switch (line.id_) {
+            case IndicatorId::EMA9:   pen = QPen(QColor(139, 0, 255), 1); break;
+            case IndicatorId::EMA20:  pen = QPen(QColor(255, 200, 0), 1); break;
+            case IndicatorId::EMA50:  pen = QPen(QColor(0, 180, 255), 1); break;
+
+            case IndicatorId::DON20UPPER:
+            case IndicatorId::DON20LOWER:
                 pen = QPen(QColor(0, 180, 255), 1);
                 break;
-            case IndicatorId::DON20UPPER :
-                pen = QPen(QColor(0, 180, 255), 1);
+
+            case IndicatorId::DON20MIDDLE:
+                pen = QPen(QColor(0, 180, 255), 1, Qt::DashLine);
                 break;
-            case IndicatorId::DON20LOWER :
-                pen = QPen(QColor(0, 180, 255), 1);
-                break;
-            case IndicatorId::DON20MIDDLE :
-                pen = QPen(QColor(0, 180, 255), 1);
+
+            default:
+                pen = QPen(QColor(200,200,200), 1);
                 break;
             }
 
@@ -174,25 +233,26 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
 
             const int n = line.values_.size();
             for (int i = first; i <= last; ++i) {
-                if (i < 0 || i >= n) continue;
-
+                if (i < 0 || i >= n) {
+                    continue;
+                }
                 const double v = line.values_[i];
-                if (std::isnan(v)) continue;
+                if (std::isnan(v)) {
+                    continue;
+                }
 
                 const int k = i - first;
                 const int x = plot.left() + k * step + candleWidth_ / 2;
                 const int y = priceToY(v);
-
                 poly << QPointF(x, y);
             }
 
-            if (poly.size() >= 2) {
-                painter.drawPolyline(poly);
-            }
+            if (poly.size() >= 2) painter.drawPolyline(poly);
         }
 
         painter.restore();
     }
+
 
     // Y axis (price scale)
     {
@@ -397,46 +457,50 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         // Pass 2: Minor
         for (int i = first; i <= last; i += stepBars) {
 
-               const int k = i - first;
-               const int x = plot.left() + k * step;
-               const int xCenter = x + candleWidth_ / 2;
+            const int k = i - first;
+            const int x = plot.left() + k * step;
+            const int xCenter = x + candleWidth_ / 2;
 
-               const qint64 ts = static_cast<qint64>(candles[i].timestamp_);
-               const QDateTime dt = toDt(ts);
+            const qint64 ts = static_cast<qint64>(candles[i].timestamp_);
+            const QDateTime dt = toDt(ts);
 
-               QString label;
-               if (currentTf_ == Timeframe::D1) {
-                   label = dt.toString("dd");
-               } else {
-                   label = dt.toString("HH:mm");
-               }
+            QString label;
+            if (currentTf_ == Timeframe::D1) {
+                label = dt.toString("dd");
+            } else {
+                label = dt.toString("HH:mm");
+            }
 
-               const int textW = fm.width(label);
-               const int textH = fm.height();
+            const int textW = fm.width(label);
+            const int textH = fm.height();
 
-               QRect textRect(xCenter - textW / 2, plot.bottom() + 6, textW + 2, textH);
+            QRect textRect(xCenter - textW / 2, plot.bottom() + 6, textW + 2, textH);
 
-               if (textRect.left() < plot.left())  textRect.moveLeft(plot.left());
-               if (textRect.right() > plot.right()) textRect.moveRight(plot.right());
+            if (textRect.left() < plot.left())  {
+                textRect.moveLeft(plot.left());
+            }
+            if (textRect.right() > plot.right()) {
+                textRect.moveRight(plot.right());
+            }
 
-               // 1) не рисуем, если налезает на предыдущий minor
-               if (textRect.left() <= lastMinorRight + 6) {
-                   continue;
-               }
+            // 1) не рисуем, если налезает на предыдущий minor
+            if (textRect.left() <= lastMinorRight + 6) {
+                continue;
+            }
 
-               // Для M1..H1: хотим видеть HH:mm по всем дням, major не должен "глушить" время.
-               // Для H4 и D1: оставляем как сейчас — major может подавлять minor рядом с ним.
-               if (timeframeShowTimeAcrossDays(currentTf_)) {
-                   if (textRect.left() <= lastMajorRight + 6) {
-                       continue;
-                   }
-               }
+            // Для M1..H1: хотим видеть HH:mm по всем дням, major не должен "глушить" время.
+            // Для H4 и D1: оставляем как сейчас — major может подавлять minor рядом с ним.
+            if (timeframeShowTimeAcrossDays(currentTf_)) {
+                if (textRect.left() <= lastMajorRight + 6) {
+                    continue;
+                }
+            }
 
-               lastMinorRight = textRect.right();
+            lastMinorRight = textRect.right();
 
-               painter.drawLine(xCenter, plot.bottom(), xCenter, plot.bottom() + 4);
-               painter.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, label);
-           }
+            painter.drawLine(xCenter, plot.bottom(), xCenter, plot.bottom() + 4);
+            painter.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, label);
+        }
 
         painter.restore();
     }
@@ -670,10 +734,14 @@ int ChartWidget::lastVisible() const {
 }
 
 void ChartWidget::normalizeViewport() {
-    if (!series_) return;
+    if (!series_) {
+        return;
+    }
 
     const int count = series_->getCount();
-    if (count <= 0) return;
+    if (count <= 0) {
+        return;
+    }
 
     const int maxVis = maxVisibleByWidth();
     const int vis = std::max(1, std::min(visibleCount_, maxVis));
@@ -698,11 +766,8 @@ void ChartWidget::normalizeViewport() {
 
 //========================================================== Helpers to WheelEvent ==========================================================
 QRectF ChartWidget::plotRect() const {
-    return QRectF(leftPadding_,
-                  topPadding_,
-                  width() - leftPadding_ - rightPadding_,
-                  height() - topPadding_ - bottomPadding_
-                  );
+    return QRectF(leftPadding_, topPadding_, width() - leftPadding_ - rightPadding_,
+                  height() - topPadding_ - bottomPadding_ );
 }
 
 int ChartWidget::stepPx() const {

@@ -3,6 +3,7 @@
 #include "src/core/candleseries.h"
 #include "ema.h"
 #include "donchian.h"
+#include "rsi.h"
 #include <QSet>
 
 class IndicatorEngine
