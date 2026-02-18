@@ -142,7 +142,7 @@ UI
 
 ## Скриншоты
 
-<img width="1898" height="979" alt="image" src="https://github.com/user-attachments/assets/a520a6bb-b25c-4db3-b859-1863ea2d97bb" />
+<img width="1912" height="980" alt="image" src="https://github.com/user-attachments/assets/ff5d1419-ffdd-4276-a163-087dd8adefa5" />
 
 <img width="1909" height="977" alt="image" src="https://github.com/user-attachments/assets/ddb925e3-1b09-4bc4-b646-d7371da2e7da" />
 
