@@ -21,7 +21,7 @@ public:
     void applyConfig(const IndicatorConfig& cfg);
 
 signals:
-    void signal_overlayLinesUpdated(QVector<IndicatorLine> lines);
+    void signal_overlayLinesUpdated(std::vector<IndicatorLine> lines);
 
 private:
     MarketDataService* mds_ = nullptr; // не владеем

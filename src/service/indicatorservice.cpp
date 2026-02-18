@@ -60,7 +60,7 @@ void IndicatorService::onCandleClosed(Candle /*c*/)
 void IndicatorService::rebuildAndEmit()
 {
     if (!series_ || series_->getCount() <= 0) {
-        emit signal_overlayLinesUpdated(QVector<IndicatorLine>{});
+        emit signal_overlayLinesUpdated(std::vector<IndicatorLine>{});
         return;
     }
 

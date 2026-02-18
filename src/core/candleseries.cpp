@@ -12,11 +12,11 @@ void CandleSeries::addCandle(const Candle& c) {
 }
 
 void CandleSeries::updateLastCandle(const Candle& c) {
-    if(candles_.isEmpty()){
+    if(candles_.empty()){
         return;
     }
 
-    Candle& last = candles_.last();
+    Candle& last = candles_.back();
 
     last.high_ = std::max(last.high_, c.high_);
     last.low_ = std::min(last.low_, c.low_);
@@ -27,13 +27,13 @@ void CandleSeries::updateLastCandle(const Candle& c) {
 }
 
 const Candle& CandleSeries::last() const {
-    return candles_.constLast();
+    return candles_.back();
 }
 
 int CandleSeries::getCount() const {
     return candles_.size();
 }
 
-const QList<Candle>& CandleSeries::getCandles() const {
+const std::vector<Candle>& CandleSeries::getCandles() const {
     return candles_;
 }

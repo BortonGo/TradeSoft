@@ -1,9 +1,8 @@
 #pragma once
-#include <QVector>
-#include <QList>
+#include <vector>
 #include "core/candle.h"
 
 class ATR {
 public:
-    static QVector<double> calculate(const QList<Candle>& candles, int period);
+    static std::vector<double> calculate(const std::vector<Candle>& candles, int period);
 };

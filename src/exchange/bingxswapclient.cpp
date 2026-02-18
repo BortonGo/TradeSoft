@@ -49,9 +49,9 @@ static bool parseSingleKlineObj(const QJsonObject& o, Candle& c) {
     return true;
 }
 
-QList<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timeframe tf)
+std::vector<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timeframe tf)
 {
-    QList<Candle> out;
+    std::vector<Candle> out;
 
     // создаём менеджер только когда приложение уже существует
     if (!mgr_) {
@@ -163,10 +163,10 @@ QList<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timeframe tf
     // BingX часто отдаёт от новых к старым — разворачиваем к виду "старые -> новые"
     std::reverse(out.begin(), out.end());
 
-    if (!out.isEmpty()) {
+    if (!out.empty()) {
         qDebug() << "[BingXSwapClient] Parsed candles:" << out.size()
-                 << "first ts:" << out.first().timestamp_
-                 << "last ts:" << out.last().timestamp_;
+                 << "first ts:" << out.front().timestamp_
+                 << "last ts:" << out.back().timestamp_;
     } else {
         qWarning() << "[BingXSwapClient] Parsed 0 candles";
     }

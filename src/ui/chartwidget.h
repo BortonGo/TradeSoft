@@ -39,12 +39,12 @@ class ChartWidget : public QWidget {
     double panRemainder_ = 0.0;
     double candleWidthAcc_ = 6.0;
 
-    QVector<IndicatorLine> indicatorLines_;
+    std::vector<IndicatorLine> indicatorLines_;
 
 public:
     explicit ChartWidget(QWidget* parent = nullptr);
     void setTimeframe(Timeframe tf);
-    void setIndicatorLines(const QVector<IndicatorLine>& lines);
+    void setIndicatorLines(const std::vector<IndicatorLine>& lines);
 
 public slots:
     void slot_setSeries(std::shared_ptr<CandleSeries> series);

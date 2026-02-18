@@ -1,10 +1,10 @@
 #include "ema.h"
 #include <limits>
 
-QVector<double> EMA::calculate(const QList<Candle>& candles, int period)
+std::vector<double> EMA::calculate(const std::vector<Candle>& candles, int period)
 {
     const int n = candles.size();
-    QVector<double> out(n, std::numeric_limits<double>::quiet_NaN());
+    std::vector<double> out(n, std::numeric_limits<double>::quiet_NaN());
     if (n < period || period <= 0) return out;
 
     double sum = 0.0;

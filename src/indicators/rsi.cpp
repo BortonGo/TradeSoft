@@ -2,9 +2,9 @@
 #include <limits>
 #include <cmath>
 
-QVector<double> RSI::calculate(const QList<Candle>& candles, int period) {
+std::vector<double> RSI::calculate(const std::vector<Candle>& candles, int period) {
     const int n = candles.size();
-    QVector<double> out(n, std::numeric_limits<double>::quiet_NaN());
+    std::vector<double> out(n, std::numeric_limits<double>::quiet_NaN());
     if (n < period || period <= 0) return out;
 
     // Wilder RSI

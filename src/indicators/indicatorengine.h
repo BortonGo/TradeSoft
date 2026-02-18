@@ -10,7 +10,7 @@
 class IndicatorEngine
 {
     QSet<IndicatorId> enabled_;
-    QVector<IndicatorLine> lines_;
+    std::vector<IndicatorLine> lines_;
 
 public:
     void setEnabled(IndicatorId id, bool on);
@@ -18,6 +18,6 @@ public:
 
     void rebuild(const CandleSeries& series);
 
-    QVector<IndicatorLine> overlayLines() const;
+    std::vector<IndicatorLine> overlayLines() const;
 };
 

@@ -2,14 +2,14 @@
 #include <limits>
 #include <algorithm>
 
-Donchian::DonchianResult Donchian::calculate(const QList<Candle>& candles, int period)
+Donchian::DonchianResult Donchian::calculate(const std::vector<Candle>& candles, int period)
 {
     const int n = candles.size();
 
     DonchianResult r;
-    r.upper  = QVector<double>(n, std::numeric_limits<double>::quiet_NaN());
-    r.lower  = QVector<double>(n, std::numeric_limits<double>::quiet_NaN());
-    r.middle = QVector<double>(n, std::numeric_limits<double>::quiet_NaN());
+    r.upper  = std::vector<double>(n, std::numeric_limits<double>::quiet_NaN());
+    r.lower  = std::vector<double>(n, std::numeric_limits<double>::quiet_NaN());
+    r.middle = std::vector<double>(n, std::numeric_limits<double>::quiet_NaN());
 
     if (n <= 0 || period <= 0 || n < period) {
         return r;

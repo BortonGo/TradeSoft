@@ -1,17 +1,16 @@
 #pragma once
-#include <QVector>
-#include <QList>
+#include <vector>
 #include "core/candle.h"
 
 class Donchian
 {
 public:
     struct DonchianResult {
-        QVector<double> upper;
-        QVector<double> lower;
-        QVector<double> middle;
+        std::vector<double> upper;
+        std::vector<double> lower;
+        std::vector<double> middle;
     };
 
-    static DonchianResult calculate(const QList<Candle>& candles, int period);
+    static DonchianResult calculate(const std::vector<Candle>& candles, int period);
 };
 

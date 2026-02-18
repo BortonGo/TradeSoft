@@ -16,7 +16,7 @@ bool IndicatorEngine::isEnabled(IndicatorId Id) const {
 void IndicatorEngine::rebuild(const CandleSeries& series) {
     lines_.clear();
 
-    const QList<Candle>& c = series.getCandles();
+    const std::vector<Candle>& c = series.getCandles();
     const int n = c.size();
     if (n <= 0) {
         return;
@@ -86,7 +86,7 @@ void IndicatorEngine::rebuild(const CandleSeries& series) {
     }
 }
 
-QVector<IndicatorLine> IndicatorEngine::overlayLines() const {
+std::vector<IndicatorLine> IndicatorEngine::overlayLines() const {
     return lines_;
 }
 

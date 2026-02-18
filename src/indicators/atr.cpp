@@ -11,10 +11,10 @@ static inline double trueRange(const Candle& cur, const Candle& prev)
     return std::max(hl, std::max(hc, lc));
 }
 
-QVector<double> ATR::calculate(const QList<Candle>& candles, int period)
+std::vector<double> ATR::calculate(const std::vector<Candle>& candles, int period)
 {
     const int n = candles.size();
-    QVector<double> out(n, std::numeric_limits<double>::quiet_NaN());
+    std::vector<double> out(n, std::numeric_limits<double>::quiet_NaN());
     if (n <= period || period <= 0) return out;
 
     // First ATR = average TR for first period

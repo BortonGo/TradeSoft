@@ -1,6 +1,6 @@
 #pragma once
 #include <QString>
-#include <QList>
+#include <vector>
 #include <functional>
 
 #include "core/candle.h"
@@ -9,7 +9,7 @@
 class IExchangeClient {
 public:
     // history
-    virtual QList<Candle> fetchKlines(const QString& symbolId, Timeframe tf) = 0;
+    virtual std::vector<Candle> fetchKlines(const QString& symbolId, Timeframe tf) = 0;
 
     // realtime polling support
     virtual bool supportsPollingRealtime() const { return false; }

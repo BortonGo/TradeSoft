@@ -1,12 +1,13 @@
 #pragma once
 #include "core\timeframe.h"
 #include "candle.h"
+#include <vector>
 
 class CandleSeries
 {
     QString symbol_;
     Timeframe timeframe_;
-    QList<Candle> candles_;
+    std::vector<Candle> candles_;
 
 public:
     CandleSeries(const QString& symbolId, Timeframe tf);
@@ -20,6 +21,6 @@ public:
     const Candle& last() const;
 
     int getCount() const;
-    const QList<Candle>& getCandles() const;
+    const std::vector<Candle>& getCandles() const;
 };
 

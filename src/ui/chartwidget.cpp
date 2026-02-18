@@ -18,7 +18,7 @@ static bool calcVisibleMinMax(const CandleSeries& s, int first, int last, double
     outMinLow = std::numeric_limits<double>::infinity();
     outMaxHigh = -std::numeric_limits<double>::infinity();
 
-    const QList<Candle>& candles = s.getCandles();
+    const std::vector<Candle>& candles = s.getCandles();
 
     for (int i = first; i <= last; ++i) {
         const Candle& c = candles[i];
@@ -42,7 +42,7 @@ void ChartWidget::setTimeframe(Timeframe tf) {
     update();
 }
 
-void ChartWidget::setIndicatorLines(const QVector<IndicatorLine>& lines) {
+void ChartWidget::setIndicatorLines(const std::vector<IndicatorLine>& lines) {
     indicatorLines_ = lines;
     update();
 }
@@ -160,7 +160,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
     }
 
     // Indicators overlay
-    if (!indicatorLines_.isEmpty()) {
+    if (!indicatorLines_.empty()) {
         painter.save();
         painter.setRenderHint(QPainter::Antialiasing, true);
 
@@ -182,8 +182,8 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             const int nL = donLower->values_.size();
             const int n = std::min(nU, nL);
 
-            QVector<QPointF> upperPts;
-            QVector<QPointF> lowerPts;
+            std::vector<QPointF> upperPts;
+            std::vector<QPointF> lowerPts;
             upperPts.reserve(last - first + 1);
             lowerPts.reserve(last - first + 1);
 
@@ -442,8 +442,8 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
     }
 
     // Current price line
-    if (!candles.isEmpty()) {
-        const double lastPrice = candles.last().close_;
+    if (!candles.empty()) {
+        const double lastPrice = candles.back().close_;
         const int y = priceToY(lastPrice);
 
         QPen pen(QColor(220, 220, 220));
@@ -453,8 +453,8 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
     }
 
     // Current price label
-        if (!candles.isEmpty()) {
-            const double lastPrice = candles.last().close_;
+        if (!candles.empty()) {
+            const double lastPrice = candles.back().close_;
             const int y = priceToY(lastPrice);
 
             const QString text = QString::number(lastPrice, 'f', 2);

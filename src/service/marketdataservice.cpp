@@ -19,7 +19,7 @@ void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
         return;
     }
 
-    QList<Candle> candles = exchange_->fetchKlines(symbolId, tf);
+    std::vector<Candle> candles = exchange_->fetchKlines(symbolId, tf);
     std::shared_ptr<CandleSeries> series = std::make_shared<CandleSeries> (symbolId, tf);
 
     for(const auto& c : candles) {

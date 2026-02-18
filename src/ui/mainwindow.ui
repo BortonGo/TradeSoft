@@ -431,6 +431,11 @@ color: white;                /* цвет текста */</string>
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="tabBacktest">
+         <attribute name="title">
+          <string>BACKTEST</string>
+         </attribute>
+        </widget>
        </widget>
       </item>
      </layout>
