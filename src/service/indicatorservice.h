@@ -13,6 +13,9 @@ class IndicatorService : public QObject
     Q_OBJECT
 
     IndicatorConfig cfg_;
+    MarketDataService* mds_ = nullptr; // не владеем
+    std::shared_ptr<CandleSeries> series_; // храним тут, MainWindow не хранит
+    IndicatorEngine engine_;
 
 public:
     explicit IndicatorService(MarketDataService* mds, QObject* parent = nullptr);
@@ -22,11 +25,6 @@ public:
 
 signals:
     void signal_overlayLinesUpdated(std::vector<IndicatorLine> lines);
-
-private:
-    MarketDataService* mds_ = nullptr; // не владеем
-    std::shared_ptr<CandleSeries> series_; // храним тут, MainWindow не хранит
-    IndicatorEngine engine_;
 
 private slots:
     void onSeriesLoaded(std::shared_ptr<CandleSeries> s);

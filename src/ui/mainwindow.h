@@ -1,7 +1,6 @@
 #pragma once
 #include <QMainWindow>
 #include "service\marketdataservice.h"
-#include "indicators\indicatorengine.h"
 #include "service\indicatorservice.h"
 
 namespace Ui {
@@ -14,7 +13,6 @@ class MainWindow : public QMainWindow
 
     Ui::MainWindow *ui;
 
-    IndicatorEngine indicators_;
     IndicatorService* indicatorService_ = nullptr;
 
 
