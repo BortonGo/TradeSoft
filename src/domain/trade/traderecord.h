@@ -1,0 +1,4 @@
+#ifndef TRADERECORD_H
+#define TRADERECORD_H
+
+#endif // TRADERECORD_H

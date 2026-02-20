@@ -1,0 +1,4 @@
+#ifndef STRATEGYSIGNAL_H
+#define STRATEGYSIGNAL_H
+
+#endif // STRATEGYSIGNAL_H
