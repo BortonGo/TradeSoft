@@ -15,6 +15,18 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    auto header = ui->tableTrades->horizontalHeader();
+
+    header->setSectionResizeMode(QHeaderView::Interactive); // базовый режим
+
+    header->setSectionResizeMode(0, QHeaderView::ResizeToContents); // Time
+    header->setSectionResizeMode(1, QHeaderView::ResizeToContents); // Symbol
+    header->setSectionResizeMode(2, QHeaderView::ResizeToContents); // Side
+    header->setSectionResizeMode(3, QHeaderView::Stretch);          // Qty
+    header->setSectionResizeMode(4, QHeaderView::Stretch);          // Price
+    header->setSectionResizeMode(5, QHeaderView::ResizeToContents); // Fee
+    header->setSectionResizeMode(6, QHeaderView::Stretch);          // Status
+
     // block signals comboSymbol/Timeframne
     // make for correct work om_combo...IndexChanged
     ui->comboSymbol->blockSignals(true);
