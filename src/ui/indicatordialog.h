@@ -12,7 +12,7 @@ class IndicatorDialog : public QDialog
 
 public:
 
-    explicit IndicatorDialog(QWidget *parent = 0);
+    explicit IndicatorDialog(QWidget *parent = nullptr);
     ~IndicatorDialog();
 
     void setConfig(const IndicatorConfig& cfg);

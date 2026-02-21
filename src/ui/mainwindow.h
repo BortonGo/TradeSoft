@@ -2,6 +2,7 @@
 #include <QMainWindow>
 #include "service\marketdataservice.h"
 #include "service\indicatorservice.h"
+#include "controllers/strategycontroller.h"
 
 namespace Ui {
 class MainWindow;
@@ -14,6 +15,7 @@ class MainWindow : public QMainWindow
     Ui::MainWindow *ui;
 
     IndicatorService* indicatorService_ = nullptr;
+    StrategyController* strategyController_ = nullptr;
 
 
 private slots:

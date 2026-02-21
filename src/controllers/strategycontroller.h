@@ -1,11 +1,20 @@
-#ifndef STRATEGYCONTROLLER_H
-#define STRATEGYCONTROLLER_H
+#pragma once
+#include <QObject>
 
+namespace Ui { class MainWindow; }
 
-class StrategyController
+class StrategyController final : public QObject
 {
-public:
-    StrategyController();
-};
+    Q_OBJECT
 
-#endif // STRATEGYCONTROLLER_H
+    Ui::MainWindow* ui_ = nullptr;
+    bool running_ = false;
+
+public:
+    explicit StrategyController(Ui::MainWindow* ui, QObject* parent = nullptr);
+
+public slots:
+    void onStart();
+    void onStop();
+
+};

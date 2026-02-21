@@ -4,6 +4,7 @@
 #include "core\symbol.h"
 #include "service\marketdataservice.h"
 #include "exchange\bingxswapclient.h"
+#include "controllers/strategycontroller.h"
 #include "ui\chartwidget.h"
 #include "ui\indicatordialog.h"
 
@@ -50,6 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboSymbol->blockSignals(false);
     ui->comboTimeframe->blockSignals(false);
 
+    // StrategyController
+    strategyController_ = new StrategyController(ui, this);
+
     //IExchangeClient
     std::shared_ptr<IExchangeClient> ex = std::make_shared<BingXSwapClient>();
 
@@ -57,14 +61,14 @@ MainWindow::MainWindow(QWidget *parent) :
     MarketDataService* market = new MarketDataService(ex, this);
     marketData_ = market;
 
-    QObject::connect(marketData_, &MarketDataService::signal_seriesLoaded, ui->chartWidget, &ChartWidget::slot_setSeries);
+    connect(marketData_, &MarketDataService::signal_seriesLoaded, ui->chartWidget, &ChartWidget::slot_setSeries);
 
-    QObject::connect(marketData_, &MarketDataService::signal_candleUpdated, ui->chartWidget, &ChartWidget::slot_onCandleUpdate);
-    QObject::connect(marketData_, &MarketDataService::signal_candleClosed, ui->chartWidget, &ChartWidget::slot_onCandleClosed);
+    connect(marketData_, &MarketDataService::signal_candleUpdated, ui->chartWidget, &ChartWidget::slot_onCandleUpdate);
+    connect(marketData_, &MarketDataService::signal_candleClosed, ui->chartWidget, &ChartWidget::slot_onCandleClosed);
 
     indicatorService_ = new IndicatorService(marketData_, this);
 
-    QObject::connect(indicatorService_, &IndicatorService::signal_overlayLinesUpdated, ui->chartWidget, &ChartWidget::setIndicatorLines);
+    connect(indicatorService_, &IndicatorService::signal_overlayLinesUpdated, ui->chartWidget, &ChartWidget::setIndicatorLines);
 
     reloadAndStart();
 }
