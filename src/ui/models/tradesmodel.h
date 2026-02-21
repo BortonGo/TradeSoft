@@ -1,11 +1,22 @@
-#ifndef TRADESMODEL_H
-#define TRADESMODEL_H
+#pragma once
+#include <QAbstractTableModel>
+#include <vector>
+#include "domain/trade/traderecord.h"
 
-
-class TradesModel
+class TradesModel final : public QAbstractTableModel
 {
-public:
-    TradesModel();
-};
+    std::vector<TradeRecord> trades_;
 
-#endif // TRADESMODEL_H
+public:
+    explicit TradesModel(QObject* parent = nullptr);
+
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section,Qt::Orientation orientation ,int role = Qt::DisplayRole) const override;
+
+    void appendTrade(const TradeRecord& t);
+    void clear();
+
+};

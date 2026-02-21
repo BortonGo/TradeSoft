@@ -8,6 +8,9 @@
 #include "ui\chartwidget.h"
 #include "ui\indicatordialog.h"
 
+#include <QStandardItemModel>
+#include <QHeaderView>
+
 #include <memory>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -16,9 +19,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // table model, to header dont crash (idk why crash)
+    ui->tableTrades->setModel(new QStandardItemModel(0, 7, ui->tableTrades));
+
     auto header = ui->tableTrades->horizontalHeader();
 
-    header->setSectionResizeMode(QHeaderView::Interactive); // базовый режим
+    header->setVisible(true);
+    header->setSectionResizeMode(QHeaderView::Interactive); // Based mode
 
     header->setSectionResizeMode(0, QHeaderView::ResizeToContents); // Time
     header->setSectionResizeMode(1, QHeaderView::ResizeToContents); // Symbol

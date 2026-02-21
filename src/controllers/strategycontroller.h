@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include "ui/models/tradesmodel.h"
 
 namespace Ui { class MainWindow; }
 
@@ -8,6 +9,7 @@ class StrategyController final : public QObject
     Q_OBJECT
 
     Ui::MainWindow* ui_ = nullptr;
+    TradesModel* tradesModel_ = nullptr;
     bool running_ = false;
 
 public:
