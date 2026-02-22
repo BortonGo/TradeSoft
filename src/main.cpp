@@ -7,9 +7,14 @@
 #include <QLoggingCategory>
 #include <memory>
 
+#include <QFileInfo>
+#include <QDebug>
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QIcon icon(":/icons/resources/TradeSoftLogo.ico");
+    a.setWindowIcon(icon);
     qRegisterMetaType<std::shared_ptr<CandleSeries>>("std::shared_ptr<CandleSeries>");
     MainWindow w;
     w.show();
