@@ -33,8 +33,8 @@ void StrategyController::onStart() {
     running_ = true;
     tick_.start();
 
-    ui_->btnStart->setEnabled(false);
-    ui_->btnStop->setEnabled(true);
+    setParamsLocked(true);
+    ui_->tab_strategy->setFocus();
     qDebug() << "[STRATEGY] START";
 }
 
@@ -45,8 +45,8 @@ void StrategyController::onStop() {
     running_ = false;
     tick_.stop();
 
-    ui_->btnStart->setEnabled(true);
-    ui_->btnStop->setEnabled(false);
+    setParamsLocked(false);
+    ui_->tab_strategy->setFocus();
     qDebug() << "[STRATEGY] STOP";
 }
 
@@ -63,4 +63,17 @@ void StrategyController::onTick() {
     tradesModel_->appendTrade(t);
 }
 
+void StrategyController::setParamsLocked(bool locked)
+{
+    // locked = true -> параметры нельзя менять
+    const bool enabled = !locked;
 
+    ui_->cbStrategy->setEnabled(enabled);
+    ui_->cbStrategyTf->setEnabled(enabled);
+
+    ui_->gbRM->setEnabled(enabled);
+    ui_->gbAccount->setEnabled(enabled);
+
+    ui_->btnStart->setEnabled(!locked);
+    ui_->btnStop->setEnabled(locked);
+}

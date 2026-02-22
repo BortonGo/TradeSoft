@@ -22,4 +22,7 @@ public slots:
     void onStop();
     void onTick();
 
+private:
+    void setParamsLocked(bool locked);
+
 };

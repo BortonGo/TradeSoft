@@ -276,7 +276,8 @@ color: white;                /* цвет текста */
                 <string notr="true">background-color: rgb(43, 43, 43);
 border-color: rgb(0, 0, 0);
 border: 2px solid rgb(22, 22, 22);
-color: white;                /* цвет текста */</string>
+color: white;                /* цвет текста */
+</string>
                </property>
                <item>
                 <property name="text">
@@ -314,10 +315,13 @@ color: white;                /* цвет текста */</string>
                 </font>
                </property>
                <property name="styleSheet">
-                <string notr="true">background-color: rgb(43, 43, 43);
+                <string notr="true">
+background-color: rgb(43, 43, 43);
 border-color: rgb(0, 0, 0);
 border: 2px solid rgb(22, 22, 22);
-color: white;                /* цвет текста */</string>
+color: white;                /* цвет текста */
+
+</string>
                </property>
               </widget>
              </item>
@@ -356,10 +360,19 @@ color: white;                /* цвет текста */</string>
                 </font>
                </property>
                <property name="styleSheet">
-                <string notr="true">background-color: #1DB954;
-color: rgb(0, 0, 0);
-border-radius: 4px;
-</string>
+                <string notr="true">/* ===== START BUTTON ===== */
+QPushButton#btnStart {
+    background-color: #1fb954;
+    color: black;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 4px;
+}
+
+QPushButton#btnStart:disabled {
+    background-color: #0f3f23;
+    color: #777;
+}</string>
                </property>
                <property name="text">
                 <string>START</string>
@@ -388,9 +401,19 @@ border-radius: 4px;
                 </font>
                </property>
                <property name="styleSheet">
-                <string notr="true">background-color: #E74C3C;
-color: rgb(0, 0, 0);
-border-radius: 4px;</string>
+                <string notr="true">/* ===== STOP BUTTON ===== */
+QPushButton#btnStop {
+    background-color: #e74c3c;
+    color: black;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 4px;
+}
+
+QPushButton#btnStop:disabled {
+    background-color: #4a1e1a;
+    color: #777;
+}</string>
                </property>
                <property name="text">
                 <string>STOP</string>
@@ -427,7 +450,7 @@ color: white;                /* цвет текста */
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
-              <widget class="QGroupBox" name="groupBox">
+              <widget class="QGroupBox" name="gbRM">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -482,6 +505,18 @@ QCheckBox {
     color: #EAEAEA;
 }
 
+QGroupBox:disabled {
+    color: #666;
+}
+
+QGroupBox:disabled QComboBox,
+QGroupBox:disabled QSpinBox,
+QGroupBox:disabled QDoubleSpinBox,
+QGroupBox:disabled QCheckBox {
+    background-color: #151515;
+    color: #444;
+    border: 1px solid #252525;
+}
 
 </string>
                </property>
@@ -837,7 +872,7 @@ color: white;                /* цвет текста */</string>
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBox_2">
+              <widget class="QGroupBox" name="gbAccount">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -892,6 +927,18 @@ QCheckBox {
     color: #EAEAEA;
 }
 
+QGroupBox:disabled {
+    color: #666;
+}
+
+QGroupBox:disabled QComboBox,
+QGroupBox:disabled QSpinBox,
+QGroupBox:disabled QDoubleSpinBox,
+QGroupBox:disabled QCheckBox {
+   background-color: #151515;
+    color: #444;
+    border: 1px solid #252525;
+}
 
 </string>
                </property>
@@ -1115,7 +1162,7 @@ color: white;                /* цвет текста */</string>
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QComboBox" name="comboBox">
+                 <widget class="QComboBox" name="cbAccount">
                   <property name="font">
                    <font>
                     <pointsize>11</pointsize>
