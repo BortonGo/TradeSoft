@@ -42,9 +42,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Timeframes
     ui->comboTimeframe->clear();
+    ui->cbStrategyTf->clear();
 
     for(const Timeframe& tf : allTimeframes()) {
         ui->comboTimeframe->addItem(toUiString(tf), static_cast<int>(tf));
+        ui->cbStrategyTf->addItem(toUiString(tf), static_cast<int>(tf));
     };
 
     // Some symbols
