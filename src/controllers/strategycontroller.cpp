@@ -68,17 +68,69 @@ void StrategyController::onStop() {
     qDebug() << "[STRATEGY] STOP";
 }
 
-void StrategyController::onTick() {
-    TradeRecord t;
-    t.time = QDateTime::currentDateTime();
-    t.symbol = ui_->comboSymbol->currentText();
-    t.side = (qrand() % 2 == 0) ? TradeSide::Buy : TradeSide::Sell;
-    t.qty = 1.0;
-    t.price = 100.0 + (qrand() % 100);
-    t.fee = 0.01;
-    t.status = TradeStatus::Open;
+void StrategyController::onTick()
+{
+    // 1) "рынок"
+    static double lastPrice = 150.0;
+    lastPrice += (qrand() % 21 - 10) * 0.1; // +-1.0
+    const double curPrice = lastPrice;
 
-    tradesModel_->appendTrade(t);
+    // 2) если сделки нет — открываем
+    if (!hasOpen_) {
+        TradeRecord t;
+        t.time   = QDateTime::currentDateTime();
+        t.symbol = ui_->comboSymbol->currentText();
+        t.side   = TradeSide::Buy;
+        t.qty    = 1.0;
+        t.price  = curPrice;                 // open price
+        t.status = TradeStatus::Open;
+        t.lifetimeTicks = 0;
+
+        tradesModel_->appendTrade(t);
+
+        hasOpen_     = true;
+        ticksAlive_  = 0;
+        openRow_     = tradesModel_->rowCount() - 1;
+
+        openPrice_   = t.price;
+        openSide_    = t.side;
+        openQty_     = t.qty;
+
+        return;
+    }
+
+    // дальше будет live/close...
+
+    // 3) если сделка открыта — обновляем "живую" строку
+    ticksAlive_++;
+
+    TradeRecord t = tradesModel_->tradeAt(openRow_); // если у тебя нет — добавим ниже
+    t.lifetimeTicks = ticksAlive_;
+
+    // простая unrealized PnL (по желанию)
+    const double dir = (openSide_ == TradeSide::Buy) ? 1.0 : -1.0;
+    const double unrealPnl = (curPrice - openPrice_) * openQty_ * dir;
+    t.pnl = unrealPnl;           // если есть поле pnl
+
+    tradesModel_->updateTrade(openRow_, t);
+
+    // 4) закрываем через 5 тиков
+    if (ticksAlive_ >= 5) {
+        t.status = TradeStatus::Closed;
+        t.closeTime = QDateTime::currentDateTime(); // если есть
+        t.closePrice = curPrice;                    // если есть
+
+        const double dir = (openSide_ == TradeSide::Buy) ? 1.0 : -1.0;
+        const double pnl = (curPrice - openPrice_) * openQty_ * dir;
+        t.pnl = pnl;
+
+        tradesModel_->updateTrade(openRow_, t);
+
+        // сброс состояния
+        hasOpen_ = false;
+        ticksAlive_ = 0;
+        openRow_ = -1;
+    }
 }
 
 void StrategyController::setParamsLocked(bool locked)

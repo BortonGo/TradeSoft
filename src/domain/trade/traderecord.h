@@ -20,6 +20,10 @@ struct TradeRecord {
     TradeSide side = TradeSide::Buy;
     double qty = 0.0;
     double price = 0.0;
+    double closePrice = 0.0;
+    double pnl = 0.0;
     double fee = 0.0;
+    int lifetimeTicks = 0;
+    QDateTime closeTime;
     TradeStatus status = TradeStatus::Open;
 };
