@@ -75,66 +75,56 @@ void StrategyController::onTick()
     lastPrice += (qrand() % 21 - 10) * 0.1; // +-1.0
     const double curPrice = lastPrice;
 
-    // 2) если сделки нет — открываем
-    if (!hasOpen_) {
+    const double feeRate = cfg_.risk.feePct / 100.0;
+
+    // 2) ENTRY (пока тестовый): иногда открываем сделку
+    // Потом заменишь на логику стратегии.
+    if ((qrand() % 100) < 35) { // 35% шанс на тик (для демонстрации)
         TradeRecord t;
         t.time   = QDateTime::currentDateTime();
         t.symbol = ui_->comboSymbol->currentText();
-        t.side   = TradeSide::Buy;
+        t.side   = TradeSide::Buy; // или рандом Buy/Sell
         t.qty    = 1.0;
-        t.price  = curPrice;                 // open price
-
-        const double feeRate = cfg_.risk.feePct / 100.0;
-        t.fee = (t.price * t.qty) * feeRate; // fee by entry
-
+        t.price  = curPrice;
         t.status = TradeStatus::Open;
         t.lifetimeTicks = 0;
 
+        // комиссия входа
+        t.fee = (t.price * t.qty) * feeRate;
+
+        // pnl пока unrealized=0 (или сразу минус fee)
+        t.pnl = 0.0;
+
         tradesModel_->appendTrade(t);
-
-        hasOpen_     = true;
-        ticksAlive_  = 0;
-        openRow_     = tradesModel_->rowCount() - 1;
-
-        openPrice_   = t.price;
-        openSide_    = t.side;
-        openQty_     = t.qty;
-
-        return;
     }
 
-    // 3) если сделка открыта — обновляем "живую" строку
-    ticksAlive_++;
+    // 3) UPDATE + EXIT по всем открытым
+    const auto openRows = tradesModel_->openTradeRows();
 
-    TradeRecord t = tradesModel_->tradeAt(openRow_);
-    t.lifetimeTicks = ticksAlive_;
+    for (int row : openRows) {
+        TradeRecord t = tradesModel_->tradeAt(row);
 
-    // простая unrealized PnL
-    const double dir = (openSide_ == TradeSide::Buy) ? 1.0 : -1.0;
-    const double unrealPnl = (curPrice - openPrice_) * openQty_ * dir;
-    t.pnl = unrealPnl;
+        t.lifetimeTicks++;
 
-    tradesModel_->updateTrade(openRow_, t);
+        const double dir = (t.side == TradeSide::Buy) ? 1.0 : -1.0;
+        const double unrealGross = (curPrice - t.price) * t.qty * dir;
+        t.pnl = unrealGross - t.fee;  // unrealized net (с учётом fee входа)
 
-    // 4) закрываем через 5 тиков
-    if (ticksAlive_ >= 5) {
-        t.status = TradeStatus::Closed;
-        t.closeTime = QDateTime::currentDateTime();
-        t.closePrice = curPrice;
+        // 4) EXIT (тестовый): закрыть через 5 тиков
+        if (t.lifetimeTicks >= 5) {
+            t.status = TradeStatus::Closed;
+            t.closeTime  = QDateTime::currentDateTime();
+            t.closePrice = curPrice;
 
-        const double feeRate = cfg_.risk.feePct / 100.0;
-        t.fee += (t.closePrice * t.qty) * feeRate;  // комиссия за выход
+            // комиссия выхода
+            t.fee += (t.closePrice * t.qty) * feeRate;
 
-        const double dir = (openSide_ == TradeSide::Buy) ? 1.0 : -1.0;
-        const double gross = (t.closePrice - openPrice_) * openQty_ * dir;
-        t.pnl = gross - t.fee;
+            // финальный pnl net
+            const double gross = (t.closePrice - t.price) * t.qty * dir;
+            t.pnl = gross - t.fee;
+        }
 
-        tradesModel_->updateTrade(openRow_, t);
-
-        // сброс состояния
-        hasOpen_ = false;
-        ticksAlive_ = 0;
-        openRow_ = -1;
+        tradesModel_->updateTrade(row, t);
     }
 }
 

@@ -135,3 +135,14 @@ void TradesModel::updateTrade(int row, const TradeRecord& t) {
     const QModelIndex right = index(row, columnCount() - 1);
     emit dataChanged(left, right);
 }
+
+std::vector<int> TradesModel::openTradeRows() const {
+    std::vector<int> rows;
+    rows.reserve(trades_.size());
+    for (int i = 0; i < static_cast<int>(trades_.size()); ++i) {
+        if (trades_[i].status == TradeStatus::Open) {
+            rows.push_back(i);
+        }
+    }
+    return rows;
+}

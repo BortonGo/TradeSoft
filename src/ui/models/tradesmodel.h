@@ -37,4 +37,6 @@ public:
     void appendTrade(const TradeRecord& t);
     void updateTrade(int row, const TradeRecord& t);
 
+    std::vector<int> openTradeRows() const;
+
 };
