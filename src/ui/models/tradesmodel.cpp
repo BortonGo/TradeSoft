@@ -39,7 +39,7 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
 
     const TradeRecord& t = trades_[(std::size_t)row];
 
-    // --- alignment for numeric columns
+    // alignment for numeric columns
     if (role == Qt::TextAlignmentRole) {
         switch (col) {
         case ColQty:
@@ -54,7 +54,7 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
         }
     }
 
-    // --- pnl coloring
+    // pnl coloring
     if (role == Qt::ForegroundRole) {
         if (col == ColPnL) {
             if (t.pnl > 0.0) return QBrush(QColor(0, 180, 0));
@@ -65,7 +65,7 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
 
     if (role != Qt::DisplayRole) return {};
 
-    const QLocale loc; // системная локаль (у тебя будет запятая)
+    const QLocale loc; // системная локаль
     auto fmt2 = [&](double v) { return loc.toString(v, 'f', 2); };
 
     switch (col) {
@@ -79,7 +79,7 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
         return (t.status == TradeStatus::Closed) ? fmt2(t.closePrice) : QString();
 
     case ColPnL:
-        // пока Open можно показывать unrealized pnl (ты его обновляешь)
+        // пока Open можно показывать unrealized pnl
         return fmt2(t.pnl);
 
     case ColFee:       return fmt2(t.fee);

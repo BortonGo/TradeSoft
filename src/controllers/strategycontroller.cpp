@@ -83,6 +83,10 @@ void StrategyController::onTick()
         t.side   = TradeSide::Buy;
         t.qty    = 1.0;
         t.price  = curPrice;                 // open price
+
+        const double feeRate = cfg_.risk.feePct / 100.0;
+        t.fee = (t.price * t.qty) * feeRate; // fee by entry
+
         t.status = TradeStatus::Open;
         t.lifetimeTicks = 0;
 
@@ -99,30 +103,31 @@ void StrategyController::onTick()
         return;
     }
 
-    // дальше будет live/close...
-
     // 3) если сделка открыта — обновляем "живую" строку
     ticksAlive_++;
 
-    TradeRecord t = tradesModel_->tradeAt(openRow_); // если у тебя нет — добавим ниже
+    TradeRecord t = tradesModel_->tradeAt(openRow_);
     t.lifetimeTicks = ticksAlive_;
 
-    // простая unrealized PnL (по желанию)
+    // простая unrealized PnL
     const double dir = (openSide_ == TradeSide::Buy) ? 1.0 : -1.0;
     const double unrealPnl = (curPrice - openPrice_) * openQty_ * dir;
-    t.pnl = unrealPnl;           // если есть поле pnl
+    t.pnl = unrealPnl;
 
     tradesModel_->updateTrade(openRow_, t);
 
     // 4) закрываем через 5 тиков
     if (ticksAlive_ >= 5) {
         t.status = TradeStatus::Closed;
-        t.closeTime = QDateTime::currentDateTime(); // если есть
-        t.closePrice = curPrice;                    // если есть
+        t.closeTime = QDateTime::currentDateTime();
+        t.closePrice = curPrice;
+
+        const double feeRate = cfg_.risk.feePct / 100.0;
+        t.fee += (t.closePrice * t.qty) * feeRate;  // комиссия за выход
 
         const double dir = (openSide_ == TradeSide::Buy) ? 1.0 : -1.0;
-        const double pnl = (curPrice - openPrice_) * openQty_ * dir;
-        t.pnl = pnl;
+        const double gross = (t.closePrice - openPrice_) * openQty_ * dir;
+        t.pnl = gross - t.fee;
 
         tradesModel_->updateTrade(openRow_, t);
 
