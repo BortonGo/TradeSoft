@@ -43,7 +43,7 @@ struct AccountState {
     QDateTime lastUpdate;
 };
 
-// simle store
+// simple store
 class AccountStore
 {
     std::vector<AccountConfig> configs_;

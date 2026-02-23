@@ -56,6 +56,42 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->comboSymbol->addItem(s.display(), s.id());
     }
 
+    // Account
+    AccountConfig demo;
+    demo.id = "demo";
+    demo.name = "Demo";
+    demo.type = AccountType::Demo;
+    demo.makerFeePct = 0.02;
+    demo.takerFeePct = 0.06;
+    demo.maxLeverage = 50;
+
+    AccountState demoSt;
+    demoSt.accountId = demo.id;
+    demoSt.balance = 1000;
+    demoSt.equity = 1000;
+
+    accounts_.add(demo, demoSt);
+
+    AccountConfig real;
+    real.id = "real";
+    real.name = "Real";
+    real.type = AccountType::Real;
+    real.makerFeePct = 0.02;
+    real.takerFeePct = 0.06;
+    real.maxLeverage = 50;
+
+    AccountState realSt;
+    realSt.accountId = real.id;
+    realSt.balance = 0;
+    realSt.equity = 0;
+
+    accounts_.add(real, realSt);
+
+    ui->cbAccount->clear();
+    for (const auto& cfg : accounts_.configs()) {
+        ui->cbAccount->addItem(cfg.name, cfg.id);
+    }
+
     // unlock signals comboSymbol/Timeframne
     ui->comboSymbol->blockSignals(false);
     ui->comboTimeframe->blockSignals(false);

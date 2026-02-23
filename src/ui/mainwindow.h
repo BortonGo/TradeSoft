@@ -3,6 +3,7 @@
 #include "service\marketdataservice.h"
 #include "service\indicatorservice.h"
 #include "controllers/strategycontroller.h"
+#include "domain/account/account.h"
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +18,7 @@ class MainWindow : public QMainWindow
     IndicatorService* indicatorService_ = nullptr;
     StrategyController* strategyController_ = nullptr;
 
+    AccountStore accounts_;
 
 private slots:
     void on_comboSymbol_currentIndexChanged(int index);

@@ -26,7 +26,7 @@ struct StrategySelection {
 struct StrategyConfig {
     StrategySelection strategy;
     RiskSettings risk;
-    QString accountType;
+    QString accountId;
     QString account;
 };
 
