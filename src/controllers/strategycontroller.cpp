@@ -33,7 +33,7 @@ void StrategyController::onStart()
     cfg_ = readConfigFromUi();
 
     // минимальная валидация
-    if (cfg_.strategy.name.isEmpty()) {
+    if (cfg_.strategy.name.isEmpty() || cfg_.strategy.name == "None") {
         qDebug() << "[STRATEGY] Can't start: strategy not selected";
         return;
     }
