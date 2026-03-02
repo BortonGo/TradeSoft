@@ -1,4 +1,19 @@
-#ifndef STRATEGYSIGNAL_H
-#define STRATEGYSIGNAL_H
+#pragma once
+#include <QString>
+#include "core/timeframe.h"
 
-#endif // STRATEGYSIGNAL_H
+enum StrategySignalType {
+    None = 0,
+    EnterLong,
+    ExitLong,
+    EnterShort,
+    ExitShort
+};
+
+struct StrategySignal {
+    StrategySignalType type = StrategySignalType::None;
+    QString symbolId;
+    Timeframe tf {};
+    int64_t timestamp = 0;
+    QString reason;
+};
