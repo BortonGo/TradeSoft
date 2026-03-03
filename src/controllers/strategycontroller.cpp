@@ -62,13 +62,7 @@ void StrategyController::onStart() {
         qDebug() << "[STRATEGY] Can't start: symbol not selected";
         return;
     }
-    runner_->setStrategy(std::unique_ptr<IStrategy>(
-        new EmaCrossStrategy(
-            9, 21,
-            cfg_.risk.allowLong,
-            cfg_.risk.allowShort
-        )
-    ));
+    runner_->setStrategy(std::unique_ptr<IStrategy>(new EmaCrossStrategy(9, 20, cfg_.risk.allowLong, cfg_.risk.allowShort)));
 
     running_ = true;
     setParamsLocked(true);

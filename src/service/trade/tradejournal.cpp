@@ -67,38 +67,39 @@ void TradeJournal::onFill(const Fill& f) {
         return;
     }
 
-    // qty close = full position (на итерации 2)
+    // qty close = full position
     const double qty = t.qty;
 
-    // realized pnl
-    double pnl = 0.0;
+    // gross pnl (WITHOUT fees)
+    double grossPnl = 0.0;
     if (t.side == TradeSide::Buy) {
-        // long: sell exit
-        pnl = (f.price - t.price) * qty;
+        // long
+        grossPnl = (f.price - t.price) * qty;
     } else {
-        // short: buy exit
-        pnl = (t.price - f.price) * qty;
+        // short
+        grossPnl = (t.price - f.price) * qty;
     }
 
-    // subtract both fees: entry fee already in t.fee, exit fee is f.fee (already subtracted from equity above)
-    pnl -= t.fee;
+    // net pnl for this trade (WITH fees)
+    const double totalFees = t.fee + f.fee;
+    const double netPnl = grossPnl - totalFees;
 
     t.closeTime = f.time;
     t.closePrice = f.price;
-    t.pnl = pnl;              // net pnl including both fees
-    t.fee = t.fee + f.fee;    // show total fees for trade
+    t.pnl = netPnl;            // показываем net pnl
+    t.fee = totalFees;         // показываем суммарные комиссии
     t.status = TradeStatus::Closed;
 
     model_->updateTrade(row, t);
     openRowBySymbol_.remove(f.symbol);
 
     // stats
-    netPnl_ += pnl;
+    netPnl_ += netPnl;
     closedTrades_++;
-    if (pnl > 0.0) winTrades_++;
+    if (netPnl > 0.0) winTrades_++;
 
-    // equity already includes fee subtraction, so we add pnl (without double counting fees)
-    equity_ += pnl;
+    // equity: fees уже списались в начале onFill(), поэтому добавляем только gross pnl
+    equity_ += grossPnl;
 
     if (equity_ > peakEquity_) peakEquity_ = equity_;
     const double dd = peakEquity_ - equity_;

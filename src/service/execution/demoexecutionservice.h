@@ -1,7 +1,7 @@
 #pragma once
 #include "domain/order/order.h"
 #include "domain/order/fill.h"
-#include "domain/strategy/strategyconfig.h" // RiskSettings
+#include "domain/strategy/strategyconfig.h"
 
 class DemoExecutionService final
 {
