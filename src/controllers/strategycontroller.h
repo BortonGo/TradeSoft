@@ -6,6 +6,10 @@
 #include "service/strategy/strategyrunner.h"
 #include "domain/strategy/emacrossstrategy.h"
 
+#include "domain/risk/riskmanager.h"
+#include "service/execution/demoexecutionservice.h"
+#include "service/trade/tradejournal.h"
+
 namespace Ui { class MainWindow; }
 
 class StrategyController final : public QObject
@@ -17,6 +21,10 @@ class StrategyController final : public QObject
 
     MarketDataService* marketData_ = nullptr;
     StrategyRunner* runner_ = nullptr;
+
+    RiskManager* risk_ = nullptr;
+    DemoExecutionService* demoExec_ = nullptr;
+    TradeJournal* journal_ = nullptr;
 
     bool running_ = false;
     StrategyConfig cfg_;
@@ -34,4 +42,7 @@ private slots:
 private:
     void setParamsLocked(bool locked);
     StrategyConfig readConfigFromUi() const;
+
+    void ensureDemoPipeline();
+    void resetDemoSession();
 };

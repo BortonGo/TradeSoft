@@ -5,8 +5,7 @@
 #include <QHeaderView>
 
 StrategyController::StrategyController(Ui::MainWindow* ui, MarketDataService* mds, QObject* parent)
-    : QObject(parent), ui_(ui), marketData_(mds)
-{
+    : QObject(parent), ui_(ui), marketData_(mds) {
     Q_ASSERT(ui_);
     Q_ASSERT(marketData_);
 
@@ -23,17 +22,26 @@ StrategyController::StrategyController(Ui::MainWindow* ui, MarketDataService* md
     ui_->tableTrades->setAlternatingRowColors(true);
 
     runner_ = new StrategyRunner(marketData_, this);
+
+    ensureDemoPipeline();
+    runner_->setRiskManager(risk_);
+    runner_->setExecutionService(demoExec_);
+    runner_->setTradeJournal(journal_);
+
     connect(runner_, &StrategyRunner::signal_signalGenerated,this, &StrategyController::onRunnerSignal);
 
     ui_->btnStart->setEnabled(true);
     ui_->btnStop->setEnabled(false);
 }
 
-void StrategyController::onStart()
-{
+void StrategyController::onStart() {
     if (running_) return;
 
+    resetDemoSession();
+
     cfg_ = readConfigFromUi();
+
+    runner_->setRiskSettings(cfg_.risk);
 
     // минимальная валидация
     if (cfg_.strategy.name.isEmpty()) {
@@ -54,9 +62,6 @@ void StrategyController::onStart()
         qDebug() << "[STRATEGY] Can't start: symbol not selected";
         return;
     }
-
-    // На итерацию 1: делаем реальную стратегию EMA-cross (параметры захардкожены)
-    // На итерацию 2: берём параметры из UI/StrategyConfig.
     runner_->setStrategy(std::unique_ptr<IStrategy>(
         new EmaCrossStrategy(
             9, 21,
@@ -89,46 +94,16 @@ void StrategyController::onStop()
     qDebug() << "[STRATEGY] STOP";
 }
 
-void StrategyController::onRunnerSignal(StrategySignal s)
-{
-    // На итерацию 1 — просто фиксируем “сигнал как событие” в TradesModel
-    TradeRecord t;
-    t.time = QDateTime::currentDateTime();
-    t.symbol = s.symbolId;
-    t.qty = 0.0;
-    t.price = 0.0;
-    t.fee = 0.0;
-    t.pnl = 0.0;
-    t.lifetimeTicks = 0;
-
-    switch (s.type) {
-    case StrategySignalType::EnterLong:
-        t.side = TradeSide::Buy;
-        t.status = TradeStatus::Open;
-        break;
-    case StrategySignalType::ExitLong:
-        t.side = TradeSide::Sell;
-        t.status = TradeStatus::Closed;
-        break;
-    case StrategySignalType::EnterShort:
-        t.side = TradeSide::Sell;
-        t.status = TradeStatus::Open;
-        break;
-    case StrategySignalType::ExitShort:
-        t.side = TradeSide::Buy;
-        t.status = TradeStatus::Closed;
-        break;
-    default:
-        return;
-    }
-
-    tradesModel_->appendTrade(t);
-
-    qDebug() << "[UI] StrategySignal" << (int)s.type << s.reason;
+void StrategyController::onRunnerSignal(StrategySignal s) {
+    // Теперь сделки в таблицу пишет TradeJournal (через fills).
+    // Здесь оставляем только лог
+    qDebug() << "[UI] StrategySignal type=" << (int)s.type
+             << "symbol=" << s.symbolId
+             << "tf=" << toUiString(s.tf)
+             << "reason=" << s.reason;
 }
 
-void StrategyController::setParamsLocked(bool locked)
-{
+void StrategyController::setParamsLocked(bool locked) {
     const bool enabled = !locked;
 
     ui_->cbStrategy->setEnabled(enabled);
@@ -141,8 +116,7 @@ void StrategyController::setParamsLocked(bool locked)
     ui_->btnStop->setEnabled(locked);
 }
 
-StrategyConfig StrategyController::readConfigFromUi() const
-{
+StrategyConfig StrategyController::readConfigFromUi() const {
     StrategyConfig c;
 
     c.strategy.name = ui_->cbStrategy->currentText();
@@ -158,4 +132,30 @@ StrategyConfig StrategyController::readConfigFromUi() const
 
     c.accountId = ui_->cbAccount->currentData().toString();
     return c;
+}
+
+void StrategyController::ensureDemoPipeline() {
+    if (!risk_) {
+        risk_ = new RiskManager();
+    }
+    if (!demoExec_) {
+        demoExec_ = new DemoExecutionService();
+    }
+    if (!journal_) {
+        journal_ = new TradeJournal(tradesModel_, 1000.0);
+    }
+}
+
+void StrategyController::resetDemoSession() {
+    tradesModel_->clear();
+
+    if (journal_) {
+        delete journal_;
+        journal_ = nullptr;
+    }
+
+    journal_ = new TradeJournal(tradesModel_, 1000.0);
+    if (runner_) {
+        runner_->setTradeJournal(journal_);
+    }
 }

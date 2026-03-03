@@ -2,9 +2,7 @@
 #include <utility>
 #include <QDebug>
 
-StrategyRunner::StrategyRunner(MarketDataService* mds, QObject* parent)
-    : QObject(parent), mds_(mds)
-{
+StrategyRunner::StrategyRunner(MarketDataService* mds, QObject* parent) : QObject(parent), mds_(mds) {
     Q_ASSERT(mds_);
     connect(mds_, &MarketDataService::signal_seriesLoaded, this, &StrategyRunner::onSeriesLoaded);
     connect(mds_, &MarketDataService::signal_candleClosed,  this, &StrategyRunner::onCandleClosed);
