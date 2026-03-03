@@ -32,6 +32,7 @@ public:
     ~MainWindow();
 
     MarketDataService* marketData_ = nullptr;
+    MarketDataService* marketDataStrategy_ = nullptr;
 
 private:
     void reloadAndStart();

@@ -103,11 +103,13 @@ MainWindow::MainWindow(QWidget *parent) :
     MarketDataService* market = new MarketDataService(ex, this);
     marketData_ = market;
 
+    //MarketDataStrategy
+    marketDataStrategy_ = new MarketDataService(ex, this);
+
     // StrategyController
-    strategyController_ = new StrategyController(ui, marketData_, this);
+    strategyController_ = new StrategyController(ui, marketDataStrategy_, this);
 
     connect(marketData_, &MarketDataService::signal_seriesLoaded, ui->chartWidget, &ChartWidget::slot_setSeries);
-
     connect(marketData_, &MarketDataService::signal_candleUpdated, ui->chartWidget, &ChartWidget::slot_onCandleUpdate);
     connect(marketData_, &MarketDataService::signal_candleClosed, ui->chartWidget, &ChartWidget::slot_onCandleClosed);
 
