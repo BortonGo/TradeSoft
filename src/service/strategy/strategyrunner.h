@@ -33,5 +33,5 @@ signals:
 private slots:
     void onSeriesLoaded(std::shared_ptr<CandleSeries> series);
     void onCandleClosed(Candle c);
-    void onCandleUpdate(Candle c);
+    void onCandleUpdated(Candle c);
 };
