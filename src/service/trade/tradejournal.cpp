@@ -116,3 +116,32 @@ TradeReport TradeJournal::report() const {
     r.maxDrawdown = maxDD_;
     return r;
 }
+
+void TradeJournal::onPriceUpdate(const QString& symbol, double markPrice, double feePct) {
+    if (!model_) return;
+    if (markPrice <= 0.0) return;
+
+    auto it = openRowBySymbol_.find(symbol);
+    if (it == openRowBySymbol_.end()) return;
+
+    const int row = it.value();
+    TradeRecord t = model_->tradeAt(row);
+    if (t.status != TradeStatus::Open) return;
+
+    // ticks: считаем обновлениями realtime (раз в секунду)
+    t.lifetimeTicks += 1;
+
+    // gross PnL at current price
+    const double qty = t.qty;
+    double gross = 0.0;
+    if (t.side == TradeSide::Buy) gross = (markPrice - t.price) * qty;
+    else                         gross = (t.price - markPrice) * qty;
+
+    // показываем "если закрыть сейчас": учитываем entry fee + оценку exit fee
+    const double estExitFee = std::abs(markPrice * qty) * (feePct / 100.0);
+    const double unrealizedNet = gross - t.fee - estExitFee;
+
+    t.pnl = unrealizedNet;
+
+    model_->updateTrade(row, t);
+}

@@ -45,4 +45,6 @@ public:
 
     TradeReport report() const;
     double equity() const { return equity_; }
+
+    void onPriceUpdate(const QString& symbol, double markPrice, double feePct);
 };

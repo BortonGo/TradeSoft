@@ -65,14 +65,15 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
 
     if (role != Qt::DisplayRole) return {};
 
-    const QLocale loc; // системная локаль
+    const QLocale loc;
+    auto fmt6 = [&](double v) { return loc.toString(v, 'f', 6); };
     auto fmt2 = [&](double v) { return loc.toString(v, 'f', 2); };
 
     switch (col) {
     case ColTime:      return t.time.toString("yyyy-MM-dd HH:mm:ss");
     case ColSymbol:    return t.symbol;
     case ColSide:      return sideToString(t.side);
-    case ColQty:       return fmt2(t.qty);
+    case ColQty:       return fmt6(t.qty);
     case ColOpenPrice: return fmt2(t.price);
 
     case ColClosePrice:

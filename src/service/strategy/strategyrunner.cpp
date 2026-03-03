@@ -93,6 +93,10 @@ void StrategyRunner::onCandleUpdated(Candle c)
 {
     if (!running_ || !strategy_ || !ctx_.series) return;
     strategy_->onCandleUpdated(ctx_, c);
+
+    if (journal_) {
+        journal_->onPriceUpdate(ctx_.symbolId, c.close_, riskSettings_.feePct);
+    }
 }
 
 void StrategyRunner::handleSignal(const StrategySignal& s, const Candle& closed)
