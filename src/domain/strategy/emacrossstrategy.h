@@ -27,8 +27,8 @@ public:
         std::vector<StrategySignal> out;
         if (!ctx.series) return out;
 
-        std::vector<Candle>& candles = ctx.series->getCandles();
-        if (candles.size() < slow_ + 2) return out;
+        const std::vector<Candle>& candles = ctx.series->getCandles();
+        if (candles.size() < static_cast<size_t>(slow_ + 2)) return out;
 
         const std::vector<double> emaFast = EMA::calculate(candles, fast_);
         const std::vector<double> emaSlow = EMA::calculate(candles, slow_);
@@ -42,7 +42,7 @@ public:
         const bool crossUp = (fPrev <= sPrev) && (fNow > sNow);
         const bool crossDown = (fPrev >= sPrev) && (fNow < sNow);
 
-        auto mk = [&](StrategySignalType type, const QString& reason){
+        auto makeSignal = [&](StrategySignalType type, const char* reason){
             StrategySignal s;
             s.type = type;
             s.symbolId = ctx.symbolId;

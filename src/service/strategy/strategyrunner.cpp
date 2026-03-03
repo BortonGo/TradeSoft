@@ -1,4 +1,5 @@
 #include "strategyrunner.h"
+#include <QObject>
 #include <utility>
 #include <QDebug>
 

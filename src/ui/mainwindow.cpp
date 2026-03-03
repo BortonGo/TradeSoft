@@ -96,15 +96,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboSymbol->blockSignals(false);
     ui->comboTimeframe->blockSignals(false);
 
-    // StrategyController
-    strategyController_ = new StrategyController(ui, this);
-
     //IExchangeClient
     std::shared_ptr<IExchangeClient> ex = std::make_shared<BingXSwapClient>();
 
     //MarketDataService
     MarketDataService* market = new MarketDataService(ex, this);
     marketData_ = market;
+
+    // StrategyController
+    strategyController_ = new StrategyController(ui, marketData_, this);
 
     connect(marketData_, &MarketDataService::signal_seriesLoaded, ui->chartWidget, &ChartWidget::slot_setSeries);
 

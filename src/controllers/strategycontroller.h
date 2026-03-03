@@ -1,8 +1,10 @@
 #pragma once
 #include <QObject>
-#include <QTimer>
 #include "ui/models/tradesmodel.h"
 #include "domain/strategy/strategyconfig.h"
+#include "service/marketdataservice.h"
+#include "service/strategy/strategyrunner.h"
+#include "domain/strategy/emacrossstrategy.h"
 
 namespace Ui { class MainWindow; }
 
@@ -12,28 +14,24 @@ class StrategyController final : public QObject
 
     Ui::MainWindow* ui_ = nullptr;
     TradesModel* tradesModel_ = nullptr;
+
+    MarketDataService* marketData_ = nullptr;
+    StrategyRunner* runner_ = nullptr;
+
     bool running_ = false;
-    QTimer tick_;
     StrategyConfig cfg_;
 
-    bool hasOpen_ = false;
-    int  ticksAlive_ = 0;
-    int  openRow_ = -1;
-
-    double openPrice_ = 0.0;
-    TradeSide openSide_ = TradeSide::Buy;
-    double openQty_ = 0.0;
-
 public:
-    explicit StrategyController(Ui::MainWindow* ui, QObject* parent = nullptr);
+    explicit StrategyController(Ui::MainWindow* ui, MarketDataService* mds, QObject* parent = nullptr);
 
 public slots:
     void onStart();
     void onStop();
-    void onTick();
+
+private slots:
+    void onRunnerSignal(StrategySignal s);
 
 private:
     void setParamsLocked(bool locked);
     StrategyConfig readConfigFromUi() const;
-
 };
