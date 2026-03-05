@@ -229,7 +229,9 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         for (const auto& line : indicatorLines_) {
             QPen pen;
             switch (line.id_) {
+            case IndicatorId::EMA5:   pen = QPen(QColor(255, 255, 255), 1); break;
             case IndicatorId::EMA9:   pen = QPen(QColor(139, 0, 255), 1); break;
+            case IndicatorId::EMA13:   pen = QPen(QColor(255, 87, 143), 1); break;
             case IndicatorId::EMA20:  pen = QPen(QColor(255, 200, 0), 1); break;
             case IndicatorId::EMA50:  pen = QPen(QColor(0, 180, 255), 1); break;
 

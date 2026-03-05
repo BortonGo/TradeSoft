@@ -21,12 +21,27 @@ void IndicatorEngine::rebuild(const CandleSeries& series) {
     if (n <= 0) {
         return;
     }
+    if (isEnabled(IndicatorId::EMA5)) {
+        IndicatorLine line;
+        line.id_ = IndicatorId::EMA5;
+        line.name_ = "EMA 5";
+        line.values_ = EMA::calculate(c, 5);
+        lines_.push_back(std::move(line));
+    }
 
     if (isEnabled(IndicatorId::EMA9)) {
         IndicatorLine line;
         line.id_ = IndicatorId::EMA9;
         line.name_ = "EMA 9";
         line.values_ = EMA::calculate(c, 9);
+        lines_.push_back(std::move(line));
+    }
+
+    if (isEnabled(IndicatorId::EMA13)) {
+        IndicatorLine line;
+        line.id_ = IndicatorId::EMA13;
+        line.name_ = "EMA 13";
+        line.values_ = EMA::calculate(c, 13);
         lines_.push_back(std::move(line));
     }
 

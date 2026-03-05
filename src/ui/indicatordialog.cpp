@@ -19,7 +19,9 @@ IndicatorDialog::~IndicatorDialog()
 
 void IndicatorDialog::setConfig(const IndicatorConfig& cfg)
 {
+    ui->chkEma5->setChecked(cfg.ema5);
     ui->chkEma9->setChecked(cfg.ema9);
+    ui->chkEma13->setChecked(cfg.ema13);
     ui->chkEma20->setChecked(cfg.ema20);
     ui->chkEma50->setChecked(cfg.ema50);
     ui->chkDonchian20->setChecked(cfg.donchian20);
@@ -30,7 +32,9 @@ void IndicatorDialog::setConfig(const IndicatorConfig& cfg)
 IndicatorConfig IndicatorDialog::config() const
 {
     IndicatorConfig cfg;
+    cfg.ema5 = ui->chkEma5->isChecked();
     cfg.ema9 = ui->chkEma9->isChecked();
+    cfg.ema13 = ui->chkEma13->isChecked();
     cfg.ema20 = ui->chkEma20->isChecked();
     cfg.ema50 = ui->chkEma50->isChecked();
     cfg.donchian20 = ui->chkDonchian20->isChecked();

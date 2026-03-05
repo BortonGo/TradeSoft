@@ -8,7 +8,9 @@
 #include <QHashFunctions>
 
 enum class IndicatorId {
+    EMA5,
     EMA9,
+    EMA13,
     EMA20,
     EMA50,
     DON20,

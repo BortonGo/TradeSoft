@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>308</width>
-    <height>314</height>
+    <width>247</width>
+    <height>388</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,6 +53,18 @@ color: white;                /* цвет текста */</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
+       <widget class="QCheckBox" name="chkEma5">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>EMA 5</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="chkEma9">
         <property name="font">
          <font>
@@ -61,6 +73,18 @@ color: white;                /* цвет текста */</string>
         </property>
         <property name="text">
          <string>EMA 9</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="chkEma13">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>EMA 13</string>
         </property>
        </widget>
       </item>
