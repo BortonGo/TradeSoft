@@ -5,6 +5,7 @@
 
 #include "domain/strategy/emacrossstrategy.h"
 #include "domain/strategy/emapullbackstrategy.h"
+#include "domain/strategy/emascalpstrategy.h"
 
 std::unique_ptr<IStrategy> StrategyFactory::create(const StrategyConfig& cfg) {
     const QString name = cfg.strategy.name.trimmed();
@@ -57,6 +58,25 @@ std::unique_ptr<IStrategy> StrategyFactory::create(const StrategyConfig& cfg) {
                 cfg.risk.allowLong,
                 cfg.risk.allowShort
             )
+        );
+    }
+
+    // 3) EMA Scalp
+    if (name.compare("EMA Scalp", Qt::CaseInsensitive) == 0 ||
+        name.compare("Ema Scalp", Qt::CaseInsensitive) == 0)
+    {
+        const int fast = 5;
+        const int slow = 13;
+
+        const bool flip = true;
+
+        const int tpBps = 10;
+        const int slBps = 8;
+        const int maxBars = 6;
+        const int minSpreadBps = 3;
+
+        return std::unique_ptr<IStrategy>(
+            new EmaScalpStrategy(fast, slow, tpBps, slBps, maxBars, minSpreadBps, flip, cfg.risk.allowLong, cfg.risk.allowShort)
         );
     }
 
