@@ -4,7 +4,7 @@
 #include "domain/strategy/strategyconfig.h"
 #include "service/marketdataservice.h"
 #include "service/strategy/strategyrunner.h"
-#include "domain/strategy/emacrossstrategy.h"
+#include "domain/strategy/strategyfactory.h"
 
 #include "domain/risk/riskmanager.h"
 #include "service/execution/demoexecutionservice.h"

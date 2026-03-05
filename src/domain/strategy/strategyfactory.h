@@ -1,11 +1,12 @@
-#ifndef STRATEGYFACTORY_H
-#define STRATEGYFACTORY_H
+#pragma once
+#include <memory>
+#include "domain/strategy/istrategy.h"
+#include "domain/strategy/strategyconfig.h"
 
-
-class StrategyFactory
+class StrategyFactory final
 {
 public:
-    StrategyFactory();
+    // Возвращает готовую стратегию по имени cfg.strategy.name
+    // (параметры пока захардкожены)
+    static std::unique_ptr<IStrategy> create(const StrategyConfig& cfg);
 };
-
-#endif // STRATEGYFACTORY_H
