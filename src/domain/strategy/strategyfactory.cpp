@@ -4,7 +4,7 @@
 #include <QDebug>
 
 #include "domain/strategy/emacrossstrategy.h"
-#include "domain/strategy/emascalpstrategy.h"
+#include "domain/strategy/emapullbackstrategy.h"
 
 std::unique_ptr<IStrategy> StrategyFactory::create(const StrategyConfig& cfg) {
     const QString name = cfg.strategy.name.trimmed();
@@ -21,9 +21,9 @@ std::unique_ptr<IStrategy> StrategyFactory::create(const StrategyConfig& cfg) {
         );
     }
 
-    // 2) EMA Scalp (Cross + Pullback + Adaptive risk)
-    if (name.compare("EMA Scalp", Qt::CaseInsensitive) == 0 ||
-        name.compare("Ema Scalp", Qt::CaseInsensitive) == 0)
+    // 2) EMA Pullback (Cross + Pullback + Adaptive risk)
+    if (name.compare("EMA Pullback", Qt::CaseInsensitive) == 0 ||
+        name.compare("Ema Pullback", Qt::CaseInsensitive) == 0)
     {
         // Стартовые параметры под M1 (BTCUSDT), дальше вынесем в UI
         const int fast = 5;
@@ -44,7 +44,7 @@ std::unique_ptr<IStrategy> StrategyFactory::create(const StrategyConfig& cfg) {
         const bool flip = true;
 
         return std::unique_ptr<IStrategy>(
-            new EmaScalpStrategy(
+            new EmaPullbackStrategy(
                 fast, slow,
                 maxBarsInTrade,
                 minSpreadBps,

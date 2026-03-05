@@ -286,6 +286,11 @@ color: white;                /* цвет текста */
                </item>
                <item>
                 <property name="text">
+                 <string>EMA Pullback</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
                  <string>EMA Scalp</string>
                 </property>
                </item>

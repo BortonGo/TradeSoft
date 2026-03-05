@@ -10,7 +10,7 @@
 // 2) После кросса ждём откат к 50% последней свечи (mid = (H+L)/2)
 // 3) Входим, когда close дошёл до mid (на закрытии)
 // 4) Выходим по TP/SL/таймауту, опционально flip при смене bias
-class EmaScalpStrategy final : public IStrategy {
+class EmaPullbackStrategy final : public IStrategy {
     int fast_ = 5;
     int slow_ = 13;
 
@@ -55,26 +55,34 @@ class EmaScalpStrategy final : public IStrategy {
     }
 
 public:
-    EmaScalpStrategy(int fast, int slow,
-                     int maxBarsInTrade,
-                     int minSpreadBps,
-                     int maxPullbackBars,
-                     double slFromRangeMul,
-                     double rr,
-                     int minSlBps, int maxSlBps,
-                     int minTpBps, int maxTpBps,
-                     bool flipOnBiasChange,
-                     bool allowLong, bool allowShort)
-        : fast_(fast), slow_(slow),
-          maxBarsInTrade_(maxBarsInTrade),
-          minSpreadBps_(minSpreadBps),
+    EmaPullbackStrategy(int fast, int slow,
+                        int maxBarsInTrade,
+                        int minSpreadBps,
+                        int maxPullbackBars,
+                        double slFromRangeMul,
+                        double rr,
+                        int minSlBps, int maxSlBps,
+                        int minTpBps, int maxTpBps,
+                        bool flipOnBiasChange,
+                        bool allowLong, bool allowShort)
+        : fast_(fast),
+          slow_(slow),
+
           maxPullbackBars_(maxPullbackBars),
+          minSpreadBps_(minSpreadBps),
+
           slFromRangeMul_(slFromRangeMul),
           rr_(rr),
-          minSlBps_(minSlBps), maxSlBps_(maxSlBps),
-          minTpBps_(minTpBps), maxTpBps_(maxTpBps),
+          minSlBps_(minSlBps),
+          maxSlBps_(maxSlBps),
+          minTpBps_(minTpBps),
+          maxTpBps_(maxTpBps),
+
+          maxBarsInTrade_(maxBarsInTrade),
           flipOnBiasChange_(flipOnBiasChange),
-          allowLong_(allowLong), allowShort_(allowShort) {}
+          allowLong_(allowLong),
+          allowShort_(allowShort)
+    {}
 
     void onStart(const StrategyContext& ctx) override {
         Q_UNUSED(ctx);
