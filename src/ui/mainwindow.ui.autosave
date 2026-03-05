@@ -1,0 +1,1374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1252</width>
+    <height>748</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>TradeSoft</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow, QWidget {
+    background-color: rgb(22, 22, 22);
+    color: white;
+}
+
+QTabWidget::pane {
+    border: 1px solid #444;
+}
+
+QTabBar::tab {
+    background: rgb(30, 30, 30);
+    color: white;
+    padding: 6px 12px;
+}
+
+QTabBar::tab:selected {
+    background: rgb(45, 45, 45);
+}
+
+QPushButton {
+	background-color: rgb(255, 124, 17);
+    padding: 1px 1px;
+}
+</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_2" rowstretch="0" columnstretch="0">
+      <item row="0" column="0">
+       <widget class="QTabWidget" name="chartTabWidget">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(22, 22, 22);
+
+color: white;                /* цвет текста */</string>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="tab_chart">
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(22, 22, 22);
+
+color: white;                /* цвет текста */</string>
+         </property>
+         <attribute name="title">
+          <string>CHART</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0">
+          <item row="1" column="0" alignment="Qt::AlignVCenter">
+           <widget class="QFrame" name="horizontalFrame">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */
+ border-radius: 4px;</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QComboBox" name="comboSymbol">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>13</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(43, 43, 43);
+border-color: rgb(0, 0, 0);
+border: 2px solid rgb(22, 22, 22);
+color: white;                /* цвет текста */</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="comboTimeframe">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>60</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>13</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(43, 43, 43);
+border-color: rgb(0, 0, 0);
+border: 2px solid rgb(22, 22, 22);
+color: white;                /* цвет текста */
+</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnIndicators">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>123</width>
+                 <height>33</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="layoutDirection">
+                <enum>Qt::LeftToRight</enum>
+               </property>
+               <property name="autoFillBackground">
+                <bool>false</bool>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(43, 43, 43);
+border-color: rgb(0, 0, 0);
+border: 2px solid rgb(22, 22, 22);
+color: white;                /* цвет текста */
+
+
+</string>
+               </property>
+               <property name="text">
+                <string>Indicators...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Expanding</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>316</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="ChartWidget" name="chartWidget" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>220</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_strategy">
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(22, 22, 22);
+color: white;                /* цвет текста */</string>
+         </property>
+         <attribute name="title">
+          <string>STRATEGY</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+          <item>
+           <widget class="QFrame" name="SetStrategyFrame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */
+ border-radius: 4px;
+
+
+</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QComboBox" name="cbStrategy">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>220</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>13</pointsize>
+                </font>
+               </property>
+               <property name="layoutDirection">
+                <enum>Qt::LeftToRight</enum>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(43, 43, 43);
+border-color: rgb(0, 0, 0);
+border: 2px solid rgb(22, 22, 22);
+color: white;                /* цвет текста */
+</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>None</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>EMA Scalp</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>EMA Cross</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Donchian Breakout</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>RSI Reversal</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbStrategyTf">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>13</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">
+background-color: rgb(43, 43, 43);
+border-color: rgb(0, 0, 0);
+border: 2px solid rgb(22, 22, 22);
+color: white;                /* цвет текста */
+
+</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>17</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnStart">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>160</width>
+                 <height>33</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>13</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">/* ===== START BUTTON ===== */
+QPushButton#btnStart {
+    background-color: #1fb954;
+    color: black;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 4px;
+}
+
+QPushButton#btnStart:disabled {
+    background-color: #0f3f23;
+    color: #777;
+}</string>
+               </property>
+               <property name="text">
+                <string>START</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnStop">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>160</width>
+                 <height>33</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>13</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">/* ===== STOP BUTTON ===== */
+QPushButton#btnStop {
+    background-color: #e74c3c;
+    color: black;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 4px;
+}
+
+QPushButton#btnStop:disabled {
+    background-color: #4a1e1a;
+    color: #777;
+}</string>
+               </property>
+               <property name="text">
+                <string>STOP</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="RmFrame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>420</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */
+ border-radius: 4px;</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QGroupBox" name="gbRM">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>390</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QGroupBox {
+    background-color: #1B1B1B;
+    border: 1px solid #2E2E2E;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 5px;
+    color: #FF8C1A;
+    font-weight: bold;
+}
+
+QLineEdit, QDoubleSpinBox, QSpinBox, QComboBox {
+    background-color: #222222;
+    border: 1px solid #2E2E2E;
+    border-radius: 4px;
+    padding: 4px;
+    color: #EAEAEA;
+}
+
+QLineEdit:focus, QDoubleSpinBox:focus {
+    border: 1px solid #FF8C1A;
+}
+
+QLabel {
+    color: #9A9A9A;
+}
+
+QCheckBox {
+    spacing: 6px;
+    color: #EAEAEA;
+}
+
+QGroupBox:disabled {
+    color: #666;
+}
+
+QGroupBox:disabled QComboBox,
+QGroupBox:disabled QSpinBox,
+QGroupBox:disabled QDoubleSpinBox,
+QGroupBox:disabled QCheckBox {
+    background-color: #151515;
+    color: #444;
+    border: 1px solid #252525;
+}
+
+</string>
+               </property>
+               <property name="title">
+                <string>Risk Manangment</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_3">
+                <item row="5" column="1">
+                 <widget class="QDoubleSpinBox" name="spinFeePct">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                  <property name="maximum">
+                   <double>1.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.010000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.060000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QLabel" name="label_8">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>34</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string>Slippage (bps):</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>34</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="layoutDirection">
+                   <enum>Qt::LeftToRight</enum>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string>Risk mode:</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="label_4">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>34</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string>Leverage:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QDoubleSpinBox" name="spinRiskPct">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="minimum">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>100.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="0">
+                 <widget class="QLabel" name="label_7">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>34</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string>Fee (%):</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QDoubleSpinBox" name="spinMaxPosUSDT">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="maximum">
+                   <double>1000000.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="cbRiskMode">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>Fixed USDT</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Percent of equity</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="4" column="1" alignment="Qt::AlignHCenter">
+                 <widget class="QCheckBox" name="chkAllowShort">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>34</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>15</pointsize>
+                   </font>
+                  </property>
+                  <property name="layoutDirection">
+                   <enum>Qt::RightToLeft</enum>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */
+ border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string>Allow short:</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="0" alignment="Qt::AlignHCenter">
+                 <widget class="QCheckBox" name="chkAllowLong">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>34</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>15</pointsize>
+                   </font>
+                  </property>
+                  <property name="layoutDirection">
+                   <enum>Qt::RightToLeft</enum>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */
+ border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string>Allow long:</string>
+                  </property>
+                  <property name="checkable">
+                   <bool>true</bool>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="1">
+                 <widget class="QSpinBox" name="spinSlippageBps">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="maximum">
+                   <number>200</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_3">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>34</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string>Max position size (USDT):</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QSpinBox" name="spinLeverage">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <number>100</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_2">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>34</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string>Risk per trade (%):</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="gbAccount">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>390</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QGroupBox {
+    background-color: #1B1B1B;
+    border: 1px solid #2E2E2E;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 5px;
+    color: #FF8C1A;
+    font-weight: bold;
+}
+
+QLineEdit, QDoubleSpinBox, QSpinBox, QComboBox {
+    background-color: #222222;
+    border: 1px solid #2E2E2E;
+    border-radius: 4px;
+    padding: 4px;
+    color: #EAEAEA;
+}
+
+QLineEdit:focus, QDoubleSpinBox:focus {
+    border: 1px solid #FF8C1A;
+}
+
+QLabel {
+    color: #9A9A9A;
+}
+
+QCheckBox {
+    spacing: 6px;
+    color: #EAEAEA;
+}
+
+QGroupBox:disabled {
+    color: #666;
+}
+
+QGroupBox:disabled QComboBox,
+QGroupBox:disabled QSpinBox,
+QGroupBox:disabled QDoubleSpinBox,
+QGroupBox:disabled QCheckBox {
+   background-color: #151515;
+    color: #444;
+    border: 1px solid #252525;
+}
+
+</string>
+               </property>
+               <property name="title">
+                <string>Account</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_5">
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_6">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Account:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QLabel" name="lblBalanceValue">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="label_11">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>34</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Free margin:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="1">
+                 <widget class="QLabel" name="lblUsedValue">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="0">
+                 <widget class="QLabel" name="label_12">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>34</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Used margin:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="label_10">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>34</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Equity:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_5">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>34</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="layoutDirection">
+                   <enum>Qt::LeftToRight</enum>
+                  </property>
+                  <property name="text">
+                   <string>Account type:</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_9">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>34</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Balance:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="cbAccountType">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>Demo</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Real</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QLabel" name="lblEquityValue">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QLabel" name="lblFreeValue">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QComboBox" name="cbAccount">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QLabel" name="label_13">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>34</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Unrealized PnL:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="1">
+                 <widget class="QLabel" name="lblUPnlValie">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"> border-radius: 4px;</string>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTableView" name="tableTrades">
+            <property name="styleSheet">
+             <string notr="true">QTableView, QTableWidget {
+    background-color: #1B1B1B;
+    alternate-background-color: #202020;
+    color: #E6E6E6;
+
+    gridline-color: #2D2D2D;
+    border: 1px solid #2A2A2A;
+    border-radius: 6px;
+
+    selection-background-color: #2F5B8A;
+    selection-color: #FFFFFF;
+
+    outline: 0;
+}
+
+QTableView::item, QTableWidget::item {
+    padding: 6px 10px;          /* читабельные отступы */
+    border: 0px;
+}
+
+QTableView::item:selected, QTableWidget::item:selected {
+    background: #2F5B8A;
+    color: #FFFFFF;
+}
+
+QTableView::item:hover, QTableWidget::item:hover {
+    background: #262626;
+}
+
+/* Шапка (горизонтальная и вертикальная) */
+QHeaderView::section {
+    background-color: #262626;
+    color: #DCDCDC;
+    padding: 7px 10px;
+    border: 1px solid #2F2F2F;
+    font-weight: 600;
+}
+
+QHeaderView::section:hover {
+    background-color: #2B2B2B;
+}
+
+QHeaderView::section:pressed {
+    background-color: #303030;
+}
+
+/* Убираем некрасивый уголок слева сверху */
+QTableCornerButton::section {
+    background-color: #262626;
+    border: 1px solid #2F2F2F;
+}
+
+/* Если редактируешь ячейки */
+QTableView QLineEdit, QTableWidget QLineEdit {
+    background: #141414;
+    color: #FFFFFF;
+    border: 1px solid #3A3A3A;
+    border-radius: 4px;
+    padding: 4px 6px;
+}
+
+/* Линия разделителя / фон под хедером иногда &quot;светит&quot; — глушим */
+QHeaderView {
+    background-color: #1B1B1B;
+}
+
+/* Скроллбар в тему */
+QScrollBar:vertical {
+    background: #161616;
+    width: 12px;
+    margin: 12px 2px 12px 2px;
+    border: 1px solid #2A2A2A;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+    background: #2F2F2F;
+    min-height: 28px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical:hover { background: #3A3A3A; }
+QScrollBar::handle:vertical:pressed { background: #4A4A4A; }
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    background: #161616;
+    height: 10px;
+    border: 0px;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: transparent; }
+
+QScrollBar:horizontal {
+    background: #161616;
+    height: 12px;
+    margin: 2px 12px 2px 12px;
+    border: 1px solid #2A2A2A;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #2F2F2F;
+    min-width: 28px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal:hover { background: #3A3A3A; }
+QScrollBar::handle:horizontal:pressed { background: #4A4A4A; }
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    background: #161616;
+    width: 10px;
+    border: 0px;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: transparent; }</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabBacktest">
+         <attribute name="title">
+          <string>BACKTEST</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>ChartWidget</class>
+   <extends>QWidget</extends>
+   <header>chartwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
