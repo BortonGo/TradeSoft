@@ -160,8 +160,8 @@ StrategyConfig StrategyController::readConfigFromUi() const {
     if (name.compare("EMA Scalp", Qt::CaseInsensitive) == 0 ||
         name.compare("Ema Scalp", Qt::CaseInsensitive) == 0) {
         c.fixedExit.enabled = true;
-        c.fixedExit.tpBps = 30;
-        c.fixedExit.slBps = 15;
+        c.fixedExit.tpBps = 13;
+        c.fixedExit.slBps = 8;
     }
 
     return c;

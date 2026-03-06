@@ -10,8 +10,8 @@ class EmaScalpStrategy final : public IStrategy {
     int slow_ = 13;
 
     // bps: 30 = 0.30%
-    int tpBps_ = 25;
-    int slBps_ = 10;
+    int tpBps_ = 13;
+    int slBps_ = 8;
 
     int maxBarsInTrade_ = 6;
 
@@ -160,21 +160,29 @@ public:
 
         // ---------------- manage open position intrabar ----------------
         if (inLong_ || inShort_) {
-            if (lastActionBarTs_ == curBarTs) {
+            /*if (lastActionBarTs_ == curBarTs) {
                 return out;
-            }
+            }*/
 
-            double ret = 0.0;
+            bool hitTp = false;
+            bool hitSl = false;
+
             if (entryPrice_ > 0.0) {
                 if (inLong_) {
-                    ret = (px - entryPrice_) / entryPrice_;
+                    const double tpPrice = entryPrice_ * (1.0 + tp);
+                    const double slPrice = entryPrice_ * (1.0 - sl);
+
+                    hitTp = (forming.high_ >= tpPrice);
+                    hitSl = (forming.low_  <= slPrice);
                 } else if (inShort_) {
-                    ret = (entryPrice_ - px) / entryPrice_;
+                    const double tpPrice = entryPrice_ * (1.0 - tp);
+                    const double slPrice = entryPrice_ * (1.0 + sl);
+
+                    hitTp = (forming.low_  <= tpPrice);
+                    hitSl = (forming.high_ >= slPrice);
                 }
             }
 
-            const bool hitTp = (ret >= tp);
-            const bool hitSl = (ret <= -sl);
             const bool timeout = (barsInTrade_ >= maxBarsInTrade_);
 
             const bool flipToShort = inLong_  && flipOnBiasChange_ && biasShort_;
@@ -203,6 +211,15 @@ public:
 
                 return out;
             }
+            qDebug() << "[SCALP EXIT CHECK]"
+                     << "inLong=" << inLong_
+                     << "inShort=" << inShort_
+                     << "entry=" << entryPrice_
+                     << "high=" << forming.high_
+                     << "low=" << forming.low_
+                     << "close=" << forming.close_
+                     << "hitTp=" << hitTp
+                     << "hitSl=" << hitSl;
 
             if (inShort_ && (hitTp || hitSl || timeout || flipToLong)) {
                 out.push_back(mk(StrategySignalType::ExitShort,
