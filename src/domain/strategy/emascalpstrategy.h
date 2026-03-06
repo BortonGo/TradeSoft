@@ -31,7 +31,7 @@ class EmaScalpStrategy final : public IStrategy {
     int barsInTrade_ = 0;
 
     int cooldownBars_ = 0;
-    int cooldownAfterExit_ = 1;
+    int cooldownAfterExit_ = 0;
 
     // indicator state, updated only on closed candles
     bool indicatorsReady_ = false;
@@ -46,11 +46,16 @@ class EmaScalpStrategy final : public IStrategy {
     qint64 lastEntryBarTs_ = -1;
     qint64 lastExitBarTs_  = -1;
 
+    // track only the movement AFTER entry on the entry bar
+    qint64 entryBarTs_ = -1;
+    double postEntryHigh_ = 0.0;
+    double postEntryLow_ = 0.0;
+    bool postEntryRangeValid_ = false;
+
     static double bpsToFrac(int bps) {
         return static_cast<double>(bps) / 10000.0;
     }
 
-    // helpers
     bool enteredThisBar(qint64 ts) const {
         return lastEntryBarTs_ == ts;
     }
@@ -60,14 +65,10 @@ class EmaScalpStrategy final : public IStrategy {
     }
 
     bool canEnterThisBar(qint64 ts) const {
-        // Нельзя входить, если:
-        // 1) уже входили на этом баре
-        // 2) уже выходили на этом баре
         return !enteredThisBar(ts) && !exitedThisBar(ts);
     }
 
     bool canExitThisBar(qint64 ts) const {
-        // Выход только один раз на бар
         return !exitedThisBar(ts);
     }
 
@@ -77,6 +78,20 @@ class EmaScalpStrategy final : public IStrategy {
 
     void markExitThisBar(qint64 ts) {
         lastExitBarTs_ = ts;
+    }
+
+    void initPostEntryRange(qint64 barTs, double px) {
+        entryBarTs_ = barTs;
+        postEntryHigh_ = px;
+        postEntryLow_ = px;
+        postEntryRangeValid_ = true;
+    }
+
+    void resetPostEntryRange() {
+        entryBarTs_ = -1;
+        postEntryHigh_ = 0.0;
+        postEntryLow_ = 0.0;
+        postEntryRangeValid_ = false;
     }
 
 public:
@@ -109,8 +124,11 @@ public:
         biasLong_ = false;
         biasShort_ = false;
         spreadOk_ = false;
+
         lastEntryBarTs_ = -1;
         lastExitBarTs_  = -1;
+
+        resetPostEntryRange();
     }
 
     std::vector<StrategySignal> onCandleClosed(const StrategyContext& ctx, const Candle& closed) override {
@@ -188,28 +206,44 @@ public:
             bool hitTp = false;
             bool hitSl = false;
 
+            const bool sameBarAsEntry = (entryBarTs_ == curBarTs);
+
+            if (sameBarAsEntry && postEntryRangeValid_) {
+                // On the entry bar, accumulate only prices seen AFTER entry.
+                postEntryHigh_ = std::max(postEntryHigh_, px);
+                postEntryLow_  = std::min(postEntryLow_,  px);
+            }
+
             if (entryPrice_ > 0.0) {
                 if (inLong_) {
                     const double tpPrice = entryPrice_ * (1.0 + tp);
                     const double slPrice = entryPrice_ * (1.0 - sl);
 
-                    hitTp = (forming.high_ >= tpPrice);
-                    hitSl = (forming.low_  <= slPrice);
+                    if (sameBarAsEntry && postEntryRangeValid_) {
+                        hitTp = (postEntryHigh_ >= tpPrice);
+                        hitSl = (postEntryLow_  <= slPrice);
+                    } else {
+                        hitTp = (forming.high_ >= tpPrice);
+                        hitSl = (forming.low_  <= slPrice);
+                    }
                 } else if (inShort_) {
                     const double tpPrice = entryPrice_ * (1.0 - tp);
                     const double slPrice = entryPrice_ * (1.0 + sl);
 
-                    hitTp = (forming.low_  <= tpPrice);
-                    hitSl = (forming.high_ >= slPrice);
+                    if (sameBarAsEntry && postEntryRangeValid_) {
+                        hitTp = (postEntryLow_  <= tpPrice);
+                        hitSl = (postEntryHigh_ >= slPrice);
+                    } else {
+                        hitTp = (forming.low_  <= tpPrice);
+                        hitSl = (forming.high_ >= slPrice);
+                    }
                 }
             }
 
             const bool timeout = (barsInTrade_ >= maxBarsInTrade_);
-
             const bool flipToShort = inLong_  && flipOnBiasChange_ && biasShort_;
             const bool flipToLong  = inShort_ && flipOnBiasChange_ && biasLong_;
 
-            // Если на этом баре уже был exit — больше ничего не делаем
             if (!canExitThisBar(curBarTs)) {
                 return out;
             }
@@ -228,6 +262,7 @@ public:
                 cooldownBars_ = cooldownAfterExit_;
 
                 markExitThisBar(curBarTs);
+                resetPostEntryRange();
                 return out;
             }
 
@@ -245,6 +280,7 @@ public:
                 cooldownBars_ = cooldownAfterExit_;
 
                 markExitThisBar(curBarTs);
+                resetPostEntryRange();
                 return out;
             }
 
@@ -258,7 +294,6 @@ public:
             return out;
         }
 
-        // На этом баре уже был entry или exit -> повторно входить нельзя
         if (!canEnterThisBar(curBarTs)) {
             return out;
         }
@@ -290,6 +325,7 @@ public:
             barsInTrade_ = 0;
 
             markEntryThisBar(curBarTs);
+            initPostEntryRange(curBarTs, px);
             return out;
         }
 
@@ -303,6 +339,7 @@ public:
             barsInTrade_ = 0;
 
             markEntryThisBar(curBarTs);
+            initPostEntryRange(curBarTs, px);
             return out;
         }
 
