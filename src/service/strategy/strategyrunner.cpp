@@ -80,19 +80,38 @@ void StrategyRunner::onCandleClosed(Candle c)
 
         emit signal_signalGenerated(s);
 
-        qDebug() << "[Runner] SIGNAL type=" << (int)s.type
+        qDebug() << "[Runner] CLOSED SIGNAL type=" << static_cast<int>(s.type)
                  << " symbol=" << s.symbolId
                  << " tf=" << toUiString(s.tf)
                  << " reason=" << s.reason;
 
         handleSignal(s, c);
     }
+
+    // Можно оставить и тут тоже, чтобы на закрытии свечи журнал точно обновился
+    if (journal_) {
+        journal_->onPriceUpdate(ctx_.symbolId, c.close_, riskSettings_.feePct);
+    }
 }
 
 void StrategyRunner::onCandleUpdated(Candle c)
 {
     if (!running_ || !strategy_ || !ctx_.series) return;
-    strategy_->onCandleUpdated(ctx_, c);
+
+    const auto signal = strategy_->onCandleUpdated(ctx_, c);
+
+    for (const auto& s : signal) {
+        if (s.type == StrategySignalType::None) continue;
+
+        emit signal_signalGenerated(s);
+
+        qDebug() << "[Runner] UPDATE SIGNAL type=" << static_cast<int>(s.type)
+                 << " symbol=" << s.symbolId
+                 << " tf=" << toUiString(s.tf)
+                 << " reason=" << s.reason;
+
+        handleSignal(s, c);
+    }
 
     if (journal_) {
         journal_->onPriceUpdate(ctx_.symbolId, c.close_, riskSettings_.feePct);
