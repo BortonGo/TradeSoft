@@ -281,7 +281,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             if (upperPts.size() >= 2 && lowerPts.size() >= 2) {
                 QPainterPath area;
                 area.moveTo(upperPts[0]);
-                for (int i = 1; i < upperPts.size(); ++i)
+                for (int i = 1; i < static_cast<int>(upperPts.size()); ++i)
                     area.lineTo(upperPts[i]);
 
                 // закрываем контур по нижней линии в обратном порядке
@@ -886,20 +886,19 @@ void ChartWidget::slot_setSeries(std::shared_ptr<CandleSeries> series) {
 }
 
 void ChartWidget::slot_onCandleUpdate(Candle c) {
+    Q_UNUSED(c);
     if (!series_) {
         return;
     }
-
-    series_->updateLastCandle(c);
     normalizeViewport();
     update();
 }
 
 void ChartWidget::slot_onCandleClosed(Candle c) {
+    Q_UNUSED(c);
     if (!series_) {
         return;
     }
-    series_->updateLastCandle(c);
     normalizeViewport();
     update();
 }
