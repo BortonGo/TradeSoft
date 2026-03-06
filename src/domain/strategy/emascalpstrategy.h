@@ -43,10 +43,40 @@ class EmaScalpStrategy final : public IStrategy {
     bool spreadOk_ = false;
 
     // protect from duplicate actions on same forming candle
-    qint64 lastActionBarTs_ = -1;
+    qint64 lastEntryBarTs_ = -1;
+    qint64 lastExitBarTs_  = -1;
 
     static double bpsToFrac(int bps) {
         return static_cast<double>(bps) / 10000.0;
+    }
+
+    // helpers
+    bool enteredThisBar(qint64 ts) const {
+        return lastEntryBarTs_ == ts;
+    }
+
+    bool exitedThisBar(qint64 ts) const {
+        return lastExitBarTs_ == ts;
+    }
+
+    bool canEnterThisBar(qint64 ts) const {
+        // Нельзя входить, если:
+        // 1) уже входили на этом баре
+        // 2) уже выходили на этом баре
+        return !enteredThisBar(ts) && !exitedThisBar(ts);
+    }
+
+    bool canExitThisBar(qint64 ts) const {
+        // Выход только один раз на бар
+        return !exitedThisBar(ts);
+    }
+
+    void markEntryThisBar(qint64 ts) {
+        lastEntryBarTs_ = ts;
+    }
+
+    void markExitThisBar(qint64 ts) {
+        lastExitBarTs_ = ts;
     }
 
 public:
@@ -79,7 +109,8 @@ public:
         biasLong_ = false;
         biasShort_ = false;
         spreadOk_ = false;
-        lastActionBarTs_ = -1;
+        lastEntryBarTs_ = -1;
+        lastExitBarTs_  = -1;
     }
 
     std::vector<StrategySignal> onCandleClosed(const StrategyContext& ctx, const Candle& closed) override {
@@ -117,14 +148,10 @@ public:
 
         indicatorsReady_ = true;
 
-        // Считаем, что на новом закрытом баре "тик-счётчик" для действий можно сбросить
-        lastActionBarTs_ = -1;
-
         if (cooldownBars_ > 0) {
             --cooldownBars_;
         }
 
-        // barsInTrade_ увеличиваем только по закрытым свечам
         if (inLong_ || inShort_) {
             ++barsInTrade_;
         }
@@ -139,7 +166,7 @@ public:
         const double px = forming.close_;
         if (px <= 0.0) return out;
 
-       const qint64 curBarTs = forming.timestamp_;
+        const qint64 curBarTs = forming.timestamp_;
 
         auto mk = [&](StrategySignalType type, const char* reason) {
             StrategySignal s;
@@ -151,19 +178,13 @@ public:
             return s;
         };
 
-        auto markAction = [&]() {
-            lastActionBarTs_ = curBarTs;
-        };
-
         const double tp = bpsToFrac(tpBps_);
         const double sl = bpsToFrac(slBps_);
 
-        // ---------------- manage open position intrabar ----------------
+        // =========================================================
+        // 1) MANAGE OPEN POSITION
+        // =========================================================
         if (inLong_ || inShort_) {
-            /*if (lastActionBarTs_ == curBarTs) {
-                return out;
-            }*/
-
             bool hitTp = false;
             bool hitSl = false;
 
@@ -188,76 +209,63 @@ public:
             const bool flipToShort = inLong_  && flipOnBiasChange_ && biasShort_;
             const bool flipToLong  = inShort_ && flipOnBiasChange_ && biasLong_;
 
+            // Если на этом баре уже был exit — больше ничего не делаем
+            if (!canExitThisBar(curBarTs)) {
+                return out;
+            }
+
             if (inLong_ && (hitTp || hitSl || timeout || flipToShort)) {
                 out.push_back(mk(StrategySignalType::ExitLong,
                                  hitTp ? "TP -> exit long" :
                                  hitSl ? "SL -> exit long" :
                                  timeout ? "Timeout -> exit long" :
-                                 "Bias flip -> exit long"));
+                                           "Bias flip -> exit long"));
 
                 inLong_ = false;
+                inShort_ = false;
                 entryPrice_ = 0.0;
                 barsInTrade_ = 0;
                 cooldownBars_ = cooldownAfterExit_;
-                markAction();
 
-                if (flipToShort && allowShort_ && spreadOk_) {
-                    out.push_back(mk(StrategySignalType::EnterShort, "Flip -> enter short"));
-                    inShort_ = true;
-                    entryPrice_ = px;
-                    barsInTrade_ = 0;
-                    cooldownBars_ = 0;
-                }
-
+                markExitThisBar(curBarTs);
                 return out;
             }
-            qDebug() << "[SCALP EXIT CHECK]"
-                     << "inLong=" << inLong_
-                     << "inShort=" << inShort_
-                     << "entry=" << entryPrice_
-                     << "high=" << forming.high_
-                     << "low=" << forming.low_
-                     << "close=" << forming.close_
-                     << "hitTp=" << hitTp
-                     << "hitSl=" << hitSl;
 
             if (inShort_ && (hitTp || hitSl || timeout || flipToLong)) {
                 out.push_back(mk(StrategySignalType::ExitShort,
                                  hitTp ? "TP -> exit short" :
                                  hitSl ? "SL -> exit short" :
                                  timeout ? "Timeout -> exit short" :
-                                 "Bias flip -> exit short"));
+                                           "Bias flip -> exit short"));
 
+                inLong_ = false;
                 inShort_ = false;
                 entryPrice_ = 0.0;
                 barsInTrade_ = 0;
                 cooldownBars_ = cooldownAfterExit_;
-                markAction();
 
-                if (flipToLong && allowLong_ && spreadOk_) {
-                    out.push_back(mk(StrategySignalType::EnterLong, "Flip -> enter long"));
-                    inLong_ = true;
-                    entryPrice_ = px;
-                    barsInTrade_ = 0;
-                    cooldownBars_ = 0;
-                }
-
+                markExitThisBar(curBarTs);
                 return out;
             }
 
             return out;
         }
 
-        // ---------------- flat: cooldown ----------------
+        // =========================================================
+        // 2) FLAT: COOLDOWN
+        // =========================================================
         if (cooldownBars_ > 0) {
             return out;
         }
 
-        if (lastActionBarTs_ == curBarTs) {
+        // На этом баре уже был entry или exit -> повторно входить нельзя
+        if (!canEnterThisBar(curBarTs)) {
             return out;
         }
 
-        // ---------------- flat: entries intrabar ----------------
+        // =========================================================
+        // 3) FLAT: ENTRIES INTRABAR
+        // =========================================================
         if (!spreadOk_) return out;
 
         const double dist = std::abs(px - lastFastEma_);
@@ -275,20 +283,26 @@ public:
         if (biasLong_ && allowLong_ && (px <= lastFastEma_) && pullbackOkLong) {
             out.push_back(mk(StrategySignalType::EnterLong,
                              "Scalp: bias long + touch fast EMA -> enter long"));
+
             inLong_ = true;
+            inShort_ = false;
             entryPrice_ = px;
             barsInTrade_ = 0;
-            markAction();
+
+            markEntryThisBar(curBarTs);
             return out;
         }
 
         if (biasShort_ && allowShort_ && (px >= lastFastEma_) && pullbackOkShort) {
             out.push_back(mk(StrategySignalType::EnterShort,
                              "Scalp: bias short + touch fast EMA -> enter short"));
+
+            inLong_ = false;
             inShort_ = true;
             entryPrice_ = px;
             barsInTrade_ = 0;
-            markAction();
+
+            markEntryThisBar(curBarTs);
             return out;
         }
 
