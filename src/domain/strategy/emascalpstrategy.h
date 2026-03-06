@@ -9,9 +9,9 @@ class EmaScalpStrategy final : public IStrategy {
     int fast_ = 5;
     int slow_ = 13;
 
-    // bps: 15 = 0.15%
-    int tpBps_ = 30;
-    int slBps_ = 15;
+    // bps: 30 = 0.30%
+    int tpBps_ = 25;
+    int slBps_ = 10;
 
     int maxBarsInTrade_ = 6;
 

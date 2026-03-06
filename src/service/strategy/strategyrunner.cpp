@@ -78,14 +78,13 @@ void StrategyRunner::onCandleClosed(Candle c)
     for (const auto& s : signal) {
         if (s.type == StrategySignalType::None) continue;
 
-        emit signal_signalGenerated(s);
-
         qDebug() << "[Runner] CLOSED SIGNAL type=" << static_cast<int>(s.type)
                  << " symbol=" << s.symbolId
                  << " tf=" << toUiString(s.tf)
                  << " reason=" << s.reason;
 
         handleSignal(s, c);
+        emit signal_signalGenerated(s);
     }
 
     // Можно оставить и тут тоже, чтобы на закрытии свечи журнал точно обновился
@@ -103,14 +102,13 @@ void StrategyRunner::onCandleUpdated(Candle c)
     for (const auto& s : signal) {
         if (s.type == StrategySignalType::None) continue;
 
-        emit signal_signalGenerated(s);
-
-        qDebug() << "[Runner] UPDATE SIGNAL type=" << static_cast<int>(s.type)
+            qDebug() << "[Runner] UPDATE SIGNAL type=" << static_cast<int>(s.type)
                  << " symbol=" << s.symbolId
                  << " tf=" << toUiString(s.tf)
                  << " reason=" << s.reason;
 
         handleSignal(s, c);
+        emit signal_signalGenerated(s);
     }
 
     if (journal_) {
@@ -149,7 +147,21 @@ void StrategyRunner::handleSignal(const StrategySignal& s, const Candle& closed)
     if (o.qty <= 0.0) return;
 
     // Demo fill
-    const Fill f = exec_->executeMarket(o, markPrice, riskSettings_);
+    Fill f = exec_->executeMarket(o, markPrice, riskSettings_);
+
+    // For OPEN fills, calculate fixed TP/SL levels from config
+    if (!f.reduceOnly && cfg_.fixedExit.enabled) {
+        const double tpFrac = static_cast<double>(cfg_.fixedExit.tpBps) / 10000.0;
+        const double slFrac = static_cast<double>(cfg_.fixedExit.slBps) / 10000.0;
+
+        if (f.side == TradeSide::Buy) {
+            f.tpPrice = f.price * (1.0 + tpFrac);
+            f.slPrice = f.price * (1.0 - slFrac);
+        } else {
+            f.tpPrice = f.price * (1.0 - tpFrac);
+            f.slPrice = f.price * (1.0 + slFrac);
+        }
+    }
 
     // Journal updates TradesModel + stats
     journal_->onFill(f);
@@ -161,5 +173,7 @@ void StrategyRunner::handleSignal(const StrategySignal& s, const Candle& closed)
              << " price=" << f.price
              << " fee=" << f.fee
              << " reduceOnly=" << f.reduceOnly
+             << " tp=" << f.tpPrice
+             << " sl=" << f.slPrice
              << " equity=" << journal_->equity();
 }

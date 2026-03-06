@@ -47,6 +47,30 @@ void ChartWidget::setIndicatorLines(const std::vector<IndicatorLine>& lines) {
     update();
 }
 
+void ChartWidget::setTradeLevels(double tpPrice, double slPrice) {
+    tpLevel_.visible = (tpPrice > 0.0);
+    tpLevel_.price = tpPrice;
+    tpLevel_.lineColor = QColor(60, 200, 100);     // красный
+    tpLevel_.fillColor = QColor(60, 200, 100);
+    tpLevel_.textColor = QColor(255, 255, 255);
+    tpLevel_.text = "TP";
+
+    slLevel_.visible = (slPrice > 0.0);
+    slLevel_.price = slPrice;
+    slLevel_.lineColor = QColor(220, 60, 60);    // зелёный
+    slLevel_.fillColor = QColor(220, 60, 60);
+    slLevel_.textColor = QColor(255, 255, 255);
+    slLevel_.text = "SL";
+
+    update();
+}
+
+void ChartWidget::clearTradeLevels() {
+    tpLevel_.visible = false;
+    slLevel_.visible = false;
+    update();
+}
+
 //==================================================== PaintEvent ====================================================
 void ChartWidget::paintEvent(QPaintEvent* event) {
     Q_UNUSED(event);
@@ -115,6 +139,16 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         return;
     }
 
+    // tp/sl
+    if (tpLevel_.visible) {
+        minLow = std::min(minLow, tpLevel_.price);
+        maxHigh = std::max(maxHigh, tpLevel_.price);
+    }
+    if (slLevel_.visible) {
+        minLow = std::min(minLow, slLevel_.price);
+        maxHigh = std::max(maxHigh, slLevel_.price);
+    }
+
     // padding by Y
     const double range = maxHigh - minLow;
     minLow -= range * 0.05;
@@ -126,6 +160,43 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
     auto priceToY = [&](double price) -> int {
         const double y = plotPrice.top() + (maxHigh - price) * yScale;
         return static_cast<int>(std::round(y));
+    };
+
+    // PriceLevel helper
+    auto drawPriceLevel = [&](const PriceLevelOverlay& lvl) {
+        if (!lvl.visible || lvl.price <= 0.0) return;
+
+        const int y = priceToY(lvl.price);
+        if (y < plotPrice.top() || y > plotPrice.bottom()) return;
+
+        QPen pen(lvl.lineColor);
+        pen.setWidth(1);
+        painter.setPen(pen);
+        painter.drawLine(plotPrice.left(), y, plotPrice.right(), y);
+
+        const QString priceText = QString::number(lvl.price, 'f', 2);
+        const QString text = lvl.text.isEmpty() ? priceText : (lvl.text + " " + priceText);
+
+        const int padX = 5;
+        const int h = 18;
+
+        const QFontMetrics fm(painter.font());
+        const int w = fm.width(text) + padX * 2;
+
+        int x = plotPrice.right() + 6;
+        int yTop = y - h / 2;
+        yTop = qBound(plotPrice.top(), yTop, plotPrice.bottom() - h);
+
+        QRect r(x, yTop, w, h);
+
+        painter.save();
+        painter.setPen(lvl.fillColor.darker(130));
+        painter.setBrush(lvl.fillColor);
+        painter.drawRect(r);
+
+        painter.setPen(lvl.textColor);
+        painter.drawText(r, Qt::AlignCenter, text);
+        painter.restore();
     };
 
     // step X
@@ -455,38 +526,42 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
     }
 
     // Current price label
-        if (!candles.empty()) {
-            const double lastPrice = candles.back().close_;
-            const int y = priceToY(lastPrice);
+    if (!candles.empty()) {
+        const double lastPrice = candles.back().close_;
+        const int y = priceToY(lastPrice);
 
-            const QString text = QString::number(lastPrice, 'f', 2);
+        const QString text = QString::number(lastPrice, 'f', 2);
 
-            const int padX = 3;
-            const int h = 18;
+        const int padX = 3;
+        const int h = 18;
 
-            const QFontMetrics fm(painter.font());
-            const int w = fm.boundingRect(text).width() + padX * 2;
+        const QFontMetrics fm(painter.font());
+        const int w = fm.boundingRect(text).width() + padX * 2;
 
-            int x = plotPrice.right() + 6;
-            int yTop = y - h / 2;
+        int x = plotPrice.right() + 6;
+        int yTop = y - h / 2;
 
-            yTop = qBound(plotPrice.top(), yTop, plotPrice.bottom() - h);
+        yTop = qBound(plotPrice.top(), yTop, plotPrice.bottom() - h);
 
-            QRect r(x, yTop, w, h);
+        QRect r(x, yTop, w, h);
 
-            painter.save();
+        painter.save();
 
-            // background , frame
-            painter.setPen(QColor(60, 60, 60));
-            painter.setBrush(QColor(35, 35, 35));
-            painter.drawRect(r);
+        // background , frame
+        painter.setPen(QColor(60, 60, 60));
+        painter.setBrush(QColor(35, 35, 35));
+        painter.drawRect(r);
 
-            // text
-            painter.setPen(QColor(230,230,230));
-            painter.drawText(r, Qt::AlignCenter, text);
+        // text
+        painter.setPen(QColor(230,230,230));
+        painter.drawText(r, Qt::AlignCenter, text);
 
-            painter.restore();
+        painter.restore();
     }
+
+    // draw tp/sl
+    drawPriceLevel(tpLevel_);
+    drawPriceLevel(slLevel_);
 
     // X axis (Time scale)
     {

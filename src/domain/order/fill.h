@@ -13,4 +13,7 @@ struct Fill {
 
     double fee = 0.0;
     bool reduceOnly = false;
+
+    double tpPrice = 0.0;
+    double slPrice = 0.0;
 };

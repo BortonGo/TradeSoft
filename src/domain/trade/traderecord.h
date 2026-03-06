@@ -26,4 +26,6 @@ struct TradeRecord {
     int lifetimeTicks = 0;
     QDateTime closeTime;
     TradeStatus status = TradeStatus::Open;
+    double tpPrice = 0.0;
+    double slPrice = 0.0;
 };

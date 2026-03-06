@@ -45,4 +45,7 @@ private:
 
     void ensureDemoPipeline();
     void resetDemoSession();
+
+    void showLevelsForSignal(const StrategySignal& s);
+    void clearChartLevels();
 };

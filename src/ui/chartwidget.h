@@ -41,10 +41,25 @@ class ChartWidget : public QWidget {
 
     std::vector<IndicatorLine> indicatorLines_;
 
+    struct PriceLevelOverlay {
+        bool visible = false;
+        double price = 0.0;
+        QColor lineColor;
+        QColor fillColor;
+        QColor textColor;
+        QString text;
+    };
+
+    PriceLevelOverlay tpLevel_;
+    PriceLevelOverlay slLevel_;
+
 public:
     explicit ChartWidget(QWidget* parent = nullptr);
     void setTimeframe(Timeframe tf);
     void setIndicatorLines(const std::vector<IndicatorLine>& lines);
+
+    void setTradeLevels(double tpPrice, double slPrice);
+    void clearTradeLevels();
 
 public slots:
     void slot_setSeries(std::shared_ptr<CandleSeries> series);

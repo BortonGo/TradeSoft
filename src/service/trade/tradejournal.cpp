@@ -48,6 +48,8 @@ void TradeJournal::onFill(const Fill& f) {
         t.fee = f.fee;
         t.pnl = 0.0;
         t.status = TradeStatus::Open;
+        t.tpPrice = f.tpPrice;
+        t.slPrice = f.slPrice;
 
         model_->appendTrade(t);
         const int row = model_->rowCount() - 1;

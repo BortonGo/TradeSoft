@@ -21,6 +21,7 @@ class StrategyRunner final : public QObject {
     DemoExecutionService* exec_ = nullptr;
     TradeJournal* journal_ = nullptr;
     RiskSettings riskSettings_;
+    StrategyConfig cfg_;
 
     StrategyContext ctx_;
     bool running_ = false;
@@ -35,6 +36,7 @@ public:
     void setExecutionService(DemoExecutionService* e) { exec_ = e; }
     void setTradeJournal(TradeJournal* j) { journal_ = j; }
     void setRiskSettings(const RiskSettings& r) { riskSettings_ = r; }
+        void setConfig(const StrategyConfig& c) { cfg_ = c; }
 
 public slots:
     void start(const QString& symbolId, Timeframe tf);
