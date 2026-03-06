@@ -144,7 +144,9 @@ UI
 
 <img width="1909" height="978" alt="image" src="https://github.com/user-attachments/assets/fc4b5ac7-dc64-4def-9559-f379c5f0ffcb" />
 
-<img width="1912" height="978" alt="image" src="https://github.com/user-attachments/assets/0b96ce13-88a0-45ff-91d3-feeb7f39f353" />
+<img width="1908" height="980" alt="image" src="https://github.com/user-attachments/assets/b79d4d67-9f8b-40db-828b-cfbf8ca1526e" />
+
+<img width="1910" height="975" alt="image" src="https://github.com/user-attachments/assets/1c5c1ec5-845c-4345-8d4e-497318033a17" />
 
 ---
 
