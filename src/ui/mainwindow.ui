@@ -536,6 +536,9 @@ QGroupBox:disabled QCheckBox {
                <property name="title">
                 <string>Risk Manangment</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
                <layout class="QGridLayout" name="gridLayout_3">
                 <item row="5" column="1">
                  <widget class="QDoubleSpinBox" name="spinFeePct">
@@ -1363,7 +1366,7 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: t
          <attribute name="title">
           <string>BACKTEST</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,1,2,1">
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="3,2,4,1">
           <item>
            <widget class="QFrame" name="BtSettingsFrame">
             <property name="sizePolicy">
@@ -1464,7 +1467,214 @@ QGroupBox:disabled QCheckBox {
                <property name="title">
                 <string>Backtest settings</string>
                </property>
-               <layout class="QGridLayout" name="gridLayout_6"/>
+               <layout class="QGridLayout" name="gridLayout_6">
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_15">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Begin</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_18">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Timeframe</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="label_16">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>End</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="label_17">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Candle</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_14">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Symbol</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="cbBtSymbol">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QComboBox" name="cbBtTimeframe">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QDateEdit" name="dateBtBegin">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QDateEdit" name="dateBtEnd">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QLineEdit" name="editBtCandles">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>22</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>22</height>
+                   </size>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
             </layout>
@@ -1481,7 +1691,7 @@ QGroupBox:disabled QCheckBox {
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>180</height>
+              <height>150</height>
              </size>
             </property>
             <property name="styleSheet">
@@ -1497,7 +1707,7 @@ color: white;                /* цвет текста */
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="QGroupBox" name="gbRM_2">
+              <widget class="QGroupBox" name="gbBacktestResults">
                <property name="enabled">
                 <bool>true</bool>
                </property>
@@ -1510,7 +1720,7 @@ color: white;                /* цвет текста */
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>160</height>
+                 <height>130</height>
                 </size>
                </property>
                <property name="font">
@@ -1583,7 +1793,7 @@ QGroupBox:disabled QCheckBox {
            </widget>
           </item>
           <item>
-           <widget class="QFrame" name="BtResultsFrame_2">
+           <widget class="QFrame" name="BtGraphAnalysisFrame">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -1609,7 +1819,7 @@ color: white;                /* цвет текста */
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <item>
-              <widget class="QGroupBox" name="gbRM_3">
+              <widget class="QGroupBox" name="gbGraphAnalysis">
                <property name="enabled">
                 <bool>true</bool>
                </property>
@@ -1695,7 +1905,7 @@ QGroupBox:disabled QCheckBox {
            </widget>
           </item>
           <item>
-           <widget class="QTableView" name="tableTrades_2">
+           <widget class="QTableView" name="btTableTrades">
             <property name="minimumSize">
              <size>
               <width>0</width>
