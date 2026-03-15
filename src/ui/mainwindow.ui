@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1307</width>
-    <height>807</height>
+    <width>1308</width>
+    <height>724</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -60,7 +60,7 @@ QPushButton {
 color: white;                /* цвет текста */</string>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab_chart">
          <property name="styleSheet">
@@ -548,7 +548,7 @@ QGroupBox:disabled QCheckBox {
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="decimals">
@@ -648,7 +648,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="minimum">
@@ -694,7 +694,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="maximum">
@@ -716,7 +716,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <item>
@@ -812,7 +812,7 @@ color: white;                /* цвет текста */
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="maximum">
@@ -855,7 +855,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="minimum">
@@ -985,7 +985,8 @@ QGroupBox:disabled QCheckBox {
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true"> border-radius: 4px;</string>
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
                   </property>
                   <property name="text">
                    <string/>
@@ -1024,7 +1025,8 @@ QGroupBox:disabled QCheckBox {
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true"> border-radius: 4px;</string>
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
                   </property>
                   <property name="text">
                    <string/>
@@ -1135,7 +1137,7 @@ QGroupBox:disabled QCheckBox {
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <item>
@@ -1158,7 +1160,8 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true"> border-radius: 4px;</string>
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
                   </property>
                   <property name="text">
                    <string/>
@@ -1173,7 +1176,8 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true"> border-radius: 4px;</string>
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
                   </property>
                   <property name="text">
                    <string/>
@@ -1188,7 +1192,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                  </widget>
@@ -1225,7 +1229,8 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true"> border-radius: 4px;</string>
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
                   </property>
                   <property name="text">
                    <string/>
@@ -1362,7 +1367,7 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: t
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tabBacktest">
+        <widget class="QWidget" name="tab_backtest">
          <attribute name="title">
           <string>BACKTEST</string>
          </attribute>
@@ -1394,7 +1399,7 @@ color: white;                /* цвет текста */
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <widget class="QGroupBox" name="gbBacktestSettings">
+              <widget class="QGroupBox" name="BtGbBacktestSettings">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1482,7 +1487,7 @@ QGroupBox:disabled QCheckBox {
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="value">
@@ -1504,7 +1509,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="minimum">
@@ -1532,7 +1537,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                  </widget>
@@ -1599,7 +1604,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="readOnly">
@@ -1621,7 +1626,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                  </widget>
@@ -1808,7 +1813,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                  </widget>
@@ -1833,7 +1838,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                  </widget>
@@ -1864,7 +1869,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                  </widget>
@@ -1895,7 +1900,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                  </widget>
@@ -1974,7 +1979,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="minimum">
@@ -2038,7 +2043,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="minimum">
@@ -2063,7 +2068,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="value">
@@ -2085,7 +2090,7 @@ color: white;                /* цвет текста */</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">background-color: rgb(43, 43, 43);
+                   <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
                   <property name="value">
@@ -2183,7 +2188,7 @@ QPushButton#btBtnStart:disabled {
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>150</height>
+              <height>100</height>
              </size>
             </property>
             <property name="styleSheet">
@@ -2199,7 +2204,7 @@ color: white;                /* цвет текста */
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="QGroupBox" name="gbBacktestResults">
+              <widget class="QGroupBox" name="BtGbBacktestResults">
                <property name="enabled">
                 <bool>true</bool>
                </property>
@@ -2212,7 +2217,7 @@ color: white;                /* цвет текста */
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>130</height>
+                 <height>80</height>
                 </size>
                </property>
                <property name="font">
@@ -2278,7 +2283,328 @@ QGroupBox:disabled QCheckBox {
                <property name="alignment">
                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                </property>
-               <layout class="QGridLayout" name="gridLayout_8"/>
+               <layout class="QGridLayout" name="gridLayout_8">
+                <item row="0" column="1">
+                 <widget class="QLineEdit" name="btLabelTradesValue">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_28">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>PF:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QLabel" name="label_29">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Winrate:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="btPf">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QLabel" name="label_30">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>NetPnL:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="4">
+                 <widget class="QLabel" name="label_31">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>AvgWin:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="3">
+                 <widget class="QLineEdit" name="btWR">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="3">
+                 <widget class="QLineEdit" name="btNetPnl">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="5">
+                 <widget class="QLineEdit" name="btAvrWin">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="4">
+                 <widget class="QLabel" name="label_32">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>MaxDD:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="5">
+                 <widget class="QLineEdit" name="btMaxDD">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="6">
+                 <widget class="QLabel" name="label_33">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>AvgLoss:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="6">
+                 <widget class="QLabel" name="label_34">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Expectancy:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_27">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Trades:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="7">
+                 <widget class="QLineEdit" name="btAvgLoss">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="7">
+                 <widget class="QLineEdit" name="btEcpecrancy">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
             </layout>
@@ -2311,7 +2637,7 @@ color: white;                /* цвет текста */
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <item>
-              <widget class="QGroupBox" name="gbGraphAnalysis">
+              <widget class="QGroupBox" name="BtGbGraphAnalysis">
                <property name="enabled">
                 <bool>true</bool>
                </property>
@@ -2390,7 +2716,419 @@ QGroupBox:disabled QCheckBox {
                <property name="alignment">
                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                </property>
-               <layout class="QGridLayout" name="gridLayout_9"/>
+               <layout class="QGridLayout" name="gridLayout_9">
+                <item row="0" column="0">
+                 <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,3">
+                  <item>
+                   <widget class="QWidget" name="widgetGraphControls" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: #1B1B1B;
+color: white;                /* цвет текста */
+ border-radius: 4px;</string>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout">
+                     <item row="5" column="0">
+                      <widget class="QCheckBox" name="btChkLongOnly">
+                       <property name="font">
+                        <font>
+                         <pointsize>9</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                       </property>
+                       <property name="text">
+                        <string>Long only</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="0" colspan="2">
+                      <widget class="QLabel" name="label_38">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>28</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                       </property>
+                       <property name="text">
+                        <string>Filters:</string>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="0">
+                      <widget class="QCheckBox" name="btChkWinnersOnly">
+                       <property name="font">
+                        <font>
+                         <pointsize>9</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                       </property>
+                       <property name="text">
+                        <string>Winners only</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="1">
+                      <widget class="QCheckBox" name="btChkShortOnly">
+                       <property name="font">
+                        <font>
+                         <pointsize>9</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                       </property>
+                       <property name="text">
+                        <string>Short only</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="1">
+                      <widget class="QComboBox" name="btCbYAxis">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>28</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="0">
+                      <widget class="QLabel" name="label_37">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>28</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                       </property>
+                       <property name="text">
+                        <string>Y axis:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QCheckBox" name="btChkLosersOnly">
+                       <property name="font">
+                        <font>
+                         <pointsize>9</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                       </property>
+                       <property name="text">
+                        <string>Losers only</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="label_35">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>28</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <pointsize>10</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                       </property>
+                       <property name="text">
+                        <string>Graph type:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QComboBox" name="btCbGraphType">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>28</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="0">
+                      <widget class="QLabel" name="label_36">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>28</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(43, 43, 43);
+color: white;                /* цвет текста */</string>
+                       </property>
+                       <property name="text">
+                        <string>X axis:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="1">
+                      <widget class="QComboBox" name="btCbXAxis">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>28</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(35, 35, 35);
+color: white;                /* цвет текста */</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="0">
+                      <spacer name="verticalSpacer">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
+                       <property name="sizeType">
+                        <enum>QSizePolicy::Maximum</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>20</width>
+                         <height>47</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item row="8" column="0" colspan="2">
+                      <widget class="QPushButton" name="btStartBacktest">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>40</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>52</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <pointsize>13</pointsize>
+                         <weight>75</weight>
+                         <bold>true</bold>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">/* ===== START BUTTON ===== */
+QPushButton#btStartBacktest {
+    background-color: #1fb954;
+    color: black;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+QPushButton#btStartBacktest:disabled {
+    background-color: #0f3f23;
+    color: #777;
+}</string>
+                       </property>
+                       <property name="text">
+                        <string>Build Graph</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="0">
+                      <spacer name="verticalSpacer_2">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
+                       <property name="sizeType">
+                        <enum>QSizePolicy::Maximum</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>20</width>
+                         <height>70</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" name="widgetBacktestGraph" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: #1B1B1B;
+color: white;                /* цвет текста */
+ border-radius: 4px;</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
               </widget>
              </item>
             </layout>
