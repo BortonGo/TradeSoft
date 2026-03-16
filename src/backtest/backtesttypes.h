@@ -56,14 +56,20 @@ struct BacktestRequest {
     QString strategyName;
 
     double initialbalance = 1000.0;
-    int leverage = 1;
 
-    double feePct = 0.0;
-    int slippageBps = 0;
+    RiskSettings backtestRisk = [](){
+        RiskSettings r;
+        r.mode = RiskMode::FixedUsdt;
+        r.riskPct = 1.0;
+        r.maxPosUsdt = 100.0;
+        r.leverage = 1;
+        r.allowLong = true;
+        r.allowShort = true;
+        r.feePct = 0.0;
+        r.slippageBps = 0;
+        return r;
+    };
 
-    RiskMode riskMode = RiskMode::FixedUsdt;
-    double riskPerTradePct = 1.0;
-    double maxPosUsdt = 100.0;
 
     CandlePriceType candlePriceType = CandlePriceType::Last;
     int warmupBars = 200;

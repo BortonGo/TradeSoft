@@ -7,7 +7,7 @@ static double calcQty(const RiskSettings& risk, double markPrice, double equityU
 
     double notionalUsdt = 0.0;
 
-    if (risk.mode == RiskMode::FixedUSDT) {
+    if (risk.mode == RiskMode::FixedUsdt) {
         notionalUsdt = risk.maxPosUsdt;
     } else {
         // PercentEquity
