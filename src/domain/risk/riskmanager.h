@@ -1,4 +1,5 @@
 #pragma once
+#include "domain/risk/riskconfig.h"
 #include "domain/strategy/strategysignal.h"
 #include "domain/strategy/strategyconfig.h"
 #include "domain/order/order.h"
