@@ -1,0 +1,4 @@
+#ifndef BACKTESTTYPES_H
+#define BACKTESTTYPES_H
+
+#endif // BACKTESTTYPES_H
