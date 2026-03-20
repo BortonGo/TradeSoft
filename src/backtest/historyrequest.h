@@ -1,11 +1,14 @@
-#ifndef HISTORYREQUEST_H
-#define HISTORYREQUEST_H
+#pragma once
+#include <QString>
+#include <QDateTime>
 
+#include "core/timeframe.h"
 
-class HistoryRequest
-{
-public:
-    HistoryRequest();
+struct HistoryRequest {
+    QString symbol;
+    Timeframe timeframe = Timeframe::M1;
+    QDateTime begin;
+    QDateTime end;
+
 };
 
-#endif // HISTORYREQUEST_H

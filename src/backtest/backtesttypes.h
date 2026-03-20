@@ -70,7 +70,6 @@ struct BacktestRequest {
         return r;
     };
 
-
     CandlePriceType candlePriceType = CandlePriceType::Last;
     int warmupBars = 200;
 };
