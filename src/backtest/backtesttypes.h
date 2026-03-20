@@ -68,7 +68,7 @@ struct BacktestRequest {
         r.feePct = 0.0;
         r.slippageBps = 0;
         return r;
-    };
+    }();
 
     CandlePriceType candlePriceType = CandlePriceType::Last;
     int warmupBars = 200;
