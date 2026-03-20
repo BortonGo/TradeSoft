@@ -174,7 +174,187 @@ std::vector<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timefr
     return out;
 }
 
-// --- NEW: async realtime polling ---
+
+// For backtest
+std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request) {
+    std::vector<Candle> out;
+
+    // создаём менеджер только когда приложение уже существует
+    if (!mgr_) {
+        QCoreApplication* app = QCoreApplication::instance();
+        if (!app) {
+            qWarning() << "[BingXSwapClient fetchHistory] No QCoreApplication instance yet!";
+            return out;
+        }
+        mgr_ = new QNetworkAccessManager(app);
+    }
+
+    if (request.symbolId.isEmpty()) {
+        qWarning() << "[BingXSwapClient fetchHistory] symbolId is empty!";
+        return out;
+    }
+
+    if (!request.begin.isValid() || !request.end.isValid()) {
+        qWarning() << "[BingXSwapClient fetchHistory] degin or end - invalid!";
+        return out;
+    }
+
+    const QString symbol   = toBingXSymbol(request.symbolId);      // "ETH-USDT"
+    const QString interval = tfToBingXInterval(request.timeframe);        // "1m"
+
+    const qint64 beginMs = request.begin.toMSecsSinceEpoch();
+    const qint64 endMs = request.end.toMSecsSinceEpoch();
+
+    if (beginMs >= endMs) {
+        qWarning() << "[BingXSwapClient fetchHistory] begin >= end!";
+        return out;
+    }
+
+    const int limit = 500;
+
+    qint64 cursorMs = beginMs;
+    while (cursorMs < endMs) {
+        QUrl url("https://open-api.bingx.com/openApi/swap/v3/quote/klines");
+        QUrlQuery q;
+        q.addQueryItem("symbol", symbol);
+        q.addQueryItem("interval", interval);
+        q.addQueryItem("startTime", QString::number(cursorMs));
+        q.addQueryItem("endTime", QString::number(endMs));
+        q.addQueryItem("limit", QString::number(limit));
+        url.setQuery(q);
+
+        qDebug() << "[BingXSwapClient fetchHistory] GET" << url.toString();
+
+        QNetworkRequest req(url);
+        req.setHeader(QNetworkRequest::UserAgentHeader, "TradeSoft-MVP/1.0");
+        req.setRawHeader("Accept", "application/json");
+        req.setRawHeader("Connection", "close");
+        req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+
+        QNetworkReply* reply = mgr_->get(req);
+
+        QEventLoop loop;
+        QTimer timer;
+        timer.setSingleShot(true);
+
+        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        QObject::connect(&timer, &QTimer::timeout, reply, &QNetworkReply::abort);
+        QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+
+        timer.start(12000);
+        loop.exec();
+
+        if (!timer.isActive()) {
+            qWarning() << "[BingXSwapClient fetchHistory] TIMEOUT";
+            reply->deleteLater();
+            return out;
+        }
+        timer.stop();
+
+        const QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+        qDebug() << "[BingXSwapClient fetchHistory] HTTP status:" << statusCode;
+
+        if (reply->error() != QNetworkReply::NoError) {
+            qWarning() << "[BingXSwapClient fetchHistory] Network error:" << reply->errorString();
+            reply->deleteLater();
+            return out;
+        }
+
+        const QByteArray body = reply->readAll();
+        reply->deleteLater();
+
+        // ---- JSON parse ----
+        QJsonParseError jerr;
+        const QJsonDocument doc = QJsonDocument::fromJson(body, &jerr);
+        if (jerr.error != QJsonParseError::NoError || doc.isNull() || !doc.isObject()) {
+            qWarning() << "[BingXSwapClient fetchHistory] JSON parse error:" << jerr.errorString();
+            qDebug().noquote() << "[BingXSwapClient fetchHistory] Body head:" << QString::fromUtf8(body.left(200));
+            return out;
+        }
+
+        const QJsonObject root = doc.object();
+        const int code = root.value("code").toInt(-1);
+        if (code != 0) {
+            qWarning() << "[BingXSwapClient fetchHistory] API error code:" << code
+                       << "msg:" << root.value("msg").toString();
+            return out;
+        }
+
+        const QJsonValue dataVal = root.value("data");
+        if (!dataVal.isArray()) {
+            qWarning() << "[BingXSwapClient fetchHistory] 'data' is not array";
+            return out;
+        }
+
+        const QJsonArray arr = dataVal.toArray();
+        out.reserve(arr.size());
+
+        std::vector<Candle> batch;
+        batch.reserve(arr.size());
+
+        for (const QJsonValue& v : arr) {
+            if (!v.isObject())
+                continue;
+
+            const QJsonObject o = v.toObject();
+
+            Candle c;
+            c.timestamp_ = static_cast<int64_t>(o.value("time").toVariant().toLongLong());
+
+            if (c.timestamp_ < beginMs || c.timestamp_ > endMs) {
+                continue;
+            }
+
+            c.open_   = o.value("open").toString().toDouble();
+            c.close_  = o.value("close").toString().toDouble();
+            c.high_   = o.value("high").toString().toDouble();
+            c.low_    = o.value("low").toString().toDouble();
+            c.volume_ = o.value("volume").toString().toDouble();
+
+            c.isFinal_ = true;
+
+            batch.push_back(c);
+        }
+        if (batch.empty()) {
+            break;
+        }
+
+        std::reverse(batch.begin(), batch.end());
+
+        for (const Candle& c : batch) {
+            if (!out.empty() && out.back().timestamp_ == c.timestamp_) {
+                continue;
+            }
+            out.push_back(c);
+        }
+
+        const qint64 lastTs = batch.back().timestamp_;
+        const qint64 tfMs = timeframeToMs(request.timeframe);
+
+        const qint64 nextCursorMs = lastTs + tfMs;
+
+        if (nextCursorMs <= cursorMs) {
+            qWarning() << "[BingXSwapClient fetchHistory] cursor did not advance";
+            break;
+        }
+
+        cursorMs = nextCursorMs;
+
+    }
+
+    if (!out.empty()) {
+        qDebug() << "[BingXSwapClient fetchHistory] Parsed candles:" << out.size()
+                 << "first ts:" << out.front().timestamp_
+                 << "last ts:" << out.back().timestamp_;
+    } else {
+        qWarning() << "[BingXSwapClient fetchHistory] Parsed 0 candles";
+    }
+
+    return out;
+}
+
+
+// Async realtime polling
 void BingXSwapClient::fetchLastKlineAsync(const QString& symbolId, Timeframe tf, LastKlineCallback cb)
 {
     // ensure manager exists

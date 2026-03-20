@@ -5,11 +5,15 @@
 
 #include "core/candle.h"
 #include "core/timeframe.h"
+#include "backtest/historyrequest.h"
 
 class IExchangeClient {
 public:
     // history
     virtual std::vector<Candle> fetchKlines(const QString& symbolId, Timeframe tf) = 0;
+
+    // history for backtest
+    virtual std::vector<Candle> fetchHistory(const HistoryRequest& request) = 0;
 
     // realtime polling support
     virtual bool supportsPollingRealtime() const { return false; }
