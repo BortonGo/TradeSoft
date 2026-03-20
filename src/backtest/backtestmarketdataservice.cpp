@@ -5,6 +5,6 @@ BacktestMarketDataService::BacktestMarketDataService(std::shared_ptr<IExchangeCl
     exchange_(std::move(exchange)) {}
 
 std::vector<Candle> BacktestMarketDataService::loadHistory(const HistoryRequest& rec) const {
-    if (!excange_) return {};
+    if (!exchange_) return {};
     return exchange_->fetchHistory(rec);
 }

@@ -1,11 +1,12 @@
-#ifndef BACKTESTCONTROLLER_H
-#define BACKTESTCONTROLLER_H
-
+#include "exchange\iexchangeclient.h"
+#include "backtestmarketdataservice.h"
+#include <memory>
 
 class BacktestController
 {
+    std::shared_ptr<IExchangeClient> exchange_;
+    std::unique_ptr<BacktestMarketDataService> marketDataService_;
 public:
-    BacktestController();
+    explicit BacktestController(std::shared_ptr<IExchangeClient> exchange);
 };
 
-#endif // BACKTESTCONTROLLER_H
