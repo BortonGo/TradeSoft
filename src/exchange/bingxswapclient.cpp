@@ -247,7 +247,7 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         if (!timer.isActive()) {
             qWarning() << "[BingXSwapClient fetchHistory] TIMEOUT";
             reply->deleteLater();
-            return out;
+            break;
         }
         timer.stop();
 
@@ -257,7 +257,7 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         if (reply->error() != QNetworkReply::NoError) {
             qWarning() << "[BingXSwapClient fetchHistory] Network error:" << reply->errorString();
             reply->deleteLater();
-            return out;
+            break;
         }
 
         const QByteArray body = reply->readAll();
@@ -269,7 +269,7 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         if (jerr.error != QJsonParseError::NoError || doc.isNull() || !doc.isObject()) {
             qWarning() << "[BingXSwapClient fetchHistory] JSON parse error:" << jerr.errorString();
             qDebug().noquote() << "[BingXSwapClient fetchHistory] Body head:" << QString::fromUtf8(body.left(200));
-            return out;
+            break;
         }
 
         const QJsonObject root = doc.object();
@@ -277,17 +277,16 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         if (code != 0) {
             qWarning() << "[BingXSwapClient fetchHistory] API error code:" << code
                        << "msg:" << root.value("msg").toString();
-            return out;
+            break;
         }
 
         const QJsonValue dataVal = root.value("data");
         if (!dataVal.isArray()) {
             qWarning() << "[BingXSwapClient fetchHistory] 'data' is not array";
-            return out;
+            break;
         }
 
         const QJsonArray arr = dataVal.toArray();
-        out.reserve(arr.size());
 
         std::vector<Candle> batch;
         batch.reserve(arr.size());

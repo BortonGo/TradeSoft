@@ -1,11 +1,13 @@
-#ifndef BACKTESTMARKETDATASERVICE_H
-#define BACKTESTMARKETDATASERVICE_H
-
+#pragma once
+#include "exchange\iexchangeclient.h"
+#include "historyrequest.h"
+#include <memory>
+#include <vector>
 
 class BacktestMarketDataService
 {
+    std::shared_ptr<IExchangeClient> exchange_;
 public:
-    BacktestMarketDataService();
+    explicit BacktestMarketDataService(std::shared_ptr<IExchangeClient> exchange);
+    std::vector<Candle> loadHistory(const HistoryRequest& rec) const;
 };
-
-#endif // BACKTESTMARKETDATASERVICE_H
