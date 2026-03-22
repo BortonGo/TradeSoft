@@ -2,6 +2,7 @@
 #include <QMainWindow>
 #include "service\marketdataservice.h"
 #include "service\indicatorservice.h"
+#include "backtest/backtestcontroller.h"
 #include "controllers/strategycontroller.h"
 #include "domain/account/account.h"
 
@@ -17,6 +18,7 @@ class MainWindow : public QMainWindow
 
     IndicatorService* indicatorService_ = nullptr;
     StrategyController* strategyController_ = nullptr;
+    BacktestController* backtestController = nullptr;
 
     AccountStore accounts_;
 
