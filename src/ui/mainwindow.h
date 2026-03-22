@@ -38,7 +38,6 @@ public:
 
 private:
     void reloadAndStart();
-
 };
 
 
