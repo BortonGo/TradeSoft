@@ -6,11 +6,14 @@
 
 BacktestController::BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExchangeClient> exchange, QObject* parent) :
     QObject(parent), ui_(ui), exchange_(std::move(exchange)),
-    marketDataService_(std::unique_ptr<BacktestMarketDataService>(new BacktestMarketDataService(exchange_))) {
+    marketDataService_(std::unique_ptr<BacktestMarketDataService>(new BacktestMarketDataService(exchange_)))
+{
     Q_ASSERT(ui_);
     Q_ASSERT(exchange_);
     Q_ASSERT(marketDataService_);
 
+    connect(ui_->btBtnStart, &QPushButton::clicked, this, &BacktestController::onStart);
+    connect(ui_->btBtnBuildGraph, &QPushButton::clicked, this, &BacktestController::onBuildGraph);
 }
 
 std::vector<Candle> BacktestController::loadHistory(const HistoryRequest& rec) const {
@@ -32,4 +35,12 @@ HistoryRequest BacktestController::buildHistoryRequest() const {
 
 std::vector<Candle> BacktestController::loadHistoryFromUi() const {
     return loadHistory(buildHistoryRequest());
+}
+
+void BacktestController::onStart() {
+
+}
+
+void BacktestController::onBuildGraph() {
+
 }

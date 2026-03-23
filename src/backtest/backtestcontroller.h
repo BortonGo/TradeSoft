@@ -21,7 +21,6 @@ public:
 
 public slots:
     void onStart();
-    void onStop();
     void onBuildGraph();
 
 private:

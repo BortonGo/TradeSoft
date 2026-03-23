@@ -1540,6 +1540,16 @@ color: white;                /* цвет текста */</string>
                    <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
+                  <item>
+                   <property name="text">
+                    <string>Fixed USDT</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Percent of equity</string>
+                   </property>
+                  </item>
                  </widget>
                 </item>
                 <item row="2" column="2">
@@ -1629,6 +1639,36 @@ color: white;                /* цвет текста */</string>
                    <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
+                  <item>
+                   <property name="text">
+                    <string>None</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>EMA Pullback</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>EMA Scalp</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>EMA Cross</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Donchian Breakout</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>RSI Reversal</string>
+                   </property>
+                  </item>
                  </widget>
                 </item>
                 <item row="0" column="4">
@@ -2098,42 +2138,7 @@ color: white;                /* цвет текста */</string>
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="5" rowspan="2">
-                 <widget class="QPushButton" name="btBtnStop">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>13</pointsize>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">/* ===== STOP BUTTON ===== */
-QPushButton#btBtnStop {
-    background-color: #e74c3c;
-    color: black;
-    font-weight: bold;
-    padding: 4px 12px;
-    border-radius: 4px;
-}
-
-QPushButton#btBtnStop:disabled {
-    background-color: #4a1e1a;
-    color: #777;
-}</string>
-                  </property>
-                  <property name="text">
-                   <string>Stop</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="4" rowspan="2">
+                <item row="3" column="4" rowspan="2" colspan="2">
                  <widget class="QPushButton" name="btBtnStart">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -3046,7 +3051,7 @@ color: white;                /* цвет текста */</string>
                       </spacer>
                      </item>
                      <item row="8" column="0" colspan="2">
-                      <widget class="QPushButton" name="btStartBacktest">
+                      <widget class="QPushButton" name="btBtnBuildGraph">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                          <horstretch>0</horstretch>

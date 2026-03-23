@@ -43,17 +43,21 @@ MainWindow::MainWindow(QWidget *parent) :
     // Timeframes
     ui->comboTimeframe->clear();
     ui->cbStrategyTf->clear();
+    ui->cbBtTimeframe->clear();
 
     for(const Timeframe& tf : allTimeframes()) {
         ui->comboTimeframe->addItem(toUiString(tf), static_cast<int>(tf));
         ui->cbStrategyTf->addItem(toUiString(tf), static_cast<int>(tf));
+        ui->cbBtTimeframe->addItem(toUiString(tf), static_cast<int>(tf));
     };
 
     // Some symbols
     ui->comboSymbol->clear();
+    ui->cbBtSymbol->clear();
 
     for(const Symbol& s : someSymbols()) {
         ui->comboSymbol->addItem(s.display(), s.id());
+        ui->cbBtSymbol->addItem(s.display(), s.id());
     }
 
     // Account
@@ -91,6 +95,9 @@ MainWindow::MainWindow(QWidget *parent) :
     for (const auto& cfg : accounts_.configs()) {
         ui->cbAccount->addItem(cfg.name, cfg.id);
     }
+
+    // Backtest params
+
 
     // unlock signals comboSymbol/Timeframne
     ui->comboSymbol->blockSignals(false);
