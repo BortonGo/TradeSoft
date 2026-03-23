@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent) :
     std::shared_ptr<IExchangeClient> ex = std::make_shared<BingXSwapClient>();
 
     //BacktestController
-    backtestController = new BacktestController(ui, ex);
+    backtestController = new BacktestController(ui, ex, this);
 
     //MarketDataService
     MarketDataService* market = new MarketDataService(ex, this);
