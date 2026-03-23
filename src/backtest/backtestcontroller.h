@@ -14,6 +14,7 @@ class BacktestController final
 public:
     explicit BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExchangeClient> exchange);
     std::vector<Candle> loadHistory(const HistoryRequest& rec) const;
+    std::vector<Candle> loadHistoryFromUi() const;
 
 private:
     HistoryRequest buildHistoryRequest() const;

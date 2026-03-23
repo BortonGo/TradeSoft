@@ -24,3 +24,7 @@ HistoryRequest BacktestController::buildHistoryRequest() const {
     r.end = ui_->dateBtEnd->dateTime();
     return r;
 }
+
+std::vector<Candle> BacktestController::loadHistoryFromUi() const {
+    return loadHistory(buildHistoryRequest());
+}
