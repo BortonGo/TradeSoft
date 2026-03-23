@@ -1,4 +1,5 @@
 #include "backtestcontroller.h"
+#include "ui_mainwindow.h"
 #include <utility>
 #include <memory>
 
@@ -13,3 +14,13 @@ std::vector<Candle> BacktestController::loadHistory(const HistoryRequest& rec) c
     return marketDataService_->loadHistory(rec);
 }
 
+HistoryRequest BacktestController::buildHistoryRequest() const {
+    if (!ui_) return {};
+    HistoryRequest r;
+
+    r.symbolId = ui_->cbBtSymbol->currentData().toString();
+    r.timeframe = static_cast<Timeframe>(ui_->cbBtTimeframe->currentData().toInt());
+    r.begin = ui_->dateBtBegin->dateTime();
+    r.end = ui_->dateBtEnd->dateTime();
+    return r;
+}
