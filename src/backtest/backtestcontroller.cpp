@@ -33,12 +33,15 @@ HistoryRequest BacktestController::buildHistoryRequest() const {
     return r;
 }
 
-std::vector<Candle> BacktestController::loadHistoryFromUi() const {
+/*std::vector<Candle> BacktestController::loadHistoryFromUi() const {
     return loadHistory(buildHistoryRequest());
-}
+}*/
 
 void BacktestController::onStart() {
-
+    HistoryRequest req = buildHistoryRequest();
+    const std::vector<Candle> candles = loadHistory(req);
+    qDebug() << "[BACKTEST] START  symbol =" << req.symbolId << ", tf =" << toUiString(req.timeframe)
+           << ", begin =" << req.begin.toString() << ", end =" << req.end.toString();
 }
 
 void BacktestController::onBuildGraph() {

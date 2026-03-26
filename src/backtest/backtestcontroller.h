@@ -16,14 +16,14 @@ class BacktestController final : public QObject
     std::unique_ptr<BacktestMarketDataService> marketDataService_;
 public:
     explicit BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExchangeClient> exchange, QObject* parent = nullptr);
-    std::vector<Candle> loadHistory(const HistoryRequest& rec) const;
-    std::vector<Candle> loadHistoryFromUi() const;
+    //std::vector<Candle> loadHistoryFromUi() const; // возможно понадобится в дальнейшем. На данном этапе - нет
 
 public slots:
     void onStart();
     void onBuildGraph();
 
 private:
+    std::vector<Candle> loadHistory(const HistoryRequest& rec) const;
     HistoryRequest buildHistoryRequest() const;
 };
 

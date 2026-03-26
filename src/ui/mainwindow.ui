@@ -1912,6 +1912,40 @@ color: white;                /* цвет текста */</string>
                    <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
                   </property>
+                  <property name="dateTime">
+                   <datetime>
+                    <hour>23</hour>
+                    <minute>59</minute>
+                    <second>59</second>
+                    <year>2019</year>
+                    <month>12</month>
+                    <day>31</day>
+                   </datetime>
+                  </property>
+                  <property name="maximumDateTime">
+                   <datetime>
+                    <hour>23</hour>
+                    <minute>59</minute>
+                    <second>59</second>
+                    <year>2120</year>
+                    <month>12</month>
+                    <day>31</day>
+                   </datetime>
+                  </property>
+                  <property name="maximumDate">
+                   <date>
+                    <year>2120</year>
+                    <month>12</month>
+                    <day>31</day>
+                   </date>
+                  </property>
+                  <property name="minimumDate">
+                   <date>
+                    <year>1900</year>
+                    <month>9</month>
+                    <day>14</day>
+                   </date>
+                  </property>
                  </widget>
                 </item>
                 <item row="3" column="1">
@@ -1942,6 +1976,33 @@ color: white;                /* цвет текста */</string>
                   <property name="styleSheet">
                    <string notr="true">background-color: rgb(35, 35, 35);
 color: white;                /* цвет текста */</string>
+                  </property>
+                  <property name="dateTime">
+                   <datetime>
+                    <hour>0</hour>
+                    <minute>0</minute>
+                    <second>0</second>
+                    <year>2026</year>
+                    <month>1</month>
+                    <day>1</day>
+                   </datetime>
+                  </property>
+                  <property name="maximumDateTime">
+                   <datetime>
+                    <hour>23</hour>
+                    <minute>59</minute>
+                    <second>59</second>
+                    <year>2026</year>
+                    <month>12</month>
+                    <day>31</day>
+                   </datetime>
+                  </property>
+                  <property name="minimumDate">
+                   <date>
+                    <year>1900</year>
+                    <month>9</month>
+                    <day>14</day>
+                   </date>
                   </property>
                  </widget>
                 </item>
@@ -3079,7 +3140,7 @@ color: white;                /* цвет текста */</string>
                        </property>
                        <property name="styleSheet">
                         <string notr="true">/* ===== START BUTTON ===== */
-QPushButton#btStartBacktest {
+QPushButton#btBtnBuildGraph {
     background-color: #1fb954;
     color: black;
     font-weight: bold;
@@ -3087,7 +3148,7 @@ QPushButton#btStartBacktest {
     border-radius: 4px;
 }
 
-QPushButton#btStartBacktest:disabled {
+QPushButton#btBtnBuildGraph:disabled {
     background-color: #0f3f23;
     color: #777;
 }</string>

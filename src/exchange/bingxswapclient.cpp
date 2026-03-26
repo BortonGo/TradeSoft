@@ -210,16 +210,16 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         return out;
     }
 
-    const int limit = 500;
+    const int limit = 1400;
 
-    qint64 cursorMs = beginMs;
-    while (cursorMs < endMs) {
+    qint64 cursorMs = endMs;
+    while (cursorMs > beginMs) {
         QUrl url("https://open-api.bingx.com/openApi/swap/v3/quote/klines");
         QUrlQuery q;
         q.addQueryItem("symbol", symbol);
         q.addQueryItem("interval", interval);
-        q.addQueryItem("startTime", QString::number(cursorMs));
-        q.addQueryItem("endTime", QString::number(endMs));
+        q.addQueryItem("startTime", QString::number(beginMs));
+        q.addQueryItem("endTime", QString::number(cursorMs));
         q.addQueryItem("limit", QString::number(limit));
         url.setQuery(q);
 
@@ -327,12 +327,12 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
             out.push_back(c);
         }
 
-        const qint64 lastTs = batch.back().timestamp_;
+        const qint64 earliestTs = batch.front().timestamp_;
         const qint64 tfMs = timeframeToMs(request.timeframe);
 
-        const qint64 nextCursorMs = lastTs + tfMs;
+        const qint64 nextCursorMs = earliestTs - tfMs;
 
-        if (nextCursorMs <= cursorMs) {
+        if (nextCursorMs >= cursorMs) {
             qWarning() << "[BingXSwapClient fetchHistory] cursor did not advance";
             break;
         }
