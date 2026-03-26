@@ -318,8 +318,6 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
             break;
         }
 
-        std::reverse(batch.begin(), batch.end());
-
         for (const Candle& c : batch) {
             if (!out.empty() && out.back().timestamp_ == c.timestamp_) {
                 continue;
@@ -327,7 +325,7 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
             out.push_back(c);
         }
 
-        const qint64 earliestTs = batch.front().timestamp_;
+        const qint64 earliestTs = batch.back().timestamp_;
         const qint64 tfMs = timeframeToMs(request.timeframe);
 
         const qint64 nextCursorMs = earliestTs - tfMs;
@@ -340,6 +338,7 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         cursorMs = nextCursorMs;
 
     }
+    std::reverse(out.begin(), out.end());
 
     if (!out.empty()) {
         qDebug() << "[BingXSwapClient fetchHistory] Parsed candles:" << out.size()
