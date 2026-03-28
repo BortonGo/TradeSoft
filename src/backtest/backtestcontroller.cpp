@@ -41,7 +41,7 @@ void BacktestController::onStart() {
     HistoryRequest req = buildHistoryRequest();
     const std::vector<Candle> candles = loadHistory(req);
     qDebug() << "[BACKTEST] START  symbol =" << req.symbolId << ", tf =" << toUiString(req.timeframe)
-           << ", begin =" << req.begin.toString() << ", end =" << req.end.toString();
+           << ", begin =" << req.begin.toString() << ", end =" << req.end.toString() << ", size =" << candles.size();
 }
 
 void BacktestController::onBuildGraph() {
