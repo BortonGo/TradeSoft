@@ -15,6 +15,18 @@ enum class BacktestState {
     Failed
 };
 
+inline QString toString(BacktestState state) {
+    switch (state){
+        case BacktestState::Cancelled : return "Cancelled";
+        case BacktestState::Completed : return "Completed";
+        case BacktestState::Failed : return "Failed";
+        case BacktestState::Idle : return "Idle";
+        case BacktestState::LoadingHistory : return "LoadingHistory";
+        case BacktestState::Running : return "Running";
+    }
+    return "Idle";
+}
+
 enum class GraphType {
     None,
     EquityCurve,
