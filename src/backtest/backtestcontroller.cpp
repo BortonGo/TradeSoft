@@ -40,6 +40,12 @@ BacktestRequest BacktestController::buildBacktestRequest(const HistoryRequest& h
     r.timeframe = hr.timeframe;
     r.begin = hr.begin;
     r.end = hr.end;
+    r.initialbalance = ui_->btSbStartBalance->value();
+    r.backtestRisk.leverage = ui_->btSbLeverage->value();
+    r.backtestRisk.feePct = ui_->btSbFee->value();
+    r.backtestRisk.slippageBps = ui_->btSbSlippage->value();
+    r.backtestRisk.riskPct = ui_->btSbRiskPerTrade->value();
+    r.backtestRisk.maxPosUsdt = ui_->btSbMaxPosUsdt->value();
     return r;
 }
 
