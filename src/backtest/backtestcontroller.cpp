@@ -46,6 +46,8 @@ BacktestRequest BacktestController::buildBacktestRequest(const HistoryRequest& h
     r.backtestRisk.slippageBps = ui_->btSbSlippage->value();
     r.backtestRisk.riskPct = ui_->btSbRiskPerTrade->value();
     r.backtestRisk.maxPosUsdt = ui_->btSbMaxPosUsdt->value();
+    r.backtestRisk.mode = static_cast<RiskMode>(ui_->cbRiskMode->currentData().toInt());
+    r.strategyName = ui_->btCbStrategy->currentText();
     return r;
 }
 

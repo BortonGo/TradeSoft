@@ -97,7 +97,9 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     // Backtest params
-
+    ui->cbRiskMode->clear();
+    ui->cbRiskMode->addItem("Fixed USDT", static_cast<int>(RiskMode::FixedUsdt));
+    ui->cbRiskMode->addItem("Percent Of Equity", static_cast<int>(RiskMode::PercentOfEquity));
 
     // unlock signals comboSymbol/Timeframne
     ui->comboSymbol->blockSignals(false);
