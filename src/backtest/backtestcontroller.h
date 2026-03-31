@@ -27,5 +27,6 @@ public slots:
 private:
     std::vector<Candle> loadHistory(const HistoryRequest& rec) const;
     HistoryRequest buildHistoryRequest() const;
+    BacktestRequest buildBacktestRequest() const;
 };
 

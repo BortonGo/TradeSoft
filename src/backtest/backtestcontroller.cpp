@@ -33,6 +33,17 @@ HistoryRequest BacktestController::buildHistoryRequest() const {
     return r;
 }
 
+BacktestRequest BacktestController::buildBacktestRequest() const {
+    if (!ui_) return {};
+    HistoryRequest req = buildHistoryRequest();
+    BacktestRequest r;
+    r.symbol = req.symbolId;
+    r.timeframe = req.timeframe;
+    r.begin = req.begin;
+    r.end = req.end;
+    return r;
+}
+
 /*std::vector<Candle> BacktestController::loadHistoryFromUi() const {
     return loadHistory(buildHistoryRequest());
 }*/
@@ -40,11 +51,7 @@ HistoryRequest BacktestController::buildHistoryRequest() const {
 void BacktestController::onStart() {
     HistoryRequest req = buildHistoryRequest();
     const std::vector<Candle> candles = loadHistory(req);
-    BacktestRequest BtReq;
-    BtReq.symbol = req.symbolId;
-    BtReq.timeframe = req.timeframe;
-    BtReq.begin = req.begin;
-    BtReq.end = req.end;
+    BacktestRequest BtReq = buildBacktestRequest();
     BacktestResult res = engine_.run(BtReq, candles);
     qDebug() << "[BACKTEST] START  symbol =" << req.symbolId << ", tf =" << toUiString(req.timeframe)
            << ", begin =" << req.begin.toString() << ", end =" << req.end.toString() << ", size =" << candles.size();
