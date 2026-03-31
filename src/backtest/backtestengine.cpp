@@ -8,5 +8,15 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
         return res;
     }
     res.state = BacktestState::Completed;
+
+    for (const auto& a : candles) {
+        EquityPoint p;
+        p.time = QDateTime::fromMSecsSinceEpoch(a.timestamp_);
+        p.equity = request.initialbalance;
+        p.drawdown = 0.0;
+        p.cumulativePnl = 0.0;
+        res.equityCurve.push_back(std::move(p));
+    }
+
     return res;
 }

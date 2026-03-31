@@ -46,7 +46,11 @@ BacktestRequest BacktestController::buildBacktestRequest(const HistoryRequest& h
     r.backtestRisk.slippageBps = ui_->btSbSlippage->value();
     r.backtestRisk.riskPct = ui_->btSbRiskPerTrade->value();
     r.backtestRisk.maxPosUsdt = ui_->btSbMaxPosUsdt->value();
-    r.backtestRisk.mode = static_cast<RiskMode>(ui_->cbRiskMode->currentData().toInt());
+    if (ui_->cbRiskMode->currentText() == "Fixed USDT") {
+        r.backtestRisk.mode = RiskMode::FixedUsdt;
+    } else {
+        r.backtestRisk.mode = RiskMode::PercentOfEquity;
+    }
     r.strategyName = ui_->btCbStrategy->currentText();
     return r;
 }
@@ -63,6 +67,14 @@ void BacktestController::onStart() {
     qDebug() << "[BACKTEST] START  symbol =" << req.symbolId << ", tf =" << toUiString(req.timeframe)
            << ", begin =" << req.begin.toString() << ", end =" << req.end.toString() << ", size =" << candles.size();
     qDebug() << "[BACKTEST RESULT]   state =" << toString(res.state) << ", err =" << res.errorText;
+    qDebug() << "[BACKTEST RESULT EQCURVE]   size =" << res.equityCurve.size();
+    if (res.equityCurve.size() != 0) {
+        qDebug() << "[BACKTEST RESULT EQCURVE]   start time ="
+                 << res.equityCurve.front().time.toString("yyyy-MM-dd HH:mm:ss") <<
+                    ", end time =" << res.equityCurve.back().time.toString("yyyy-MM-dd HH:mm:ss") <<
+                    ", start equity =" << res.equityCurve.front().equity <<
+                    ", end equity =" << res.equityCurve.back().equity;
+    }
 }
 
 void BacktestController::onBuildGraph() {
