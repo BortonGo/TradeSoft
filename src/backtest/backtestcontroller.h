@@ -18,7 +18,7 @@ class BacktestController final : public QObject
     BacktestEngine engine_;
 
     BacktestResult lastResult_;
-    bool hasResult = false;
+    bool hasResult_ = false;
 public:
     explicit BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExchangeClient> exchange, QObject* parent = nullptr);
     //std::vector<Candle> loadHistoryFromUi() const; // возможно понадобится в дальнейшем. На данном этапе - нет

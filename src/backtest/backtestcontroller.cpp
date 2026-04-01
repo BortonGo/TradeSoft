@@ -77,9 +77,9 @@ void BacktestController::onStart() {
     const std::vector<Candle> candles = loadHistory(req);
     BacktestRequest BtReq = buildBacktestRequest(req);
     lastResult_ = engine_.run(BtReq, candles);
-    hasResult = true;
+    hasResult_ = true;
     qDebug() << "[BACKTEST] START  symbol =" << req.symbolId << ", tf =" << toUiString(req.timeframe)
-           << ", begin =" << req.begin.toString() << ", end =" << req.end.toString() << ", size =" << candles.size();
+           << ", begin =" << req.begin.toString("yyyy-MM-dd HH:mm:ss") << ", end =" << req.end.toString("yyyy-MM-dd HH:mm:ss") << ", size =" << candles.size();
     qDebug() << "[BACKTEST RESULT]   state =" << toString(lastResult_.state) << ", err =" << lastResult_.errorText;
     qDebug() << "[BACKTEST RESULT EQUITY CURVE]   size =" << lastResult_.equityCurve.size();
     if (!lastResult_.equityCurve.empty()) {
@@ -92,7 +92,7 @@ void BacktestController::onStart() {
 }
 
 void BacktestController::onBuildGraph() {
-    if (!hasResult) {
+    if (!hasResult_) {
         qDebug() << "[BUILD BT GRAPH] Don't have BacktestResult";
         return;
     }
