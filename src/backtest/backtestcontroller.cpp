@@ -69,6 +69,19 @@ std::vector<GraphPoint> BacktestController::buildEquityGraph(const BacktestResul
     return points;
 }
 
+GraphRequest BacktestController::buildGraphRequest() const {
+    if (!ui_) return {};
+    GraphRequest gr;
+    gr.type = static_cast<GraphType>(ui_->btCbGraphType->currentData().toInt());
+    gr.xAxis = static_cast<GraphAxis>(ui_->btCbXAxis->currentData().toInt());
+    gr.yAxis = static_cast<GraphAxis>(ui_->btCbYAxis->currentData().toInt());
+    gr.longOnly = ui_->btChkLongOnly->isChecked();
+    gr.shortOnly = ui_->btChkShortOnly->isChecked();
+    gr.winnersOnly = ui_->btChkWinnersOnly->isChecked();
+    gr.losersOnly = ui_->btChkLosersOnly->isChecked();
+    return gr;
+}
+
 /*std::vector<Candle> BacktestController::loadHistoryFromUi() const {
     return loadHistory(buildHistoryRequest());
 }*/
