@@ -76,20 +76,30 @@ void BacktestController::onStart() {
     HistoryRequest req = buildHistoryRequest();
     const std::vector<Candle> candles = loadHistory(req);
     BacktestRequest BtReq = buildBacktestRequest(req);
-    BacktestResult res = engine_.run(BtReq, candles);
+    lastResult_ = engine_.run(BtReq, candles);
+    hasResult = true;
     qDebug() << "[BACKTEST] START  symbol =" << req.symbolId << ", tf =" << toUiString(req.timeframe)
            << ", begin =" << req.begin.toString() << ", end =" << req.end.toString() << ", size =" << candles.size();
-    qDebug() << "[BACKTEST RESULT]   state =" << toString(res.state) << ", err =" << res.errorText;
-    qDebug() << "[BACKTEST RESULT EQCURVE]   size =" << res.equityCurve.size();
-    if (res.equityCurve.size() != 0) {
+    qDebug() << "[BACKTEST RESULT]   state =" << toString(lastResult_.state) << ", err =" << lastResult_.errorText;
+    qDebug() << "[BACKTEST RESULT EQUITY CURVE]   size =" << lastResult_.equityCurve.size();
+    if (!lastResult_.equityCurve.empty()) {
         qDebug() << "[BACKTEST RESULT EQCURVE]   start time ="
-                 << res.equityCurve.front().time.toString("yyyy-MM-dd HH:mm:ss") <<
-                    ", end time =" << res.equityCurve.back().time.toString("yyyy-MM-dd HH:mm:ss") <<
-                    ", start equity =" << res.equityCurve.front().equity <<
-                    ", end equity =" << res.equityCurve.back().equity;
+                 << lastResult_.equityCurve.front().time.toString("yyyy-MM-dd HH:mm:ss") <<
+                    ", end time =" << lastResult_.equityCurve.back().time.toString("yyyy-MM-dd HH:mm:ss") <<
+                    ", start equity =" << lastResult_.equityCurve.front().equity <<
+                    ", end equity =" << lastResult_.equityCurve.back().equity;
     }
 }
 
 void BacktestController::onBuildGraph() {
-
+    if (!hasResult) {
+        qDebug() << "[BUILD BT GRAPH] Don't have BacktestResult";
+        return;
+    }
+    std::vector<GraphPoint> points = buildEquityGraph(lastResult_);
+    qDebug() << "[BUILD BT GRAPH]   size =" << points.size();
+    if (!points.empty()) {
+        qDebug() << "[BUILD BT GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
+                    ", last x =" << points.back().x << ", last y =" << points.back().y;
+    }
 }
