@@ -58,11 +58,12 @@ BacktestRequest BacktestController::buildBacktestRequest(const HistoryRequest& h
 std::vector<GraphPoint> BacktestController::buildEquityGraph(const BacktestResult& res) const {
     if (res.equityCurve.size() == 0) return {};
     std::vector<GraphPoint> points;
+    points.reserve(res.equityCurve.size());
     for (int i = 0; i < static_cast<int>(res.equityCurve.size()); ++i) {
         GraphPoint p;
         p.x = static_cast<double>(i);
         p.y = res.equityCurve[i].equity;
-        points.push_back(std::move(p));
+        points.push_back(p);
     }
     return points;
 }
