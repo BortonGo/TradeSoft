@@ -27,6 +27,9 @@ public slots:
     void onStart();
     void onBuildGraph();
 
+    void onGraphTypeChanged();
+    void onGraphAxisChanged();
+
 private:
     std::vector<Candle> loadHistory(const HistoryRequest& rec) const;
     HistoryRequest buildHistoryRequest() const;

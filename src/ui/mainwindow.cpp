@@ -109,8 +109,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btCbGraphType->addItem("Custom", static_cast<int>(GraphType::Custom));
 
     ui->btCbXAxis->clear();
-    ui->btCbXAxis->addItem("Trade Index", static_cast<int>(GraphAxis::TradeIndex));
     ui->btCbXAxis->addItem("Time", static_cast<int>(GraphAxis::Time));
+    ui->btCbXAxis->addItem("Trade Index", static_cast<int>(GraphAxis::TradeIndex));
 
     ui->btCbYAxis->clear();
     ui->btCbYAxis->addItem("Equity", static_cast<int>(GraphAxis::Equity));

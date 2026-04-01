@@ -14,6 +14,11 @@ BacktestController::BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExch
 
     connect(ui_->btBtnStart, &QPushButton::clicked, this, &BacktestController::onStart);
     connect(ui_->btBtnBuildGraph, &QPushButton::clicked, this, &BacktestController::onBuildGraph);
+
+    connect(ui_->btCbGraphType, &QComboBox::currentTextChanged, this, &BacktestController::onGraphTypeChanged);
+    connect(ui_->btCbXAxis, &QComboBox::currentTextChanged, this, &BacktestController::onGraphAxisChanged);
+    connect(ui_->btCbYAxis, &QComboBox::currentTextChanged, this, &BacktestController::onGraphAxisChanged);
+
 }
 
 std::vector<Candle> BacktestController::loadHistory(const HistoryRequest& rec) const {
@@ -46,11 +51,7 @@ BacktestRequest BacktestController::buildBacktestRequest(const HistoryRequest& h
     r.backtestRisk.slippageBps = ui_->btSbSlippage->value();
     r.backtestRisk.riskPct = ui_->btSbRiskPerTrade->value();
     r.backtestRisk.maxPosUsdt = ui_->btSbMaxPosUsdt->value();
-    if (ui_->cbRiskMode->currentText() == "Fixed USDT") {
-        r.backtestRisk.mode = RiskMode::FixedUsdt;
-    } else {
-        r.backtestRisk.mode = RiskMode::PercentOfEquity;
-    }
+    r.backtestRisk.mode = static_cast<RiskMode>(ui_->cbRiskMode->currentData().toInt());
     r.strategyName = ui_->btCbStrategy->currentText();
     return r;
 }
@@ -102,4 +103,111 @@ void BacktestController::onBuildGraph() {
         qDebug() << "[BUILD BT GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
                     ", last x =" << points.back().x << ", last y =" << points.back().y;
     }
+}
+
+void BacktestController::onGraphTypeChanged() {
+    const GraphType gt = static_cast<GraphType>(ui_->btCbGraphType->currentData().toInt());
+    switch (gt) {
+        case GraphType::EquityCurve : {
+            ui_->btCbXAxis->blockSignals(true);
+            ui_->btCbYAxis->blockSignals(true);
+
+            const int xIndex = ui_->btCbXAxis->findData(static_cast<int>(GraphAxis::Time));
+            if (xIndex >= 0) {
+                ui_->btCbXAxis->setCurrentIndex(xIndex);
+            }
+            const int yIndex = ui_->btCbYAxis->findData(static_cast<int>(GraphAxis::Equity));
+            if (yIndex >= 0) {
+                ui_->btCbYAxis->setCurrentIndex(yIndex);
+            }
+
+            ui_->btCbXAxis->blockSignals(false);
+            ui_->btCbYAxis->blockSignals(false);
+            break;
+        }
+
+        case GraphType::DrawdownCurve : {
+            ui_->btCbXAxis->blockSignals(true);
+            ui_->btCbYAxis->blockSignals(true);
+
+            const int xIndex = ui_->btCbXAxis->findData(static_cast<int>(GraphAxis::Time));
+            if (xIndex >= 0) {
+                ui_->btCbXAxis->setCurrentIndex(xIndex);
+            }
+            const int yIndex = ui_->btCbYAxis->findData(static_cast<int>(GraphAxis::Drawdown));
+            if (yIndex >= 0) {
+                ui_->btCbYAxis->setCurrentIndex(yIndex);
+            }
+
+            ui_->btCbXAxis->blockSignals(false);
+            ui_->btCbYAxis->blockSignals(false);
+            break;
+        }
+
+        case GraphType::PnlByTrade : {
+            ui_->btCbXAxis->blockSignals(true);
+            ui_->btCbYAxis->blockSignals(true);
+
+            const int xIndex = ui_->btCbXAxis->findData(static_cast<int>(GraphAxis::TradeIndex));
+            if (xIndex >= 0) {
+                ui_->btCbXAxis->setCurrentIndex(xIndex);
+            }
+            const int yIndex = ui_->btCbYAxis->findData(static_cast<int>(GraphAxis::NetPnl));
+            if (yIndex >= 0) {
+                ui_->btCbYAxis->setCurrentIndex(yIndex);
+            }
+
+            ui_->btCbXAxis->blockSignals(false);
+            ui_->btCbYAxis->blockSignals(false);
+            break;
+        }
+
+        case GraphType::Scatter : {
+            break;
+        }
+
+        case GraphType::Custom : {
+            break;
+        }
+
+        default: {
+            break;
+        }
+
+    }
+}
+
+void BacktestController::onGraphAxisChanged() {
+    const GraphAxis gaX = static_cast<GraphAxis>(ui_->btCbXAxis->currentData().toInt());
+    const GraphAxis gaY = static_cast<GraphAxis>(ui_->btCbYAxis->currentData().toInt());
+    if (gaX == GraphAxis::Time && gaY == GraphAxis::Equity) {
+        const int index = ui_->btCbGraphType->findData(static_cast<int>(GraphType::EquityCurve));
+        if (index >= 0) {
+            ui_->btCbGraphType->blockSignals(true);
+            ui_->btCbGraphType->setCurrentIndex(index);
+            ui_->btCbGraphType->blockSignals(false);
+        }
+    } else if (gaX == GraphAxis::Time && gaY == GraphAxis::Drawdown) {
+        const int index = ui_->btCbGraphType->findData(static_cast<int>(GraphType::DrawdownCurve));
+        if (index >= 0) {
+            ui_->btCbGraphType->blockSignals(true);
+            ui_->btCbGraphType->setCurrentIndex(index);
+            ui_->btCbGraphType->blockSignals(false);
+        }
+    } else if (gaX == GraphAxis::TradeIndex && gaY == GraphAxis::NetPnl) {
+        const int index = ui_->btCbGraphType->findData(static_cast<int>(GraphType::PnlByTrade));
+        if (index >= 0) {
+            ui_->btCbGraphType->blockSignals(true);
+            ui_->btCbGraphType->setCurrentIndex(index);
+            ui_->btCbGraphType->blockSignals(false);
+        }
+    } else {
+        const int index = ui_->btCbGraphType->findData(static_cast<int>(GraphType::Custom));
+        if (index >= 0) {
+            ui_->btCbGraphType->blockSignals(true);
+            ui_->btCbGraphType->setCurrentIndex(index);
+            ui_->btCbGraphType->blockSignals(false);
+        }
+    }
+
 }
