@@ -101,6 +101,27 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->cbRiskMode->addItem("Fixed USDT", static_cast<int>(RiskMode::FixedUsdt));
     ui->cbRiskMode->addItem("Percent Of Equity", static_cast<int>(RiskMode::PercentOfEquity));
 
+    ui->btCbGraphType->clear();
+    ui->btCbGraphType->addItem("Equity Curve", static_cast<int>(GraphType::EquityCurve));
+    ui->btCbGraphType->addItem("Drawdown Curve", static_cast<int>(GraphType::DrawdownCurve));
+    ui->btCbGraphType->addItem("PnL By Trade", static_cast<int>(GraphType::PnlByTrade));
+    ui->btCbGraphType->addItem("Scatter", static_cast<int>(GraphType::Scatter));
+    ui->btCbGraphType->addItem("Custom", static_cast<int>(GraphType::Custom));
+
+    ui->btCbXAxis->clear();
+    ui->btCbXAxis->addItem("Trade Index", static_cast<int>(GraphAxis::TradeIndex));
+    ui->btCbXAxis->addItem("Time", static_cast<int>(GraphAxis::Time));
+
+    ui->btCbYAxis->clear();
+    ui->btCbYAxis->addItem("Equity", static_cast<int>(GraphAxis::Equity));
+    ui->btCbYAxis->addItem("Net PnL", static_cast<int>(GraphAxis::NetPnl));
+    ui->btCbYAxis->addItem("Gross PnL", static_cast<int>(GraphAxis::GrossPnl));
+    ui->btCbYAxis->addItem("Drawdown", static_cast<int>(GraphAxis::Drawdown));
+    ui->btCbYAxis->addItem("Entry Price", static_cast<int>(GraphAxis::EntryPrice));
+    ui->btCbYAxis->addItem("Exit Price", static_cast<int>(GraphAxis::ExitPrice));
+    ui->btCbYAxis->addItem("Quantity", static_cast<int>(GraphAxis::Quantity));
+    ui->btCbYAxis->addItem("Bars Held", static_cast<int>(GraphAxis::BarsHeld));
+
     // unlock signals comboSymbol/Timeframne
     ui->comboSymbol->blockSignals(false);
     ui->comboTimeframe->blockSignals(false);

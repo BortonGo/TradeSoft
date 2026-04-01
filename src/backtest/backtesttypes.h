@@ -32,13 +32,15 @@ enum class GraphType {
     EquityCurve,
     DrawdownCurve,
     PnlByTrade,
-    Scatter
+    Scatter,
+    Custom
 };
 
 enum class GraphAxis {
     None,
     TradeIndex,
     Time,
+    Equity,
     NetPnl,
     GrossPnl,
     Drawdown,
