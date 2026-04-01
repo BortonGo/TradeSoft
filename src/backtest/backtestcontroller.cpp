@@ -56,13 +56,17 @@ BacktestRequest BacktestController::buildBacktestRequest(const HistoryRequest& h
     return r;
 }
 
-std::vector<GraphPoint> BacktestController::buildEquityGraph(const BacktestResult& res) const {
+std::vector<GraphPoint> BacktestController::buildEquityGraph(const BacktestResult& res, const GraphRequest& gr) const {
     if (res.equityCurve.empty()) return {};
     std::vector<GraphPoint> points;
     points.reserve(res.equityCurve.size());
     for (int i = 0; i < static_cast<int>(res.equityCurve.size()); ++i) {
         GraphPoint p;
-        p.x = static_cast<double>(i);
+        if (gr.xAxis == GraphAxis::TradeIndex) {
+            p.x = static_cast<double>(i);
+        } else {
+            p.x = static_cast<double>(res.equityCurve[i].time.toMSecsSinceEpoch());
+        }
         p.y = res.equityCurve[i].equity;
         points.push_back(p);
     }
@@ -112,7 +116,7 @@ void BacktestController::onBuildGraph() {
     }
     GraphRequest gr = buildGraphRequest();
     if (gr.type == GraphType::EquityCurve) {
-        std::vector<GraphPoint> points = buildEquityGraph(lastResult_);
+        std::vector<GraphPoint> points = buildEquityGraph(lastResult_, gr);
         qDebug() << "[BUILD BT GRAPH]   size =" << points.size();
         if (!points.empty()) {
             qDebug() << "[BUILD BT GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
