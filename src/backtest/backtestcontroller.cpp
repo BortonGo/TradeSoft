@@ -57,7 +57,7 @@ BacktestRequest BacktestController::buildBacktestRequest(const HistoryRequest& h
 }
 
 std::vector<GraphPoint> BacktestController::buildEquityGraph(const BacktestResult& res) const {
-    if (res.equityCurve.size() == 0) return {};
+    if (res.equityCurve.empty()) return {};
     std::vector<GraphPoint> points;
     points.reserve(res.equityCurve.size());
     for (int i = 0; i < static_cast<int>(res.equityCurve.size()); ++i) {
@@ -110,11 +110,16 @@ void BacktestController::onBuildGraph() {
         qDebug() << "[BUILD BT GRAPH] Don't have BacktestResult";
         return;
     }
-    std::vector<GraphPoint> points = buildEquityGraph(lastResult_);
-    qDebug() << "[BUILD BT GRAPH]   size =" << points.size();
-    if (!points.empty()) {
-        qDebug() << "[BUILD BT GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
-                    ", last x =" << points.back().x << ", last y =" << points.back().y;
+    GraphRequest gr = buildGraphRequest();
+    if (gr.type == GraphType::EquityCurve) {
+        std::vector<GraphPoint> points = buildEquityGraph(lastResult_);
+        qDebug() << "[BUILD BT GRAPH]   size =" << points.size();
+        if (!points.empty()) {
+            qDebug() << "[BUILD BT GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
+                        ", last x =" << points.back().x << ", last y =" << points.back().y;
+        }
+    } else {
+        qDebug() << "[BUILD BT GRAPH] graph type not implemented";
     }
 }
 
