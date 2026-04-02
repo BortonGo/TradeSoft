@@ -35,6 +35,7 @@ private:
     HistoryRequest buildHistoryRequest() const;
     BacktestRequest buildBacktestRequest(const HistoryRequest& hr) const;
     std::vector<GraphPoint> buildEquityGraph(const BacktestResult& res, const GraphRequest& gr) const;
+    std::vector<GraphPoint> buildDrawdownGraph(const BacktestResult& res, const GraphRequest& gr) const;
     GraphRequest buildGraphRequest() const;
 };
 

@@ -73,6 +73,23 @@ std::vector<GraphPoint> BacktestController::buildEquityGraph(const BacktestResul
     return points;
 }
 
+std::vector<GraphPoint> BacktestController::buildDrawdownGraph(const BacktestResult& res, const GraphRequest& gr) const {
+    if (res.equityCurve.empty()) return {};
+    std::vector<GraphPoint> points;
+    points.reserve(res.equityCurve.size());
+    for (int i = 0; i < static_cast<int>(res.equityCurve.size()); ++i) {
+        GraphPoint p;
+        if (gr.xAxis == GraphAxis::Time) {
+            p.x = static_cast<double>(res.equityCurve[i].time.toMSecsSinceEpoch());
+        } else {
+            p.x = static_cast<double>(i);
+        }
+        p.y = res.equityCurve[i].drawdown;
+        points.push_back(p);
+    }
+    return points;
+}
+
 GraphRequest BacktestController::buildGraphRequest() const {
     if (!ui_) return {};
     GraphRequest gr;
@@ -115,15 +132,29 @@ void BacktestController::onBuildGraph() {
         return;
     }
     GraphRequest gr = buildGraphRequest();
-    if (gr.type == GraphType::EquityCurve) {
-        std::vector<GraphPoint> points = buildEquityGraph(lastResult_, gr);
-        qDebug() << "[BUILD BT GRAPH]   size =" << points.size();
-        if (!points.empty()) {
-            qDebug() << "[BUILD BT GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
-                        ", last x =" << points.back().x << ", last y =" << points.back().y;
+
+    switch (gr.type) {
+        case GraphType::EquityCurve : {
+            std::vector<GraphPoint> points = buildEquityGraph(lastResult_, gr);
+            qDebug() << "[BUILD EQ GRAPH]   size =" << points.size();
+            if (!points.empty()) {
+                qDebug() << "[BUILD EQ GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
+                            ", last x =" << points.back().x << ", last y =" << points.back().y;
+            }
+            break;
         }
-    } else {
-        qDebug() << "[BUILD BT GRAPH] graph type not implemented";
+        case GraphType::DrawdownCurve : {
+            std::vector<GraphPoint> points = buildDrawdownGraph(lastResult_, gr);
+            qDebug() << "[BUILD DD GRAPH]   size =" << points.size();
+            if (!points.empty()) {
+                qDebug() << "[BUILD DD GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
+                            ", last x =" << points.back().x << ", last y =" << points.back().y;
+            }
+            break;
+        }
+        default : {
+             qDebug() << "[BUILD BT GRAPH] graph type not implemented";
+        }
     }
 }
 
