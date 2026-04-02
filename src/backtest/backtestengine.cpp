@@ -1,4 +1,5 @@
 #include "backtestengine.h"
+#include "domain\strategy\strategyfactory.h"
 
 static StrategyConfig buildStrategyConfig(const BacktestRequest& request) {
     StrategyConfig cfg;
