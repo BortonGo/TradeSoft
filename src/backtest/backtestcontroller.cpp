@@ -111,6 +111,10 @@ void BacktestController::onStart() {
     HistoryRequest req = buildHistoryRequest();
     const std::vector<Candle> candles = loadHistory(req);
     BacktestRequest BtReq = buildBacktestRequest(req);
+    if (BtReq.strategyName == "None") {
+        qDebug() << "[BACKTEST] Strategy name is not selected";
+        return;
+    }
     lastResult_ = engine_.run(BtReq, candles);
     hasResult_ = true;
     qDebug() << "[BACKTEST] START  symbol =" << req.symbolId << ", tf =" << toUiString(req.timeframe)

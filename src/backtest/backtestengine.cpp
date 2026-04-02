@@ -7,6 +7,11 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
         res.errorText = "No candles for backtest";
         return res;
     }
+    if (request.strategyName.trimmed().isEmpty() || request.strategyName == "None") {
+        res.state = BacktestState::Failed;
+        res.errorText = "Strategy name is not selected";
+        return res;
+    }
 
     double peakEquity = request.initialbalance;
 
