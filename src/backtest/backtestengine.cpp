@@ -1,5 +1,13 @@
 #include "backtestengine.h"
 
+static StrategyConfig buildStrategyConfig(const BacktestRequest& request) {
+    StrategyConfig cfg;
+    cfg.strategy.name = request.strategyName;
+    cfg.strategy.tf = request.timeframe;
+    cfg.risk = request.backtestRisk;
+    return cfg;
+}
+
 BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::vector<Candle>& candles) const {
     BacktestResult res;
     if (candles.empty()) {
@@ -9,11 +17,19 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
     }
     if (request.strategyName.trimmed().isEmpty() || request.strategyName == "None") {
         res.state = BacktestState::Failed;
-        res.errorText = "Strategy name is not selected";
+        res.errorText = "Strategy is not selected";
         return res;
     }
 
+    const StrategyConfig cfg = buildStrategyConfig(request);
+
     double peakEquity = request.initialbalance;
+    auto strategy = StrategyFactory::create(cfg);
+    if (!strategy) {
+        res.state = BacktestState::Failed;
+        res.errorText = "Strategy is not supported";
+        return res;
+    }
 
     for (const auto& a : candles) {
         EquityPoint p;

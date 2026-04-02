@@ -1,6 +1,7 @@
 #pragma once
 #include "backtesttypes.h"
-#include "core/candle.h"
+#include "core\candle.h"
+#include "domain\strategy\strategyfactory.h"
 #include <vector>
 
 class BacktestEngine
