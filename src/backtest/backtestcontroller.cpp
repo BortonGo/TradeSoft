@@ -79,10 +79,10 @@ std::vector<GraphPoint> BacktestController::buildDrawdownGraph(const BacktestRes
     points.reserve(res.equityCurve.size());
     for (int i = 0; i < static_cast<int>(res.equityCurve.size()); ++i) {
         GraphPoint p;
-        if (gr.xAxis == GraphAxis::Time) {
-            p.x = static_cast<double>(res.equityCurve[i].time.toMSecsSinceEpoch());
-        } else {
+        if (gr.xAxis == GraphAxis::TradeIndex) {
             p.x = static_cast<double>(i);
+        } else {
+            p.x = static_cast<double>(res.equityCurve[i].time.toMSecsSinceEpoch());
         }
         p.y = res.equityCurve[i].drawdown;
         points.push_back(p);
