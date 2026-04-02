@@ -7,16 +7,21 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
         res.errorText = "No candles for backtest";
         return res;
     }
-    res.state = BacktestState::Completed;
+
+    double peakEquity = request.initialbalance;
 
     for (const auto& a : candles) {
         EquityPoint p;
         p.time = QDateTime::fromMSecsSinceEpoch(a.timestamp_);
         p.equity = request.initialbalance;
-        p.drawdown = 0.0;
+        if (p.equity > peakEquity) {
+            peakEquity = p.equity;
+        }
+        p.drawdown = peakEquity - p.equity;
         p.cumulativePnl = 0.0;
         res.equityCurve.push_back(std::move(p));
     }
+    res.state = BacktestState::Completed;
 
     return res;
 }
