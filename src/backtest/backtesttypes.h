@@ -69,6 +69,9 @@ struct BacktestRequest {
     QString symbol;
     Timeframe timeframe = Timeframe::M1;
 
+    BacktestExecutionMode executionMode = BacktestExecutionMode::BarClose;
+    Timeframe executionTimeframe = Timeframe::M1;
+
     QDateTime begin;
     QDateTime end;
 
