@@ -5,8 +5,7 @@
 #include <QObject>
 #include <QTimer>
 
-class MarketDataService final : public QObject
-{
+class MarketDataService final : public QObject {
     Q_OBJECT
 
     std::shared_ptr<IExchangeClient> exchange_;

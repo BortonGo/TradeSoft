@@ -44,8 +44,7 @@ struct AccountState final {
 };
 
 // simple store
-class AccountStore final
-{
+class AccountStore final {
     std::vector<AccountConfig> configs_;
     std::vector<AccountState> states_;
 

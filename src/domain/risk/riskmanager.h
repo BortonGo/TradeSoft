@@ -4,8 +4,7 @@
 #include "domain/strategy/strategyconfig.h"
 #include "domain/order/order.h"
 
-class RiskManager final
-{
+class RiskManager final {
 public:
     RiskManager() = default;
 

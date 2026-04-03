@@ -3,8 +3,7 @@
 #include <vector>
 #include <QNetworkAccessManager>
 
-class BingXSwapClient final : public IExchangeClient
-{
+class BingXSwapClient final : public IExchangeClient {
 public:
     std::vector<Candle> fetchKlines(const QString& symbolId, Timeframe tf) override;
     std::vector<Candle> fetchHistory(const HistoryRequest& request) override;

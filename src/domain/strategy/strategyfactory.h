@@ -3,8 +3,7 @@
 #include "domain/strategy/istrategy.h"
 #include "domain/strategy/strategyconfig.h"
 
-class StrategyFactory final
-{
+class StrategyFactory final {
 public:
     // Возвращает готовую стратегию по имени cfg.strategy.name
     // (параметры пока захардкожены)

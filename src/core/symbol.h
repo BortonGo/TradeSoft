@@ -17,7 +17,7 @@ struct Symbol final {
     }
 };
 
-inline QList<Symbol> someSymbols(){
+inline QList<Symbol> someSymbols() {
     return {
         Symbol("ETH", "USDT"),
         Symbol("BTC", "USDT"),

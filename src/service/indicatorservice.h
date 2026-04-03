@@ -8,8 +8,7 @@
 
 class IndicatorDialog; // forward
 
-class IndicatorService final : public QObject
-{
+class IndicatorService final : public QObject {
     Q_OBJECT
 
     IndicatorConfig cfg_;

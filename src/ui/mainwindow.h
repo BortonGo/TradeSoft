@@ -7,11 +7,10 @@
 #include "domain/account/account.h"
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
     Ui::MainWindow *ui;

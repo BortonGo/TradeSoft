@@ -3,8 +3,7 @@
 #include "candle.h"
 #include <vector>
 
-class CandleSeries final
-{
+class CandleSeries final {
     QString symbol_;
     Timeframe timeframe_;
     std::vector<Candle> candles_;

@@ -3,8 +3,7 @@
 #include <vector>
 #include "domain/trade/traderecord.h"
 
-class TradesModel final : public QAbstractTableModel
-{
+class TradesModel final : public QAbstractTableModel {
     std::vector<TradeRecord> trades_;
 
 public:

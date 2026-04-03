@@ -4,8 +4,7 @@
 #include <memory>
 #include <vector>
 
-class BacktestMarketDataService final
-{
+class BacktestMarketDataService final {
     std::shared_ptr<IExchangeClient> exchange_;
 public:
     explicit BacktestMarketDataService(std::shared_ptr<IExchangeClient> exchange);

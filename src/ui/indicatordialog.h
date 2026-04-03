@@ -3,11 +3,10 @@
 #include "indicators/indicatorconfig.h"
 
 namespace Ui {
-class IndicatorDialog;
+    class IndicatorDialog;
 }
 
-class IndicatorDialog final : public QDialog
-{
+class IndicatorDialog final : public QDialog{
     Q_OBJECT
 
 public:

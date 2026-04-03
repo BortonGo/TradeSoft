@@ -10,10 +10,11 @@
 #include "service/execution/demoexecutionservice.h"
 #include "service/trade/tradejournal.h"
 
-namespace Ui { class MainWindow; }
+namespace Ui {
+    class MainWindow;
+}
 
-class StrategyController final : public QObject
-{
+class StrategyController final : public QObject {
     Q_OBJECT
 
     Ui::MainWindow* ui_ = nullptr;

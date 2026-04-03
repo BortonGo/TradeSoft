@@ -3,8 +3,7 @@
 #include "domain/order/fill.h"
 #include "domain/strategy/strategyconfig.h"
 
-class DemoExecutionService final
-{
+class DemoExecutionService final {
 public:
     DemoExecutionService() = default;
 

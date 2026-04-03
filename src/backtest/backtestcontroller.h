@@ -8,8 +8,7 @@
 
 namespace Ui {class MainWindow;}
 
-class BacktestController final : public QObject
-{
+class BacktestController final : public QObject {
     Q_OBJECT
 
     Ui::MainWindow* ui_ = nullptr;

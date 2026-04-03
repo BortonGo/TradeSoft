@@ -21,8 +21,7 @@ enum class IndicatorId {
     ATR14
 };
 
-inline uint qHash(IndicatorId key, uint seed = 0) noexcept
-{
+inline uint qHash(IndicatorId key, uint seed = 0) noexcept {
     using U = typename std::underlying_type<IndicatorId>::type;
     return ::qHash(static_cast<U>(key), seed);
 }
