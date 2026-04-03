@@ -22,6 +22,11 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
         res.errorText = "Strategy is not selected";
         return res;
     }
+    if (request.executionMode == BacktestExecutionMode::IntrabarLowerTf) {
+        res.state = BacktestState::Failed;
+        res.errorText = "Intrabar backtest is not implemented yet";
+        return res;
+    }
 
     const StrategyConfig cfg = buildStrategyConfig(request);
     double peakEquity = request.initialbalance;
@@ -51,12 +56,6 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
     ctx.tf = request.timeframe;
 
     strategy->onStart(ctx);
-
-    if (request.executionMode == BacktestExecutionMode::IntrabarLowerTf) {
-        res.state = BacktestState::Failed;
-        res.errorText = "Intrabar backtest is not implemented yet";
-        return res;
-    }
 
     int signalCandleClosedCount = 0;
     for (int i = warmup; i < static_cast<int>(candles.size()); ++i) {
