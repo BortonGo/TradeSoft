@@ -23,7 +23,6 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
     }
 
     const StrategyConfig cfg = buildStrategyConfig(request);
-
     double peakEquity = request.initialbalance;
     auto strategy = StrategyFactory::create(cfg);
     if (!strategy) {
@@ -31,6 +30,40 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
         res.errorText = "Strategy is not supported";
         return res;
     }
+
+    const int warmup = request.warmupBars;
+    if (static_cast<int>(candles.size()) <= warmup) {
+        res.state = BacktestState::Failed;
+        res.errorText = "Not enough candles for warmup";
+        return res;
+    }
+
+    std::shared_ptr<CandleSeries> series = std::make_shared<CandleSeries>(request.symbol, request.timeframe);
+
+    for (int i = 0; i < warmup; ++i) {
+        series->addCandle(candles[i]);
+    }
+
+    StrategyContext ctx;
+    ctx.series = series;
+    ctx.symbolId = request.symbol;
+    ctx.tf = request.timeframe;
+
+    strategy->onStart(ctx);
+
+    int signalCount = 0;
+    for (int i = warmup; i < static_cast<int>(candles.size()); ++i) {
+        series->addCandle(candles[i]);
+
+        const auto signal = strategy->onCandleClosed(ctx, candles[i]);
+
+        for (const auto& s : signal) {
+            if (s.type != StrategySignalType::None) {
+                ++signalCount;
+            }
+        }
+    }
+    res.stats.trades = signalCount; // временно
 
     for (const auto& a : candles) {
         EquityPoint p;
@@ -41,7 +74,7 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
         }
         p.drawdown = peakEquity - p.equity;
         p.cumulativePnl = 0.0;
-        res.equityCurve.push_back(std::move(p));
+        res.equityCurve.push_back(p);
     }
     res.state = BacktestState::Completed;
 
