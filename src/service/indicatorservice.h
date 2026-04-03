@@ -8,7 +8,7 @@
 
 class IndicatorDialog; // forward
 
-class IndicatorService : public QObject
+class IndicatorService final : public QObject
 {
     Q_OBJECT
 

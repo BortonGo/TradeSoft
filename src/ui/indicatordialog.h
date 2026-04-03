@@ -6,7 +6,7 @@ namespace Ui {
 class IndicatorDialog;
 }
 
-class IndicatorDialog : public QDialog
+class IndicatorDialog final : public QDialog
 {
     Q_OBJECT
 

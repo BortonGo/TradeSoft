@@ -4,7 +4,7 @@
 #include "domain/strategy/strategysignal.h"
 #include "core/candleseries.h"
 
-struct StrategyContext {
+struct StrategyContext final {
     QString symbolId;
     Timeframe tf {};
     std::shared_ptr<CandleSeries> series;

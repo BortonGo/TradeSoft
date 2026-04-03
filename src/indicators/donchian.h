@@ -2,8 +2,7 @@
 #include <vector>
 #include "core/candle.h"
 
-class Donchian
-{
+class Donchian final {
 public:
     struct DonchianResult {
         std::vector<double> upper;

@@ -65,7 +65,7 @@ enum class BacktestExecutionMode {
     IntrabarLowerTf
 };
 
-struct BacktestRequest {
+struct BacktestRequest final {
     QString symbol;
     Timeframe timeframe = Timeframe::M1;
 
@@ -96,7 +96,7 @@ struct BacktestRequest {
     int warmupBars = 200;
 };
 
-struct BacktestTrade {
+struct BacktestTrade final {
     QDateTime entryTime;
     QDateTime exitTime;
 
@@ -114,14 +114,14 @@ struct BacktestTrade {
     bool winner = false;
 };
 
-struct EquityPoint {
+struct EquityPoint final {
     QDateTime time;
     double equity = 0.0;
     double drawdown = 0.0;
     double cumulativePnl = 0.0;
 };
 
-struct BacktestStats {
+struct BacktestStats final {
     int trades = 0;
     double winratePct = 0.0;
     double profitFactor = 0.0;
@@ -132,7 +132,7 @@ struct BacktestStats {
     double expectancy = 0.0;
 };
 
-struct BacktestResult {
+struct BacktestResult final {
     BacktestState state = BacktestState::Idle;
     QString errorText;
 
@@ -141,7 +141,7 @@ struct BacktestResult {
     std::vector<EquityPoint> equityCurve;
 };
 
-struct GraphRequest {
+struct GraphRequest final {
     GraphType type = GraphType::EquityCurve;
     GraphAxis xAxis = GraphAxis::TradeIndex;
     GraphAxis yAxis = GraphAxis::NetPnl;
@@ -152,7 +152,7 @@ struct GraphRequest {
     bool losersOnly = false;
 };
 
-struct GraphPoint {
+struct GraphPoint final {
     double x = 0.0;
     double y = 0.0;
     QString label;

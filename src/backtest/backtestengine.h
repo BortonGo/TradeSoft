@@ -3,7 +3,7 @@
 #include "core\candle.h"
 #include <vector>
 
-class BacktestEngine
+class BacktestEngine final
 {
 public:
     BacktestResult run(const BacktestRequest& request, const std::vector<Candle>& candles) const;

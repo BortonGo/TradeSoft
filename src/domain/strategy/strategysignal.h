@@ -10,7 +10,7 @@ enum StrategySignalType {
     ExitShort
 };
 
-struct StrategySignal {
+struct StrategySignal final {
     StrategySignalType type = StrategySignalType::None;
     QString symbolId;
     Timeframe tf {};

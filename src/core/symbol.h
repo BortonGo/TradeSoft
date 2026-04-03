@@ -2,7 +2,7 @@
 #include <QString>
 #include <QList>
 
-struct Symbol {
+struct Symbol final {
     QString base_;
     QString quote_;
 

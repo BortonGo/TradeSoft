@@ -4,7 +4,7 @@
 
 #include "core/timeframe.h"
 
-struct HistoryRequest {
+struct HistoryRequest final {
     QString symbolId;
     Timeframe timeframe = Timeframe::M1;
     QDateTime begin;

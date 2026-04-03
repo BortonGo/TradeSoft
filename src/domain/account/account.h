@@ -23,7 +23,7 @@ inline AccountType accountTypeFromUiString(const QString& s) {
     return AccountType::Demo;
 }
 
-struct AccountConfig {
+struct AccountConfig  final {
     QString id;
     QString name;
     AccountType type;
@@ -33,7 +33,7 @@ struct AccountConfig {
     int maxLeverage = 1;
 };
 
-struct AccountState {
+struct AccountState final {
     QString accountId;
 
     double balance = 0.0;
@@ -44,7 +44,7 @@ struct AccountState {
 };
 
 // simple store
-class AccountStore
+class AccountStore final
 {
     std::vector<AccountConfig> configs_;
     std::vector<AccountState> states_;

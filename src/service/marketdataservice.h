@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QTimer>
 
-class MarketDataService : public QObject
+class MarketDataService final : public QObject
 {
     Q_OBJECT
 

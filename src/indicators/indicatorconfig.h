@@ -1,6 +1,6 @@
 #pragma once
 
-struct IndicatorConfig {
+struct IndicatorConfig final {
     bool ema5 = false;
     bool ema9 = false;
     bool ema13 = false;

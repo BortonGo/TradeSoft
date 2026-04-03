@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-struct Candle {
+struct Candle final {
     int64_t timestamp_;
 
     double open_;

@@ -5,7 +5,7 @@ enum class RiskMode {
     PercentOfEquity
 };
 
-struct RiskSettings {
+struct RiskSettings final {
     RiskMode mode = RiskMode::FixedUsdt;
     double riskPct = 0.0;
     double maxPosUsdt = 0.0;

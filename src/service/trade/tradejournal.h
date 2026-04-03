@@ -4,7 +4,7 @@
 #include "ui/models/tradesmodel.h"
 #include "domain/order/fill.h"
 
-struct TradeReport {
+struct TradeReport final {
     double equity = 0.0;
     double netPnl = 0.0;
     double fees = 0.0;

@@ -12,7 +12,7 @@
 #include "core\timeframe.h"
 #include "indicators\indicatortypes.h"
 
-class ChartWidget : public QWidget {
+class ChartWidget final : public QWidget {
     Q_OBJECT
 
     std::shared_ptr<CandleSeries> series_;

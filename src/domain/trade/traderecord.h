@@ -14,7 +14,7 @@ enum class TradeStatus {
     Rejected
 };
 
-struct TradeRecord {
+struct TradeRecord final {
     QDateTime time;
     QString symbol;
     TradeSide side = TradeSide::Buy;

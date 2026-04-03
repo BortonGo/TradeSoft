@@ -8,7 +8,7 @@ enum class OrderType {
     Limit
 };
 
-struct Order {
+struct Order final {
     QString symbol;
     TradeSide side = TradeSide::Buy;
     OrderType type = OrderType::Market;

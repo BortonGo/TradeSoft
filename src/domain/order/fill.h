@@ -3,7 +3,7 @@
 #include <QDateTime>
 #include "domain/trade/traderecord.h"
 
-struct Fill {
+struct Fill final {
     QDateTime time;
     QString symbol;
     TradeSide side = TradeSide::Buy;

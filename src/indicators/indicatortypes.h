@@ -27,7 +27,7 @@ inline uint qHash(IndicatorId key, uint seed = 0) noexcept
     return ::qHash(static_cast<U>(key), seed);
 }
 
-struct IndicatorLine {
+struct IndicatorLine final {
     IndicatorId id_;
     QString name_;
     std::vector<double> values_;

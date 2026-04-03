@@ -7,7 +7,7 @@
 #include "atr.h"
 #include <QSet>
 
-class IndicatorEngine
+class IndicatorEngine final
 {
     QSet<IndicatorId> enabled_;
     std::vector<IndicatorLine> lines_;
