@@ -54,9 +54,9 @@ BacktestRequest BacktestController::buildBacktestRequest(const HistoryRequest& h
     r.backtestRisk.mode = static_cast<RiskMode>(ui_->cbRiskMode->currentData().toInt());
     r.strategyName = ui_->btCbStrategy->currentText();
     if (r.strategyName.trimmed().isEmpty() || r.strategyName == "EMA Scalp") {
-        r.executionMode == BacktestExecutionMode::IntrabarLowerTf;
+        r.executionMode = BacktestExecutionMode::IntrabarLowerTf;
     } else {
-        r.executionMode == BacktestExecutionMode::BarClose;
+        r.executionMode = BacktestExecutionMode::BarClose;
     }
 
     return r;
