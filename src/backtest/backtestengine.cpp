@@ -52,15 +52,16 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
 
     strategy->onStart(ctx);
 
+    if (request.executionMode == BacktestExecutionMode::IntrabarLowerTf) {
+        res.state = BacktestState::Failed;
+        res.errorText = "Intrabar backtest is not implemented yet";
+        return res;
+    }
+
     int signalCandleClosedCount = 0;
     for (int i = warmup; i < static_cast<int>(candles.size()); ++i) {
         series->addCandle(candles[i]);
 
-        if (request.executionMode == BacktestExecutionMode::IntrabarLowerTf) {
-            res.state = BacktestState::Failed;
-            res.errorText = "Intrabar backtest is not implement yet";
-            return res;
-        }
         const auto signalsCandleClosed = strategy->onCandleClosed(ctx, candles[i]);
 
         for (const auto& s : signalsCandleClosed) {
