@@ -60,6 +60,11 @@ enum class CandlePriceType {
     Mark
 };
 
+enum class BacktestExecutionMode {
+    BarClose,
+    IntrabarLowerTf
+};
+
 struct BacktestRequest {
     QString symbol;
     Timeframe timeframe = Timeframe::M1;
