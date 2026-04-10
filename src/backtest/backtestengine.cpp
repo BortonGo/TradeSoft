@@ -131,15 +131,15 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
                 ", WinSum = " << grossWinSum <<
                 ", LossSum = " << grossLossSum;
 
-    for (const auto& a : candles) {
+    double currentEquity = request.initialbalance;
+    for (const auto& a : res.trades) {
+        currentEquity += a.netPnl;
         EquityPoint p;
-        p.time = QDateTime::fromMSecsSinceEpoch(a.timestamp_);
-        p.equity = request.initialbalance;
-        if (p.equity > peakEquity) {
-            peakEquity = p.equity;
-        }
+        p.time = a.exitTime;
+        p.equity = currentEquity;
+        peakEquity = std::max(peakEquity, p.equity);
         p.drawdown = peakEquity - p.equity;
-        p.cumulativePnl = 0.0;
+        p.cumulativePnl = currentEquity - request.initialbalance;
         res.equityCurve.push_back(p);
     }
     res.state = BacktestState::Completed;
