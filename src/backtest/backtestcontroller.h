@@ -36,5 +36,6 @@ private:
     std::vector<GraphPoint> buildEquityGraph(const BacktestResult& res, const GraphRequest& gr) const;
     std::vector<GraphPoint> buildDrawdownGraph(const BacktestResult& res, const GraphRequest& gr) const;
     GraphRequest buildGraphRequest() const;
+    void setResultsToUi();
 };
 

@@ -130,6 +130,7 @@ void BacktestController::onStart() {
                     ", start equity =" << lastResult_.equityCurve.front().equity <<
                     ", end equity =" << lastResult_.equityCurve.back().equity;
     }
+    setResultsToUi();
 }
 
 void BacktestController::onBuildGraph() {
@@ -268,5 +269,15 @@ void BacktestController::onGraphAxisChanged() {
             ui_->btCbGraphType->blockSignals(false);
         }
     }
+}
 
+void BacktestController::setResultsToUi() {
+    ui_->btLabelTradesValue->setText(QString::number(lastResult_.stats.trades));
+    ui_->btWR->setText(QString::number(lastResult_.stats.winratePct, 'f', 2));
+    ui_->btAvgWin->setText(QString::number(lastResult_.stats.avgWin, 'f', 2));
+    ui_->btAvgLoss->setText(QString::number(lastResult_.stats.avgLoss, 'f', 2));
+    ui_->btPf->setText(QString::number(lastResult_.stats.profitFactor, 'f', 2));
+    ui_->btNetPnl->setText(QString::number(lastResult_.stats.netPnl, 'f', 2));
+    ui_->btMaxDD->setText(QString::number(lastResult_.stats.MaxDDPct, 'f', 2)); // пока еще не считается
+    ui_->btEcpecrancy->setText(QString::number(lastResult_.stats.expectancy, 'f', 2));
 }

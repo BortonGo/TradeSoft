@@ -1,6 +1,7 @@
 #include "backtestengine.h"
 #include "domain\strategy\strategyfactory.h"
 #include <QDebug>
+#include <cmath>
 
 static StrategyConfig buildStrategyConfig(const BacktestRequest& request) {
     StrategyConfig cfg;
@@ -112,24 +113,34 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
     //stats
     int winCount = 0;
     int lossCount = 0;
-    int grossWinSum = 0;
-    int grossLossSum = 0;
-    for (auto& t : res.trades) {
+    double winSum = 0;
+    double lossSum = 0;
+    for (const auto& t : res.trades) {
         if (t.winner) {
             ++winCount;
-            grossWinSum += t.netPnl;
+            winSum += t.netPnl;
         } else {
             ++lossCount;
-            grossLossSum += t.netPnl;
+            lossSum += t.netPnl;
         }
+    }
+    if (res.stats.trades > 0) {
+        res.stats.winratePct = 100.0 * static_cast<double>(winCount) / res.stats.trades;
+        res.stats.avgWin = (winCount > 0) ? winSum / winCount : 0;
+        res.stats.avgLoss = (lossCount > 0) ? lossSum / lossCount : 0;
+        if (lossSum < 0.0) {
+            res.stats.profitFactor = winSum / std::abs(lossSum);
+        }
+        res.stats.expectancy = (winSum + lossSum) / static_cast<double>(res.stats.trades);
     }
 
     qDebug() << "[BACKTEST ENGINE]  Total trades = " << res.stats.trades <<
                 ", strategy = " << cfg.strategy.name <<
                 ", Wins = " << winCount <<
                 ", Losses = " << lossCount <<
-                ", WinSum = " << grossWinSum <<
-                ", LossSum = " << grossLossSum;
+                ", WinSum = " << winSum <<
+                ", LossSum = " << lossSum <<
+                ", Winrate = " << res.stats.winratePct;
 
     double currentEquity = request.initialbalance;
     for (const auto& a : res.trades) {
@@ -141,7 +152,14 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
         p.drawdown = peakEquity - p.equity;
         p.cumulativePnl = currentEquity - request.initialbalance;
         res.equityCurve.push_back(p);
+        double ddPct = 0.0;
+        if (peakEquity > 0.0) {
+            ddPct = 100.0 * (peakEquity - p.equity) / peakEquity;
+        }
+        res.stats.MaxDDPct = std::max(res.stats.MaxDDPct, ddPct);
     }
+    res.stats.netPnl = currentEquity - request.initialbalance;
+
     res.state = BacktestState::Completed;
 
     return res;

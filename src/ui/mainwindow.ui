@@ -2511,7 +2511,7 @@ color: white;                /* цвет текста */</string>
                  </widget>
                 </item>
                 <item row="0" column="5">
-                 <widget class="QLineEdit" name="btAvrWin">
+                 <widget class="QLineEdit" name="btAvgWin">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                     <horstretch>0</horstretch>
