@@ -57,21 +57,79 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
 
     strategy->onStart(ctx);
 
-    int signalCandleClosedCount = 0;
+    BacktestTrade btTrade;
+    bool inLong = false;
+    bool inShort = false;
+
     for (int i = warmup; i < static_cast<int>(candles.size()); ++i) {
         series->addCandle(candles[i]);
 
         const auto signalsCandleClosed = strategy->onCandleClosed(ctx, candles[i]);
 
         for (const auto& s : signalsCandleClosed) {
-            if (s.type != StrategySignalType::None) {
-                ++signalCandleClosedCount;
+            if (s.type == StrategySignalType::EnterLong && !inLong && !inShort) {
+                btTrade = BacktestTrade{};
+                btTrade.entryPrice = candles[i].close_;
+                btTrade.entryTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
+                btTrade.side = BacktestTradeSide::Long;
+                inLong = true;
+            }
+            if (s.type == StrategySignalType::EnterShort && !inLong && !inShort) {
+                btTrade = BacktestTrade{};
+                btTrade.entryPrice = candles[i].close_;
+                btTrade.entryTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
+                btTrade.side = BacktestTradeSide::Short;
+                inShort = true;
+            }
+            if (s.type == StrategySignalType::ExitLong && inLong && !inShort) {
+                btTrade.exitPrice = candles[i].close_;
+                btTrade.exitTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
+                btTrade.quantity = 1.0;
+                btTrade.grossPnl = btTrade.exitPrice - btTrade.entryPrice;
+                btTrade.netPnl = btTrade.grossPnl;
+                btTrade.winner = btTrade.netPnl > 0.0;
+                res.trades.push_back(std::move(btTrade));
+                btTrade = BacktestTrade {};
+                inLong = false;
+                inShort = false;
+            }
+            if (s.type == StrategySignalType::ExitShort && !inLong && inShort) {
+                btTrade.exitPrice = candles[i].close_;
+                btTrade.exitTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
+                btTrade.quantity = 1.0;
+                btTrade.grossPnl = btTrade.entryPrice - btTrade.exitPrice;
+                btTrade.netPnl = btTrade.grossPnl;
+                btTrade.winner = btTrade.netPnl > 0.0;
+                res.trades.push_back(std::move(btTrade));
+                btTrade = BacktestTrade {};
+                inLong = false;
+                inShort = false;
             }
         }
     }
+    res.stats.trades =  static_cast<int>(res.trades.size());
 
-    qDebug() << "[BACKTEST ENGINE]  onCandleClosedSignals = " << signalCandleClosedCount <<
-                ", strategy = " << cfg.strategy.name;
+    //stats
+    int winCount = 0;
+    int lossCount = 0;
+    int grossWinSum = 0;
+    int grossLossSum = 0;
+    for (auto& t : res.trades) {
+        if (t.winner) {
+            ++winCount;
+            grossWinSum += t.netPnl;
+        } else {
+            ++lossCount;
+            grossLossSum += t.netPnl;
+        }
+    }
+
+    qDebug() << "[BACKTEST ENGINE]  Total trades = " << res.stats.trades <<
+                ", strategy = " << cfg.strategy.name <<
+                ", Wins = " << winCount <<
+                ", Losses = " << lossCount <<
+                ", WinSum = " << grossWinSum <<
+                ", LossSum = " << grossLossSum;
 
     for (const auto& a : candles) {
         EquityPoint p;
