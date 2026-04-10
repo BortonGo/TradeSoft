@@ -2,6 +2,7 @@
 #include <QObject>
 #include "exchange\iexchangeclient.h"
 #include "backtestmarketdataservice.h"
+#include "ui/models/backtesttradesmodel.h"
 #include "backtestengine.h"
 #include <memory>
 #include <vector>
@@ -12,6 +13,7 @@ class BacktestController final : public QObject {
     Q_OBJECT
 
     Ui::MainWindow* ui_ = nullptr;
+    BacktestTradesModel* tradesModel_ = nullptr;
     std::shared_ptr<IExchangeClient> exchange_;
     std::unique_ptr<BacktestMarketDataService> marketDataService_;
     BacktestEngine engine_;
@@ -37,5 +39,6 @@ private:
     std::vector<GraphPoint> buildDrawdownGraph(const BacktestResult& res, const GraphRequest& gr) const;
     GraphRequest buildGraphRequest() const;
     void setResultsToUi();
+    void setTradesToUi();
 };
 

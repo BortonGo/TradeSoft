@@ -1,7 +1,7 @@
 #pragma once
 #include <QAbstractTableModel>
 #include <vector>
-#include "backtest/backtestengine.h"
+#include "backtest/backtesttypes.h"
 
 class BacktestTradesModel final : public QAbstractTableModel {
     std::vector<BacktestTrade> trades_;
@@ -14,7 +14,7 @@ public:
             ColQty,
             ColEntryPrice,
             ColExitPrice,
-            ColNetPnL,
+            ColNetPnl,
             ColWinner,
             ColCount
         };

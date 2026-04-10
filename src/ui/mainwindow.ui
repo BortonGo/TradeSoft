@@ -1371,7 +1371,7 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: t
          <attribute name="title">
           <string>BACKTEST</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="3,2,4,1">
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="3,2,3,2">
           <item>
            <widget class="QFrame" name="BtSettingsFrame">
             <property name="sizePolicy">
@@ -1384,6 +1384,12 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: t
              <size>
               <width>0</width>
               <height>180</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>200</height>
              </size>
             </property>
             <property name="styleSheet">
@@ -2257,6 +2263,12 @@ QPushButton#btBtnStart:disabled {
               <height>100</height>
              </size>
             </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>150</height>
+             </size>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(43, 43, 43);
 color: white;                /* цвет текста */
@@ -2717,6 +2729,12 @@ color: white;                /* цвет текста */
                 <size>
                  <width>0</width>
                  <height>280</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>320</height>
                 </size>
                </property>
                <property name="font">
@@ -3211,7 +3229,7 @@ color: white;                /* цвет текста */
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>90</height>
+              <height>16777215</height>
              </size>
             </property>
             <property name="styleSheet">

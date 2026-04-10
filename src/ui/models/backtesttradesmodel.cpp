@@ -32,12 +32,13 @@ QVariant BacktestTradesModel::data(const QModelIndex& index, int role) const
     // alignment for numeric columns
     if (role == Qt::TextAlignmentRole) {
         switch (col) {
+        case ColNetPnl:
+        case ColWinner:
+                return int(Qt::AlignCenter);
         case ColQty:
         case ColEntryPrice:
         case ColExitPrice:
-        case ColNetPnL:
-        //case ColWinner:
-        //case ColSide:
+        case ColSide:
             return int(Qt::AlignRight | Qt::AlignVCenter);
         default:
             return int(Qt::AlignLeft | Qt::AlignVCenter);
@@ -46,7 +47,7 @@ QVariant BacktestTradesModel::data(const QModelIndex& index, int role) const
 
     // pnl coloring
     if (role == Qt::ForegroundRole) {
-        if (col == ColNetPnL) {
+        if (col == ColNetPnl) {
             if (t.netPnl > 0.0) return QBrush(QColor(0, 180, 0));
             if (t.netPnl < 0.0) return QBrush(QColor(200, 40, 40));
         }
@@ -66,8 +67,8 @@ QVariant BacktestTradesModel::data(const QModelIndex& index, int role) const
     case ColQty:            return fmt6(t.quantity);
     case ColEntryPrice:     return fmt2(t.entryPrice);
     case ColExitPrice:      return fmt2(t.exitPrice);
-    case ColNetPnL:         return fmt2(t.netPnl);
-    case ColWinner:         return (t.winner) ? "Win" : "Lose";
+    case ColNetPnl:         return fmt2(t.netPnl);
+    case ColWinner:         return (t.winner) ? "Win" : "Loss";
     default:                return {};
     }
 }
@@ -82,10 +83,10 @@ QVariant BacktestTradesModel::headerData(int section, Qt::Orientation orientatio
     case ColExitTime:       return "Exit Time";
     case ColSide:           return "Side";
     case ColQty:            return "Qty";
-    case ColEntryPrice:     return "Open";
-    case ColExitPrice:      return "Close";
-    case ColNetPnL:         return "PnL";
-    case ColWinner:         return "Status";
+    case ColEntryPrice:     return "Entry";
+    case ColExitPrice:      return "Exit";
+    case ColNetPnl:         return "Net PnL";
+    case ColWinner:         return "Winner";
     default:                return {};
     }
 }

@@ -19,6 +19,25 @@ BacktestController::BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExch
     connect(ui_->btCbXAxis, &QComboBox::currentTextChanged, this, &BacktestController::onGraphAxisChanged);
     connect(ui_->btCbYAxis, &QComboBox::currentTextChanged, this, &BacktestController::onGraphAxisChanged);
 
+    tradesModel_ = new BacktestTradesModel(this);
+    ui_->btTableTrades->setModel(tradesModel_);
+    ui_->btTableTrades->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui_->btTableTrades->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui_->btTableTrades->setAlternatingRowColors(true);
+
+    auto* header = ui_->btTableTrades->horizontalHeader();
+    header->setVisible(true);
+    header->setSectionResizeMode(QHeaderView::Interactive);
+
+    header->setSectionResizeMode(BacktestTradesModel::ColEntryTime, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(BacktestTradesModel::ColExitTime, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(BacktestTradesModel::ColSide, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(BacktestTradesModel::ColQty, QHeaderView::ResizeToContents);
+
+    header->setSectionResizeMode(BacktestTradesModel::ColEntryPrice, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(BacktestTradesModel::ColExitPrice, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(BacktestTradesModel::ColNetPnl, QHeaderView::Stretch);
+    header->setSectionResizeMode(BacktestTradesModel::ColWinner, QHeaderView::ResizeToContents);
 }
 
 std::vector<Candle> BacktestController::loadHistory(const HistoryRequest& rec) const {
@@ -131,6 +150,7 @@ void BacktestController::onStart() {
                     ", end equity =" << lastResult_.equityCurve.back().equity;
     }
     setResultsToUi();
+    setTradesToUi();
 }
 
 void BacktestController::onBuildGraph() {
@@ -280,4 +300,8 @@ void BacktestController::setResultsToUi() {
     ui_->btNetPnl->setText(QString::number(lastResult_.stats.netPnl, 'f', 2));
     ui_->btMaxDD->setText(QString::number(lastResult_.stats.MaxDDPct, 'f', 2)); // пока еще не считается
     ui_->btEcpecrancy->setText(QString::number(lastResult_.stats.expectancy, 'f', 2));
+}
+
+void BacktestController::setTradesToUi() {
+    tradesModel_->setTrades(lastResult_.trades);
 }
