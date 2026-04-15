@@ -128,6 +128,20 @@ std::vector<GraphPoint> BacktestController::buildDrawdownGraph(const BacktestRes
     return points;
 }
 
+std::vector<GraphPoint> BacktestController::buildPnlByTradeGraph(const BacktestResult& res, const GraphRequest& gr) const {
+    if (res.equityCurve.empty()) return {};
+    std::vector<GraphPoint> points;
+    std::vector<BacktestTrade> filteredTrades = filterTrades(res, gr);
+    points.reserve(filteredTrades.size());
+    for (int i = 0; i < static_cast<int>(filteredTrades.size()); ++i) {
+        GraphPoint p;
+        p.x = static_cast<double>(i);
+        p.y = filteredTrades[i].netPnl;
+        points.push_back(p);
+    }
+    return points;
+}
+
 GraphRequest BacktestController::buildGraphRequest() const {
     if (!ui_) return {};
     GraphRequest gr;
@@ -195,6 +209,16 @@ void BacktestController::onBuildGraph() {
             graphWidget_->setPoints(points);
             break;
         }
+    case GraphType::PnlByTrade : {
+        std::vector<GraphPoint> points = buildPnlByTradeGraph(lastResult_, gr);
+        qDebug() << "[BUILD DD GRAPH]   size =" << points.size();
+        if (!points.empty()) {
+            qDebug() << "[BUILD DD GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
+                        ", last x =" << points.back().x << ", last y =" << points.back().y;
+        }
+        graphWidget_->setPoints(points);
+        break;
+    }
         default : {
             graphWidget_->clearPoints();
             qDebug() << "[BUILD BT GRAPH] graph type not implemented";
