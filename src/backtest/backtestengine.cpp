@@ -11,6 +11,30 @@ static StrategyConfig buildStrategyConfig(const BacktestRequest& request) {
     return cfg;
 }
 
+static double calcBacktestQty(const RiskSettings& risk, double markPrice, double equityUsdt) {
+    if (markPrice <= 0.0) {
+        return 0.0;
+    }
+
+    double notionalUsdt = 0.0;
+
+    if (risk.mode == RiskMode::FixedUsdt) {
+        notionalUsdt = risk.maxPosUsdt;
+    } else {
+        notionalUsdt = equityUsdt * (risk.riskPct / 100.0);
+    }
+
+    if (notionalUsdt <= 0.0) {
+        return 0.0;
+    }
+
+    notionalUsdt *= std::max(1, risk.leverage);
+
+    const double qty = notionalUsdt / markPrice;
+    return (qty > 0.0) ? qty : 0.0;
+}
+
+
 BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::vector<Candle>& candles) const {
     BacktestResult res;
     if (candles.empty()) {
@@ -61,6 +85,7 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
     BacktestTrade btTrade;
     bool inLong = false;
     bool inShort = false;
+    double currentEquity = request.initialbalance;
 
     for (int i = warmup; i < static_cast<int>(candles.size()); ++i) {
         series->addCandle(candles[i]);
@@ -73,6 +98,7 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
                 btTrade.entryPrice = candles[i].close_;
                 btTrade.entryTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
                 btTrade.side = BacktestTradeSide::Long;
+                btTrade.quantity = calcBacktestQty(request.backtestRisk, btTrade.entryPrice, currentEquity);
                 inLong = true;
             }
             if (s.type == StrategySignalType::EnterShort && !inLong && !inShort) {
@@ -80,14 +106,15 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
                 btTrade.entryPrice = candles[i].close_;
                 btTrade.entryTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
                 btTrade.side = BacktestTradeSide::Short;
+                btTrade.quantity = calcBacktestQty(request.backtestRisk, btTrade.entryPrice, currentEquity);
                 inShort = true;
             }
             if (s.type == StrategySignalType::ExitLong && inLong && !inShort) {
                 btTrade.exitPrice = candles[i].close_;
                 btTrade.exitTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
-                btTrade.quantity = 1.0;
-                btTrade.grossPnl = btTrade.exitPrice - btTrade.entryPrice;
+                btTrade.grossPnl = (btTrade.exitPrice - btTrade.entryPrice) * btTrade.quantity;
                 btTrade.netPnl = btTrade.grossPnl;
+                currentEquity += btTrade.netPnl;
                 btTrade.winner = btTrade.netPnl > 0.0;
                 res.trades.push_back(std::move(btTrade));
                 btTrade = BacktestTrade {};
@@ -97,9 +124,9 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
             if (s.type == StrategySignalType::ExitShort && !inLong && inShort) {
                 btTrade.exitPrice = candles[i].close_;
                 btTrade.exitTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
-                btTrade.quantity = 1.0;
-                btTrade.grossPnl = btTrade.entryPrice - btTrade.exitPrice;
+                btTrade.grossPnl = (btTrade.entryPrice - btTrade.exitPrice) * btTrade.quantity;
                 btTrade.netPnl = btTrade.grossPnl;
+                currentEquity += btTrade.netPnl;
                 btTrade.winner = btTrade.netPnl > 0.0;
                 res.trades.push_back(std::move(btTrade));
                 btTrade = BacktestTrade {};
@@ -142,15 +169,15 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
                 ", LossSum = " << lossSum <<
                 ", Winrate = " << res.stats.winratePct;
 
-    double currentEquity = request.initialbalance;
+    double equityCurveEquity = request.initialbalance;
     for (const auto& a : res.trades) {
-        currentEquity += a.netPnl;
+        equityCurveEquity += a.netPnl;
         EquityPoint p;
         p.time = a.exitTime;
-        p.equity = currentEquity;
+        p.equity = equityCurveEquity;
         peakEquity = std::max(peakEquity, p.equity);
         p.drawdown = peakEquity - p.equity;
-        p.cumulativePnl = currentEquity - request.initialbalance;
+        p.cumulativePnl = equityCurveEquity - request.initialbalance;
         res.equityCurve.push_back(p);
         double ddPct = 0.0;
         if (peakEquity > 0.0) {
@@ -158,6 +185,7 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
         }
         res.stats.MaxDDPct = std::max(res.stats.MaxDDPct, ddPct);
     }
+
     res.stats.netPnl = currentEquity - request.initialbalance;
 
     res.state = BacktestState::Completed;
