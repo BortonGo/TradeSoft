@@ -93,15 +93,17 @@ BacktestRequest BacktestController::buildBacktestRequest(const HistoryRequest& h
 std::vector<GraphPoint> BacktestController::buildEquityGraph(const BacktestResult& res, const GraphRequest& gr) const {
     if (res.equityCurve.empty()) return {};
     std::vector<GraphPoint> points;
-    points.reserve(res.equityCurve.size());
-    for (int i = 0; i < static_cast<int>(res.equityCurve.size()); ++i) {
+    std::vector<BacktestTrade> filteredTrades = filterTrades(res, gr);
+    std::vector<EquityPoint> filteredCurve = buildEquityCurveFromTrades(filteredTrades, lastRequest_.initialbalance);
+    points.reserve(filteredCurve.size());
+    for (int i = 0; i < static_cast<int>(filteredCurve.size()); ++i) {
         GraphPoint p;
         if (gr.xAxis == GraphAxis::TradeIndex) {
             p.x = static_cast<double>(i);
         } else {
-            p.x = static_cast<double>(res.equityCurve[i].time.toMSecsSinceEpoch());
+            p.x = static_cast<double>(filteredCurve[i].time.toMSecsSinceEpoch());
         }
-        p.y = res.equityCurve[i].equity;
+        p.y = filteredCurve[i].equity;
         points.push_back(p);
     }
     return points;
@@ -110,15 +112,17 @@ std::vector<GraphPoint> BacktestController::buildEquityGraph(const BacktestResul
 std::vector<GraphPoint> BacktestController::buildDrawdownGraph(const BacktestResult& res, const GraphRequest& gr) const {
     if (res.equityCurve.empty()) return {};
     std::vector<GraphPoint> points;
-    points.reserve(res.equityCurve.size());
-    for (int i = 0; i < static_cast<int>(res.equityCurve.size()); ++i) {
+    std::vector<BacktestTrade> filteredTrades = filterTrades(res, gr);
+    std::vector<EquityPoint> filteredCurve = buildEquityCurveFromTrades(filteredTrades, lastRequest_.initialbalance);
+    points.reserve(filteredCurve.size());
+    for (int i = 0; i < static_cast<int>(filteredCurve.size()); ++i) {
         GraphPoint p;
         if (gr.xAxis == GraphAxis::TradeIndex) {
             p.x = static_cast<double>(i);
         } else {
-            p.x = static_cast<double>(res.equityCurve[i].time.toMSecsSinceEpoch());
+            p.x = static_cast<double>(filteredCurve[i].time.toMSecsSinceEpoch());
         }
-        p.y = res.equityCurve[i].drawdown;
+        p.y = filteredCurve[i].drawdown;
         points.push_back(p);
     }
     return points;
@@ -145,6 +149,7 @@ void BacktestController::onStart() {
     HistoryRequest req = buildHistoryRequest();
     const std::vector<Candle> candles = loadHistory(req);
     BacktestRequest BtReq = buildBacktestRequest(req);
+    lastRequest_ = BtReq;
     lastResult_ = engine_.run(BtReq, candles);
     hasResult_ = true;
     qDebug() << "[BACKTEST] START  symbol =" << req.symbolId << ", tf =" << toUiString(req.timeframe)
@@ -317,4 +322,34 @@ void BacktestController::setResultsToUi() {
 
 void BacktestController::setTradesToUi() {
     tradesModel_->setTrades(lastResult_.trades);
+}
+
+std::vector<BacktestTrade> BacktestController::filterTrades(const BacktestResult& res, const GraphRequest& gr) const {
+    std::vector<BacktestTrade> result;
+    for (const auto& a : res.trades) {
+        if (gr.longOnly && a.side != BacktestTradeSide::Long) continue;
+        if (gr.shortOnly && a.side != BacktestTradeSide::Short) continue;
+        if (gr.winnersOnly && !a.winner) continue;
+        if (gr.losersOnly && a.winner) continue;
+        result.push_back(a);
+    }
+    return result;
+}
+
+std::vector<EquityPoint> BacktestController::buildEquityCurveFromTrades(const std::vector<BacktestTrade>& trades, double initialbalance) const {
+    std::vector<EquityPoint> result;
+    result.reserve(trades.size());
+    double peakEquity = initialbalance;
+    double currentEquity = initialbalance;
+    for (const auto& a : trades) {
+        currentEquity += a.netPnl;
+        EquityPoint p;
+        p.time = a.exitTime;
+        p.equity = currentEquity;
+        peakEquity = std::max(peakEquity, p.equity);
+        p.drawdown = peakEquity - p.equity;
+        p.cumulativePnl = currentEquity - initialbalance;
+        result.push_back(p);
+    }
+    return result;
 }

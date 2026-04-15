@@ -20,6 +20,7 @@ class BacktestController final : public QObject {
     BacktestEngine engine_;
     BacktestWidget* graphWidget_ = nullptr;
 
+    BacktestRequest lastRequest_;
     BacktestResult lastResult_;
     bool hasResult_ = false;
 public:
@@ -42,5 +43,7 @@ private:
     GraphRequest buildGraphRequest() const;
     void setResultsToUi();
     void setTradesToUi();
+    std::vector<BacktestTrade> filterTrades(const BacktestResult& res, const GraphRequest& gr) const;
+    std::vector<EquityPoint> buildEquityCurveFromTrades(const std::vector<BacktestTrade>& trades, double initialBalance) const;
 };
 
