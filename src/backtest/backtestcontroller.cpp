@@ -38,6 +38,15 @@ BacktestController::BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExch
     header->setSectionResizeMode(BacktestTradesModel::ColExitPrice, QHeaderView::ResizeToContents);
     header->setSectionResizeMode(BacktestTradesModel::ColNetPnl, QHeaderView::Stretch);
     header->setSectionResizeMode(BacktestTradesModel::ColWinner, QHeaderView::ResizeToContents);
+
+    graphWidget_ = new BacktestWidget(ui_->backtestWidget);
+    auto* layout = qobject_cast<QVBoxLayout*>(ui_->backtestWidget->layout());
+    if (!layout) {
+        layout = new QVBoxLayout(ui_->backtestWidget);
+        layout->setContentsMargins(0, 0, 0, 0);
+    }
+
+    layout->addWidget(graphWidget_);
 }
 
 std::vector<Candle> BacktestController::loadHistory(const HistoryRequest& rec) const {
@@ -168,6 +177,7 @@ void BacktestController::onBuildGraph() {
                 qDebug() << "[BUILD EQ GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
                             ", last x =" << points.back().x << ", last y =" << points.back().y;
             }
+            graphWidget_->setPoints(points);
             break;
         }
         case GraphType::DrawdownCurve : {
@@ -177,10 +187,13 @@ void BacktestController::onBuildGraph() {
                 qDebug() << "[BUILD DD GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
                             ", last x =" << points.back().x << ", last y =" << points.back().y;
             }
+            graphWidget_->setPoints(points);
             break;
         }
         default : {
-             qDebug() << "[BUILD BT GRAPH] graph type not implemented";
+            graphWidget_->clearPoints();
+            qDebug() << "[BUILD BT GRAPH] graph type not implemented";
+            break;
         }
     }
 }

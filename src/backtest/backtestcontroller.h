@@ -4,6 +4,7 @@
 #include "backtestmarketdataservice.h"
 #include "ui/models/backtesttradesmodel.h"
 #include "backtestengine.h"
+#include "backtestwidget.h"
 #include <memory>
 #include <vector>
 
@@ -17,6 +18,7 @@ class BacktestController final : public QObject {
     std::shared_ptr<IExchangeClient> exchange_;
     std::unique_ptr<BacktestMarketDataService> marketDataService_;
     BacktestEngine engine_;
+    BacktestWidget* graphWidget_ = nullptr;
 
     BacktestResult lastResult_;
     bool hasResult_ = false;
