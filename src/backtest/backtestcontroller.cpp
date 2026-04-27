@@ -155,10 +155,6 @@ GraphRequest BacktestController::buildGraphRequest() const {
     return gr;
 }
 
-/*std::vector<Candle> BacktestController::loadHistoryFromUi() const {
-    return loadHistory(buildHistoryRequest());
-}*/
-
 void BacktestController::onStart() {
     HistoryRequest req = buildHistoryRequest();
     const std::vector<Candle> candles = loadHistory(req);

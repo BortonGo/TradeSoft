@@ -25,7 +25,6 @@ class BacktestController final : public QObject {
     bool hasResult_ = false;
 public:
     explicit BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExchangeClient> exchange, QObject* parent = nullptr);
-    //std::vector<Candle> loadHistoryFromUi() const; // возможно понадобится в дальнейшем. На данном этапе - нет
 
 public slots:
     void onStart();

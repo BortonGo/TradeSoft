@@ -34,6 +34,12 @@ static double calcBacktestQty(const RiskSettings& risk, double markPrice, double
     return (qty > 0.0) ? qty : 0.0;
 }
 
+static double calcTradeFee(double price, double feePct, double qty) {
+    if (price <= 0.0 || feePct <= 0.0 || qty <= 0.0) {
+        return 0.0;
+    }
+    return price * qty * (feePct / 100.0);
+}
 
 BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::vector<Candle>& candles) const {
     BacktestResult res;
@@ -113,19 +119,27 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
                 btTrade.exitPrice = candles[i].close_;
                 btTrade.exitTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
                 btTrade.grossPnl = (btTrade.exitPrice - btTrade.entryPrice) * btTrade.quantity;
-                btTrade.netPnl = btTrade.grossPnl;
+                const double entryFee = calcTradeFee(btTrade.entryPrice, request.backtestRisk.feePct, btTrade.quantity);
+                const double exitFee = calcTradeFee(btTrade.exitPrice, request.backtestRisk.feePct, btTrade.quantity);
+                btTrade.feePaid = entryFee + exitFee;
+                btTrade.netPnl = btTrade.grossPnl - btTrade.feePaid;
                 currentEquity += btTrade.netPnl;
                 btTrade.winner = btTrade.netPnl > 0.0;
                 res.trades.push_back(std::move(btTrade));
                 btTrade = BacktestTrade {};
                 inLong = false;
                 inShort = false;
+
             }
             if (s.type == StrategySignalType::ExitShort && !inLong && inShort) {
                 btTrade.exitPrice = candles[i].close_;
                 btTrade.exitTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
                 btTrade.grossPnl = (btTrade.entryPrice - btTrade.exitPrice) * btTrade.quantity;
-                btTrade.netPnl = btTrade.grossPnl;
+                const double entryFee = calcTradeFee(btTrade.entryPrice,request.backtestRisk.feePct, btTrade.quantity);
+                const double exitFee = calcTradeFee(btTrade.exitPrice, request.backtestRisk.feePct, btTrade.quantity);
+
+                btTrade.feePaid = entryFee + exitFee;
+                btTrade.netPnl = btTrade.grossPnl - btTrade.feePaid;
                 currentEquity += btTrade.netPnl;
                 btTrade.winner = btTrade.netPnl > 0.0;
                 res.trades.push_back(std::move(btTrade));
@@ -153,8 +167,8 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
     }
     if (res.stats.trades > 0) {
         res.stats.winratePct = 100.0 * static_cast<double>(winCount) / res.stats.trades;
-        res.stats.avgWin = (winCount > 0) ? winSum / winCount : 0;
-        res.stats.avgLoss = (lossCount > 0) ? lossSum / lossCount : 0;
+        res.stats.avgWin = (winCount > 0) ? winSum / winCount : 0.0;
+        res.stats.avgLoss = (lossCount > 0) ? lossSum / lossCount : 0.0;
         if (lossSum < 0.0) {
             res.stats.profitFactor = winSum / std::abs(lossSum);
         }
@@ -192,3 +206,4 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
 
     return res;
 }
+
