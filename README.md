@@ -121,7 +121,7 @@ UI
 - [x] Подключение биржевого клиента
 - [x] Обновление текущей свечи в realtime
 - [ ] WebSocket поток
-- [ ] Кэширование / локальное хранение данных
+- [x] Кэширование / локальное хранение данных
 - [ ] Повышение устойчивости data-layer
 
 ### Этап 3 — Аналитика и визуализация
@@ -200,6 +200,12 @@ ctest --test-dir build --output-on-failure
 - macOS: `~/Library/Application Support/BortonGo/TradeSoft/config.json`
 
 В нём можно менять дефолтный инструмент, таймфрейм, интервал realtime polling и список символов.
+
+### Кэш свечей
+
+Свечи для графика кэшируются локально, чтобы ускорить повторные запуски и иметь fallback при сетевой ошибке:
+
+- macOS: `~/Library/Caches/BortonGo/TradeSoft/marketdata`
 
 ---
 

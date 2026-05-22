@@ -9,12 +9,14 @@
 #include "indicators/donchian.h"
 #include "indicators/ema.h"
 #include "indicators/rsi.h"
+#include "service/marketdata/candlecache.h"
 
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <QDateTime>
 
 namespace {
 
@@ -163,6 +165,25 @@ void testBacktestValidation()
     require(noStrategy.state == BacktestState::Failed, "Backtest fails without selected strategy");
 }
 
+void testCandleCacheFreshness()
+{
+    std::vector<Candle> candles;
+    require(!CandleCache::isFresh(candles, Timeframe::M1), "CandleCache treats empty candles as stale");
+
+    Candle fresh = candle(100.0);
+    fresh.timestamp_ = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+    candles.push_back(fresh);
+    require(CandleCache::isFresh(candles, Timeframe::M1), "CandleCache treats current candle as fresh");
+
+    Candle stale = candle(100.0);
+    stale.timestamp_ = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch() - timeframeToMs(Timeframe::M1) * 10;
+    candles[0] = stale;
+    require(!CandleCache::isFresh(candles, Timeframe::M1), "CandleCache treats old candle as stale");
+
+    require(CandleCache::filePath("ETH/USDT", Timeframe::M1).contains("ETH_USDT_M1"),
+            "CandleCache sanitizes symbol path parts");
+}
+
 } // namespace
 
 int main()
@@ -173,6 +194,7 @@ int main()
     testDonchian();
     testRiskManager();
     testBacktestValidation();
+    testCandleCacheFreshness();
 
     std::cout << "All TradeSoft tests passed\n";
     return 0;

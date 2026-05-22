@@ -1,4 +1,5 @@
 #include "marketdataservice.h"
+#include "service/marketdata/candlecache.h"
 #include <iostream>
 #include <QDebug>
 #include <QtGlobal>
@@ -20,7 +21,26 @@ void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
         return;
     }
 
-    std::vector<Candle> candles = exchange_->fetchKlines(symbolId, tf);
+    std::vector<Candle> cachedCandles = CandleCache::load(symbolId, tf);
+    std::vector<Candle> candles;
+
+    if (CandleCache::isFresh(cachedCandles, tf)) {
+        candles = cachedCandles;
+        qDebug() << "[MarketDataService] Loaded fresh candles from cache"
+                 << symbolId << toUiString(tf) << candles.size();
+    } else {
+        candles = exchange_->fetchKlines(symbolId, tf);
+        if (!candles.empty()) {
+            CandleCache::save(symbolId, tf, candles);
+            qDebug() << "[MarketDataService] Saved candles to cache"
+                     << symbolId << toUiString(tf) << candles.size();
+        } else if (!cachedCandles.empty()) {
+            candles = cachedCandles;
+            qWarning() << "[MarketDataService] Exchange returned no candles; using stale cache"
+                       << symbolId << toUiString(tf) << candles.size();
+        }
+    }
+
     std::shared_ptr<CandleSeries> series = std::make_shared<CandleSeries> (symbolId, tf);
 
     for(const auto& c : candles) {
@@ -101,6 +121,7 @@ void MarketDataService::onRtTick()
                 if (fresh.timestamp_ == last.timestamp_) {
                     fresh.isFinal_ = false;
                     currentSeries_->updateLastCandle(fresh);
+                    CandleCache::save(rtSymbolId_, rtTimeframe_, currentSeries_->getCandles());
                     emit signal_candleUpdated(fresh);
                     return;
                 }
@@ -113,6 +134,7 @@ void MarketDataService::onRtTick()
 
                     fresh.isFinal_ = false;
                     currentSeries_->addCandle(fresh);
+                    CandleCache::save(rtSymbolId_, rtTimeframe_, currentSeries_->getCandles());
                     emit signal_candleUpdated(fresh);
                     return;
                 }
@@ -124,4 +146,3 @@ void MarketDataService::onRtTick()
         return;
     }
 }
-
