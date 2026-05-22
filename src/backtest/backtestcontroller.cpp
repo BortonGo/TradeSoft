@@ -175,6 +175,7 @@ void BacktestController::onStart() {
     }
     setResultsToUi();
     setTradesToUi();
+    ui_->editBtCandles->setText(QString::number(candles.size()));
 }
 
 void BacktestController::onBuildGraph() {

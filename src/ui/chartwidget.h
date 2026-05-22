@@ -7,10 +7,10 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <memory>
-#include "core\candleseries.h"
-#include "core\candle.h"
-#include "core\timeframe.h"
-#include "indicators\indicatortypes.h"
+#include "core/candleseries.h"
+#include "core/candle.h"
+#include "core/timeframe.h"
+#include "indicators/indicatortypes.h"
 
 class ChartWidget final : public QWidget {
     Q_OBJECT
@@ -27,10 +27,10 @@ class ChartWidget final : public QWidget {
     int candleGap_ = 2;
 
 
-    int leftPadding_ = 10;
-    int rightPadding_ = 60;
-    int topPadding_ = 10;
-    int bottomPadding_ = 20;
+    int leftPadding_ = 12;
+    int rightPadding_ = 78;
+    int topPadding_ = 8;
+    int bottomPadding_ = 30;
 
     bool followRight_ = true;
 
@@ -86,5 +86,4 @@ private:
     int clampCandleWidth(int width) const;
 
 };
-
 

@@ -157,11 +157,35 @@ UI
 - [ ] Проверка стратегий на истории
 
 ### Этап 6 — Инфраструктура
-- [ ] CMake
+- [x] CMake
 - [ ] Логирование
 - [ ] Конфигурация
-- [ ] Unit-тесты
+- [x] Unit-тесты
 - [ ] CI/CD
+
+---
+
+## Сборка на macOS
+
+Установи Qt и CMake, затем собери проект из отдельной build-директории:
+
+```bash
+brew install cmake qt
+cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
+cmake --build build
+open build/TradeSoft.app
+```
+
+Если Qt установлен не через Homebrew, передай путь к Qt в `CMAKE_PREFIX_PATH`, например `/Users/you/Qt/6.7.0/macos`.
+
+### Тесты
+
+Тесты включены в стандартную CMake-сборку:
+
+```bash
+cmake --build build --target TradeSoftTests
+ctest --test-dir build --output-on-failure
+```
 
 ---
 

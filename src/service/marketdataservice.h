@@ -1,6 +1,6 @@
 #pragma once
-#include <exchange\iexchangeclient.h>
-#include <core\candleseries.h>
+#include <exchange/iexchangeclient.h>
+#include <core/candleseries.h>
 #include <memory>
 #include <QObject>
 #include <QTimer>

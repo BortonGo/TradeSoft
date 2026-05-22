@@ -1,12 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "core\timeframe.h"
-#include "core\symbol.h"
-#include "service\marketdataservice.h"
-#include "exchange\bingxswapclient.h"
+#include "core/timeframe.h"
+#include "core/symbol.h"
+#include "service/marketdataservice.h"
+#include "exchange/bingxswapclient.h"
 #include "controllers/strategycontroller.h"
-#include "ui\chartwidget.h"
-#include "ui\indicatordialog.h"
+#include "ui/chartwidget.h"
+#include "ui/indicatordialog.h"
 
 #include <QStandardItemModel>
 #include <QHeaderView>

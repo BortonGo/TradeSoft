@@ -1,6 +1,7 @@
-#include "ui\mainwindow.h"
-#include "core\candleseries.h"
+#include "ui/mainwindow.h"
+#include "core/candleseries.h"
 #include <QApplication>
+#include <QIcon>
 #include <QMetaType>
 #include <QSslSocket>
 #include <QDebug>

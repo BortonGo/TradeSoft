@@ -1,5 +1,5 @@
 #include "backtestengine.h"
-#include "domain\strategy\strategyfactory.h"
+#include "domain/strategy/strategyfactory.h"
 #include <QDebug>
 #include <cmath>
 

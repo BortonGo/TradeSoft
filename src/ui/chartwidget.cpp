@@ -1,14 +1,43 @@
-#include "ui\chartwidget.h"
+#include "ui/chartwidget.h"
 #include <limits>
 #include <algorithm>
 #include <cmath>
 #include <QPainter>
+#include <QPainterPath>
 #include <QDebug>
 #include <QDateTime>
 #include <QFontMetrics>
+#include <QTimeZone>
+#include <QtGlobal>
 
 ChartWidget::ChartWidget(QWidget* parent) : QWidget(parent) {
     candleWidthAcc_ = static_cast<double>(candleWidth_);
+}
+
+static int textWidth(const QFontMetrics& fm, const QString& text) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    return fm.horizontalAdvance(text);
+#else
+    return fm.width(text);
+#endif
+}
+
+static QPointF wheelPosition(const QWheelEvent* event) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    return event->position();
+#else
+    return event->posF();
+#endif
+}
+
+static int priceDecimals(double stepPrice) {
+    if (stepPrice <= 0.0 || !std::isfinite(stepPrice)) {
+        return 2;
+    }
+    if (stepPrice < 1.0) {
+        return qBound(2, static_cast<int>(std::ceil(-std::log10(stepPrice))) + 1, 8);
+    }
+    return 2;
 }
 
 static bool calcVisibleMinMax(const CandleSeries& s, int first, int last, double& outMinLow, double& outMaxHigh) {
@@ -181,7 +210,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         const int h = 18;
 
         const QFontMetrics fm(painter.font());
-        const int w = fm.width(text) + padX * 2;
+        const int w = textWidth(fm, text) + padX * 2;
 
         int x = plotPrice.right() + 6;
         int yTop = y - h / 2;
@@ -478,11 +507,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
             const double stepPrice = niceM * pow10;
 
             // decimals for beautiful numbers
-            int decimals = 2;
-            if (stepPrice < 1.0) {
-                decimals = static_cast<int>(std::ceil(-std::log10(stepPrice))) + 1;
-                decimals = qBound(2, decimals, 8);
-            }
+            const int decimals = priceDecimals(stepPrice);
 
             // first tick
             const double firstTick = std::ceil(minLow / stepPrice) * stepPrice;
@@ -530,13 +555,15 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         const double lastPrice = candles.back().close_;
         const int y = priceToY(lastPrice);
 
-        const QString text = QString::number(lastPrice, 'f', 2);
+        const double priceRange = maxHigh - minLow;
+        const double roughStep = (priceRange > 0.0) ? priceRange / 8.0 : lastPrice;
+        const QString text = QString::number(lastPrice, 'f', priceDecimals(roughStep));
 
         const int padX = 3;
         const int h = 18;
 
         const QFontMetrics fm(painter.font());
-        const int w = fm.boundingRect(text).width() + padX * 2;
+        const int w = textWidth(fm, text) + padX * 2;
 
         int x = plotPrice.right() + 6;
         int yTop = y - h / 2;
@@ -581,7 +608,11 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
         int lastMajorRight = std::numeric_limits<int>::min();
 
         auto toDt = [](qint64 ms){
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+            return QDateTime::fromMSecsSinceEpoch(ms, QTimeZone::UTC);
+#else
             return QDateTime::fromMSecsSinceEpoch(ms, Qt::UTC);
+#endif
         };
 
         const QFontMetrics fm(painter.font());
@@ -630,7 +661,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
                 label = dt.toString("dd MMM");
             }
 
-            const int textW = fm.width(label);
+            const int textW = textWidth(fm, label);
             const int textH = fm.height();
 
             QRect textRect(xCenter - textW / 2, plotPrice.bottom() + 6, textW + 2, textH);
@@ -670,7 +701,7 @@ void ChartWidget::paintEvent(QPaintEvent* event) {
                 label = dt.toString("HH:mm");
             }
 
-            const int textW = fm.width(label);
+            const int textW = textWidth(fm, label);
             const int textH = fm.height();
 
             QRect textRect(xCenter - textW / 2, plotPrice.bottom() + 6, textW + 2, textH);
@@ -815,7 +846,7 @@ void ChartWidget::wheelEvent(QWheelEvent* event) {
     }
 
     const QRectF plotArea = plotRect();
-    double cursorXInPlot = event->posF().x() - plotArea.left();
+    double cursorXInPlot = wheelPosition(event).x() - plotArea.left();
 
     if (cursorXInPlot < 0.0) {
         cursorXInPlot = 0;
@@ -985,5 +1016,3 @@ int ChartWidget::clampCandleWidth(int width) const {
     }
     return width;
 }
-
-

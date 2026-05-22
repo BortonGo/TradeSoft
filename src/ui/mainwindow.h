@@ -1,7 +1,7 @@
 #pragma once
 #include <QMainWindow>
-#include "service\marketdataservice.h"
-#include "service\indicatorservice.h"
+#include "service/marketdataservice.h"
+#include "service/indicatorservice.h"
 #include "backtest/backtestcontroller.h"
 #include "controllers/strategycontroller.h"
 #include "domain/account/account.h"

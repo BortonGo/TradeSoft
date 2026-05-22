@@ -1,6 +1,6 @@
 #pragma once
 #include <QObject>
-#include "exchange\iexchangeclient.h"
+#include "exchange/iexchangeclient.h"
 #include "backtestmarketdataservice.h"
 #include "ui/models/backtesttradesmodel.h"
 #include "backtestengine.h"

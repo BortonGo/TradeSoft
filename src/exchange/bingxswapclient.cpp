@@ -17,6 +17,15 @@
 #include <algorithm>
 
 // --- helpers ---
+static void enableRedirects(QNetworkRequest& req) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                     QNetworkRequest::NoLessSafeRedirectPolicy);
+#else
+    req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+#endif
+}
+
 static QString tfToBingXInterval(Timeframe tf) {
     switch (tf) {
     case Timeframe::M1:  return "1m";
@@ -80,7 +89,7 @@ std::vector<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timefr
     req.setHeader(QNetworkRequest::UserAgentHeader, "TradeSoft-MVP/1.0");
     req.setRawHeader("Accept", "application/json");
     req.setRawHeader("Connection", "close");
-    req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    enableRedirects(req);
 
     QNetworkReply* reply = mgr_->get(req);
 
@@ -229,7 +238,7 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         req.setHeader(QNetworkRequest::UserAgentHeader, "TradeSoft-MVP/1.0");
         req.setRawHeader("Accept", "application/json");
         req.setRawHeader("Connection", "close");
-        req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+        enableRedirects(req);
 
         QNetworkReply* reply = mgr_->get(req);
 
@@ -380,7 +389,7 @@ void BingXSwapClient::fetchLastKlineAsync(const QString& symbolId, Timeframe tf,
     req.setHeader(QNetworkRequest::UserAgentHeader, "TradeSoft-MVP/1.0");
     req.setRawHeader("Accept", "application/json");
     req.setRawHeader("Connection", "close");
-    req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    enableRedirects(req);
 
     QNetworkReply* reply = mgr_->get(req);
 
@@ -450,4 +459,3 @@ void BingXSwapClient::fetchLastKlineAsync(const QString& symbolId, Timeframe tf,
         if (cb) cb(true, best);
     });
 }
-
