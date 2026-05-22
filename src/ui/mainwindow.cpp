@@ -10,6 +10,7 @@
 
 #include <QStandardItemModel>
 #include <QHeaderView>
+#include <QDebug>
 
 #include <memory>
 
@@ -18,6 +19,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    config_ = AppConfig::load();
+    qDebug() << "[AppConfig] Loaded from" << AppConfig::configFilePath()
+             << "defaultSymbol=" << config_.defaultSymbolId
+             << "defaultTimeframe=" << toUiString(config_.defaultTimeframe)
+             << "pollingMs=" << config_.realtimePollingMs;
 
     // table model, to header dont crash (idk why crash)
     ui->tableTrades->setModel(new QStandardItemModel(0, 7, ui->tableTrades));
@@ -55,9 +61,29 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboSymbol->clear();
     ui->cbBtSymbol->clear();
 
-    for(const Symbol& s : someSymbols()) {
+    for(const Symbol& s : config_.symbols) {
         ui->comboSymbol->addItem(s.display(), s.id());
         ui->cbBtSymbol->addItem(s.display(), s.id());
+    }
+
+    const int defaultSymbolIdx = ui->comboSymbol->findData(config_.defaultSymbolId);
+    if (defaultSymbolIdx >= 0) {
+        ui->comboSymbol->setCurrentIndex(defaultSymbolIdx);
+        ui->cbBtSymbol->setCurrentIndex(defaultSymbolIdx);
+    }
+
+    const int defaultTfValue = static_cast<int>(config_.defaultTimeframe);
+    const int defaultChartTfIdx = ui->comboTimeframe->findData(defaultTfValue);
+    if (defaultChartTfIdx >= 0) {
+        ui->comboTimeframe->setCurrentIndex(defaultChartTfIdx);
+    }
+    const int defaultStrategyTfIdx = ui->cbStrategyTf->findData(defaultTfValue);
+    if (defaultStrategyTfIdx >= 0) {
+        ui->cbStrategyTf->setCurrentIndex(defaultStrategyTfIdx);
+    }
+    const int defaultBacktestTfIdx = ui->cbBtTimeframe->findData(defaultTfValue);
+    if (defaultBacktestTfIdx >= 0) {
+        ui->cbBtTimeframe->setCurrentIndex(defaultBacktestTfIdx);
     }
 
     // Account
@@ -134,10 +160,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //MarketDataService
     MarketDataService* market = new MarketDataService(ex, this);
+    market->setRealtimePollingMs(config_.realtimePollingMs);
     marketData_ = market;
 
     //MarketDataStrategy
     marketDataStrategy_ = new MarketDataService(ex, this);
+    marketDataStrategy_->setRealtimePollingMs(config_.realtimePollingMs);
 
     // StrategyController
     strategyController_ = new StrategyController(ui, marketDataStrategy_, this);

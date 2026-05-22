@@ -1,5 +1,6 @@
 #pragma once
 #include <QMainWindow>
+#include "core/appconfig.h"
 #include "service/marketdataservice.h"
 #include "service/indicatorservice.h"
 #include "backtest/backtestcontroller.h"
@@ -20,6 +21,7 @@ class MainWindow : public QMainWindow {
     BacktestController* backtestController = nullptr;
 
     AccountStore accounts_;
+    AppConfig config_;
 
 private slots:
     void on_comboSymbol_currentIndexChanged(int index);
@@ -38,5 +40,4 @@ public:
 private:
     void reloadAndStart();
 };
-
 

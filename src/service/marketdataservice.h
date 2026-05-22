@@ -17,6 +17,7 @@ class MarketDataService final : public QObject {
 
     bool useExchangeRealtime_ = false;
     bool requestInFlight_ = false;
+    int realtimePollingMs_ = 1000;
 
 
 public:
@@ -25,6 +26,7 @@ public:
     void loadHistory(const QString& symbolId, Timeframe tf);
     void startRealTime();
     void stopRealTime();
+    void setRealtimePollingMs(int intervalMs);
 
 signals:
 
@@ -36,4 +38,3 @@ signals:
 private slots:
     void onRtTick();
 };
-

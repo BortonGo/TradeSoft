@@ -1,6 +1,7 @@
 #include "marketdataservice.h"
 #include <iostream>
 #include <QDebug>
+#include <QtGlobal>
 
 MarketDataService::MarketDataService(std::shared_ptr<IExchangeClient> exchange, QObject *parent) :
     QObject(parent), exchange_(exchange)
@@ -50,10 +51,18 @@ void MarketDataService::startRealTime()
         connect(rtTimer_, &QTimer::timeout, this, &MarketDataService::onRtTick);
     }
 
-    rtTimer_->setInterval(1000);
+    rtTimer_->setInterval(realtimePollingMs_);
 
     if (!rtTimer_->isActive())
         rtTimer_->start();
+}
+
+void MarketDataService::setRealtimePollingMs(int intervalMs)
+{
+    realtimePollingMs_ = qBound(250, intervalMs, 60000);
+    if (rtTimer_) {
+        rtTimer_->setInterval(realtimePollingMs_);
+    }
 }
 
 void MarketDataService::stopRealTime() {
@@ -115,5 +124,4 @@ void MarketDataService::onRtTick()
         return;
     }
 }
-
 

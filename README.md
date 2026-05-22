@@ -158,10 +158,10 @@ UI
 
 ### Этап 6 — Инфраструктура
 - [x] CMake
-- [ ] Логирование
-- [ ] Конфигурация
+- [x] Логирование
+- [x] Конфигурация
 - [x] Unit-тесты
-- [ ] CI/CD
+- [x] CI/CD
 
 ---
 
@@ -186,6 +186,20 @@ open build/TradeSoft.app
 cmake --build build --target TradeSoftTests
 ctest --test-dir build --output-on-failure
 ```
+
+### Логи
+
+При запуске приложение пишет Qt-логи в пользовательскую папку приложения:
+
+- macOS: `~/Library/Application Support/BortonGo/TradeSoft/tradesoft.log`
+
+### Конфигурация
+
+При первом запуске создаётся JSON-конфиг:
+
+- macOS: `~/Library/Application Support/BortonGo/TradeSoft/config.json`
+
+В нём можно менять дефолтный инструмент, таймфрейм, интервал realtime polling и список символов.
 
 ---
 

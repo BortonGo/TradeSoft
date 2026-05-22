@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  macos-tests:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install cmake qt
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
+
+      - name: Build tests
+        run: cmake --build build --target TradeSoftTests
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure

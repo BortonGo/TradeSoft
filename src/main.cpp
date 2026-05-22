@@ -1,5 +1,6 @@
 #include "ui/mainwindow.h"
 #include "core/candleseries.h"
+#include "core/logging.h"
 #include <QApplication>
 #include <QIcon>
 #include <QMetaType>
@@ -14,6 +15,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QCoreApplication::setOrganizationName("BortonGo");
+    QCoreApplication::setApplicationName("TradeSoft");
+    AppLogging::install();
+
     QIcon icon(":/icons/resources/TradeSoftLogo.ico");
     a.setWindowIcon(icon);
     qRegisterMetaType<std::shared_ptr<CandleSeries>>("std::shared_ptr<CandleSeries>");
@@ -24,6 +29,7 @@ int main(int argc, char *argv[])
     qDebug() << "SSL supported:" << QSslSocket::supportsSsl();
     qDebug() << "SSL build:" << QSslSocket::sslLibraryBuildVersionString();
     qDebug() << "SSL runtime:" << QSslSocket::sslLibraryVersionString();
+    qDebug() << "Log file:" << AppLogging::logFilePath();
 
     return a.exec();
 }
