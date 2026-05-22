@@ -18,6 +18,7 @@ class MarketDataService final : public QObject {
     bool useExchangeRealtime_ = false;
     bool requestInFlight_ = false;
     int realtimePollingMs_ = 1000;
+    int consecutiveRealtimeFailures_ = 0;
 
 
 public:
@@ -37,4 +38,7 @@ signals:
 
 private slots:
     void onRtTick();
+
+private:
+    void setRealtimeIntervalForFailures();
 };

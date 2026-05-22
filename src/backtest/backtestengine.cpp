@@ -2,6 +2,7 @@
 #include "domain/strategy/strategyfactory.h"
 #include <QDebug>
 #include <cmath>
+#include <limits>
 
 static StrategyConfig buildStrategyConfig(const BacktestRequest& request) {
     StrategyConfig cfg;
@@ -91,6 +92,7 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
     BacktestTrade btTrade;
     bool inLong = false;
     bool inShort = false;
+    int entryBarIndex = -1;
     double currentEquity = request.initialbalance;
 
     for (int i = warmup; i < static_cast<int>(candles.size()); ++i) {
@@ -105,6 +107,7 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
                 btTrade.entryTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
                 btTrade.side = BacktestTradeSide::Long;
                 btTrade.quantity = calcBacktestQty(request.backtestRisk, btTrade.entryPrice, currentEquity);
+                entryBarIndex = i;
                 inLong = true;
             }
             if (s.type == StrategySignalType::EnterShort && !inLong && !inShort) {
@@ -113,6 +116,7 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
                 btTrade.entryTime = QDateTime::fromMSecsSinceEpoch(candles[i].timestamp_);
                 btTrade.side = BacktestTradeSide::Short;
                 btTrade.quantity = calcBacktestQty(request.backtestRisk, btTrade.entryPrice, currentEquity);
+                entryBarIndex = i;
                 inShort = true;
             }
             if (s.type == StrategySignalType::ExitLong && inLong && !inShort) {
@@ -123,10 +127,12 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
                 const double exitFee = calcTradeFee(btTrade.exitPrice, request.backtestRisk.feePct, btTrade.quantity);
                 btTrade.feePaid = entryFee + exitFee;
                 btTrade.netPnl = btTrade.grossPnl - btTrade.feePaid;
+                btTrade.barsHeld = (entryBarIndex >= 0) ? (i - entryBarIndex) : 0;
                 currentEquity += btTrade.netPnl;
                 btTrade.winner = btTrade.netPnl > 0.0;
                 res.trades.push_back(std::move(btTrade));
                 btTrade = BacktestTrade {};
+                entryBarIndex = -1;
                 inLong = false;
                 inShort = false;
 
@@ -140,10 +146,12 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
 
                 btTrade.feePaid = entryFee + exitFee;
                 btTrade.netPnl = btTrade.grossPnl - btTrade.feePaid;
+                btTrade.barsHeld = (entryBarIndex >= 0) ? (i - entryBarIndex) : 0;
                 currentEquity += btTrade.netPnl;
                 btTrade.winner = btTrade.netPnl > 0.0;
                 res.trades.push_back(std::move(btTrade));
                 btTrade = BacktestTrade {};
+                entryBarIndex = -1;
                 inLong = false;
                 inShort = false;
             }
@@ -156,7 +164,16 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
     int lossCount = 0;
     double winSum = 0;
     double lossSum = 0;
+    int barsHeldSum = 0;
+    double bestTrade = -std::numeric_limits<double>::infinity();
+    double worstTrade = std::numeric_limits<double>::infinity();
     for (const auto& t : res.trades) {
+        res.stats.grossPnl += t.grossPnl;
+        res.stats.totalFees += t.feePaid;
+        barsHeldSum += t.barsHeld;
+        bestTrade = std::max(bestTrade, t.netPnl);
+        worstTrade = std::min(worstTrade, t.netPnl);
+
         if (t.winner) {
             ++winCount;
             winSum += t.netPnl;
@@ -173,6 +190,9 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
             res.stats.profitFactor = winSum / std::abs(lossSum);
         }
         res.stats.expectancy = (winSum + lossSum) / static_cast<double>(res.stats.trades);
+        res.stats.bestTrade = bestTrade;
+        res.stats.worstTrade = worstTrade;
+        res.stats.avgBarsHeld = static_cast<double>(barsHeldSum) / static_cast<double>(res.stats.trades);
     }
 
     qDebug() << "[BACKTEST ENGINE]  Total trades = " << res.stats.trades <<
@@ -193,6 +213,7 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
         p.drawdown = peakEquity - p.equity;
         p.cumulativePnl = equityCurveEquity - request.initialbalance;
         res.equityCurve.push_back(p);
+        res.stats.maxDrawdown = std::max(res.stats.maxDrawdown, p.drawdown);
         double ddPct = 0.0;
         if (peakEquity > 0.0) {
             ddPct = 100.0 * (peakEquity - p.equity) / peakEquity;
@@ -206,4 +227,3 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
 
     return res;
 }
-

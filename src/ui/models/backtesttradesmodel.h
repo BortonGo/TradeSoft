@@ -14,7 +14,10 @@ public:
             ColQty,
             ColEntryPrice,
             ColExitPrice,
+            ColGrossPnl,
             ColNetPnl,
+            ColFee,
+            ColBarsHeld,
             ColWinner,
             ColCount
         };

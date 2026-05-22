@@ -11,6 +11,7 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 #include <QDebug>
+#include <QStatusBar>
 
 #include <memory>
 
@@ -173,6 +174,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(marketData_, &MarketDataService::signal_seriesLoaded, ui->chartWidget, &ChartWidget::slot_setSeries);
     connect(marketData_, &MarketDataService::signal_candleUpdated, ui->chartWidget, &ChartWidget::slot_onCandleUpdate);
     connect(marketData_, &MarketDataService::signal_candleClosed, ui->chartWidget, &ChartWidget::slot_onCandleClosed);
+    connect(marketData_, &MarketDataService::signal_connectionStateChanged, this, [this](const QString& state) {
+        statusBar()->showMessage(state);
+        qDebug() << "[MarketDataStatus]" << state;
+    });
 
     indicatorService_ = new IndicatorService(marketData_, this);
 

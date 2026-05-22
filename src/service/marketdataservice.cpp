@@ -13,31 +13,40 @@ MarketDataService::MarketDataService(std::shared_ptr<IExchangeClient> exchange, 
 void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
     if (symbolId.isEmpty()){
         qWarning() << "[MarketDataService] symbolId is empty!";
+        emit signal_connectionStateChanged("Market data: symbol is empty");
         return;
     }
 
     if (exchange_ == nullptr){
         qWarning() << "[MarketDataService] exchange_ == nullptr";
+        emit signal_connectionStateChanged("Market data: exchange is not configured");
         return;
     }
+
+    emit signal_connectionStateChanged("Market data: loading " + symbolId + " " + toUiString(tf));
 
     std::vector<Candle> cachedCandles = CandleCache::load(symbolId, tf);
     std::vector<Candle> candles;
 
     if (CandleCache::isFresh(cachedCandles, tf)) {
         candles = cachedCandles;
+        emit signal_connectionStateChanged("Market data: loaded fresh cache");
         qDebug() << "[MarketDataService] Loaded fresh candles from cache"
                  << symbolId << toUiString(tf) << candles.size();
     } else {
         candles = exchange_->fetchKlines(symbolId, tf);
         if (!candles.empty()) {
             CandleCache::save(symbolId, tf, candles);
+            emit signal_connectionStateChanged("Market data: loaded from exchange");
             qDebug() << "[MarketDataService] Saved candles to cache"
                      << symbolId << toUiString(tf) << candles.size();
         } else if (!cachedCandles.empty()) {
             candles = cachedCandles;
+            emit signal_connectionStateChanged("Market data: exchange failed, using stale cache");
             qWarning() << "[MarketDataService] Exchange returned no candles; using stale cache"
                        << symbolId << toUiString(tf) << candles.size();
+        } else {
+            emit signal_connectionStateChanged("Market data: no candles loaded");
         }
     }
 
@@ -57,12 +66,14 @@ void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
     useExchangeRealtime_ = exchange_->supportsPollingRealtime();
 
     requestInFlight_ = false;
+    consecutiveRealtimeFailures_ = 0;
 }
 
 void MarketDataService::startRealTime()
 {
     if (!currentSeries_) {
         qWarning() << "[MarketDataService] currentSeries_ == nullptr";
+        emit signal_connectionStateChanged("Market data: realtime cannot start without series");
         return;
     }
 
@@ -75,6 +86,8 @@ void MarketDataService::startRealTime()
 
     if (!rtTimer_->isActive())
         rtTimer_->start();
+
+    emit signal_connectionStateChanged("Market data: realtime polling started");
 }
 
 void MarketDataService::setRealtimePollingMs(int intervalMs)
@@ -90,6 +103,7 @@ void MarketDataService::stopRealTime() {
         rtTimer_->stop();
     }
     requestInFlight_ = false;
+    emit signal_connectionStateChanged("Market data: realtime stopped");
 }
 
 void MarketDataService::onRtTick()
@@ -111,7 +125,17 @@ void MarketDataService::onRtTick()
                 requestInFlight_ = false;
 
                 if (!ok || !currentSeries_ || currentSeries_->getCount() == 0) {
+                    ++consecutiveRealtimeFailures_;
+                    setRealtimeIntervalForFailures();
+                    emit signal_connectionStateChanged(
+                        "Market data: realtime retry #" + QString::number(consecutiveRealtimeFailures_));
                     return;
+                }
+
+                if (consecutiveRealtimeFailures_ > 0) {
+                    consecutiveRealtimeFailures_ = 0;
+                    setRealtimeIntervalForFailures();
+                    emit signal_connectionStateChanged("Market data: realtime recovered");
                 }
 
                 Candle fresh = freshIn;
@@ -145,4 +169,14 @@ void MarketDataService::onRtTick()
 
         return;
     }
+}
+
+void MarketDataService::setRealtimeIntervalForFailures()
+{
+    if (!rtTimer_) {
+        return;
+    }
+
+    const int multiplier = qBound(1, consecutiveRealtimeFailures_ + 1, 10);
+    rtTimer_->setInterval(realtimePollingMs_ * multiplier);
 }

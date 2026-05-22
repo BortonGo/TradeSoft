@@ -32,7 +32,10 @@ QVariant BacktestTradesModel::data(const QModelIndex& index, int role) const
     // alignment for numeric columns
     if (role == Qt::TextAlignmentRole) {
         switch (col) {
+        case ColGrossPnl:
         case ColNetPnl:
+        case ColFee:
+        case ColBarsHeld:
         case ColWinner:
                 return int(Qt::AlignCenter);
         case ColQty:
@@ -47,9 +50,10 @@ QVariant BacktestTradesModel::data(const QModelIndex& index, int role) const
 
     // pnl coloring
     if (role == Qt::ForegroundRole) {
-        if (col == ColNetPnl) {
-            if (t.netPnl > 0.0) return QBrush(QColor(0, 180, 0));
-            if (t.netPnl < 0.0) return QBrush(QColor(200, 40, 40));
+        if (col == ColGrossPnl || col == ColNetPnl) {
+            const double pnl = (col == ColGrossPnl) ? t.grossPnl : t.netPnl;
+            if (pnl > 0.0) return QBrush(QColor(0, 180, 0));
+            if (pnl < 0.0) return QBrush(QColor(200, 40, 40));
         }
         return {};
     }
@@ -67,7 +71,10 @@ QVariant BacktestTradesModel::data(const QModelIndex& index, int role) const
     case ColQty:            return fmt6(t.quantity);
     case ColEntryPrice:     return fmt2(t.entryPrice);
     case ColExitPrice:      return fmt2(t.exitPrice);
+    case ColGrossPnl:       return fmt2(t.grossPnl);
     case ColNetPnl:         return fmt2(t.netPnl);
+    case ColFee:            return fmt2(t.feePaid);
+    case ColBarsHeld:       return t.barsHeld;
     case ColWinner:         return (t.winner) ? "Win" : "Loss";
     default:                return {};
     }
@@ -85,7 +92,10 @@ QVariant BacktestTradesModel::headerData(int section, Qt::Orientation orientatio
     case ColQty:            return "Qty";
     case ColEntryPrice:     return "Entry";
     case ColExitPrice:      return "Exit";
+    case ColGrossPnl:       return "Gross PnL";
     case ColNetPnl:         return "Net PnL";
+    case ColFee:            return "Fee";
+    case ColBarsHeld:       return "Bars";
     case ColWinner:         return "Winner";
     default:                return {};
     }
@@ -107,7 +117,6 @@ BacktestTrade BacktestTradesModel::tradeAt(int row) const {
     if (row < 0 || row >= (int)trades_.size()) return BacktestTrade{};
     return trades_[row];
 }
-
 
 
 

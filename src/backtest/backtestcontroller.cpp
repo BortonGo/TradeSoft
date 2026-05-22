@@ -36,7 +36,10 @@ BacktestController::BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExch
 
     header->setSectionResizeMode(BacktestTradesModel::ColEntryPrice, QHeaderView::ResizeToContents);
     header->setSectionResizeMode(BacktestTradesModel::ColExitPrice, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(BacktestTradesModel::ColGrossPnl, QHeaderView::ResizeToContents);
     header->setSectionResizeMode(BacktestTradesModel::ColNetPnl, QHeaderView::Stretch);
+    header->setSectionResizeMode(BacktestTradesModel::ColFee, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(BacktestTradesModel::ColBarsHeld, QHeaderView::ResizeToContents);
     header->setSectionResizeMode(BacktestTradesModel::ColWinner, QHeaderView::ResizeToContents);
 
     graphWidget_ = new BacktestWidget(ui_->backtestWidget);
@@ -337,7 +340,9 @@ void BacktestController::setResultsToUi() {
     ui_->btAvgLoss->setText(QString::number(lastResult_.stats.avgLoss, 'f', 2));
     ui_->btPf->setText(QString::number(lastResult_.stats.profitFactor, 'f', 2));
     ui_->btNetPnl->setText(QString::number(lastResult_.stats.netPnl, 'f', 2));
-    ui_->btMaxDD->setText(QString::number(lastResult_.stats.MaxDDPct, 'f', 2)); // пока еще не считается
+    ui_->btMaxDD->setText(QString("%1 / %2%")
+                              .arg(lastResult_.stats.maxDrawdown, 0, 'f', 2)
+                              .arg(lastResult_.stats.MaxDDPct, 0, 'f', 2));
     ui_->btEcpecrancy->setText(QString::number(lastResult_.stats.expectancy, 'f', 2));
 }
 

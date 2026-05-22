@@ -125,9 +125,15 @@ struct BacktestStats final {
     int trades = 0;
     double winratePct = 0.0;
     double profitFactor = 0.0;
+    double grossPnl = 0.0;
     double netPnl = 0.0;
+    double totalFees = 0.0;
     double avgWin = 0.0;
     double avgLoss = 0.0;
+    double bestTrade = 0.0;
+    double worstTrade = 0.0;
+    double avgBarsHeld = 0.0;
+    double maxDrawdown = 0.0;
     double MaxDDPct = 0.0;
     double expectancy = 0.0;
 };

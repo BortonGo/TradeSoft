@@ -165,6 +165,17 @@ void testBacktestValidation()
     require(noStrategy.state == BacktestState::Failed, "Backtest fails without selected strategy");
 }
 
+void testBacktestStatsDefaults()
+{
+    BacktestStats stats;
+    require(stats.grossPnl == 0.0, "BacktestStats gross PnL defaults to zero");
+    require(stats.totalFees == 0.0, "BacktestStats total fees default to zero");
+    require(stats.bestTrade == 0.0, "BacktestStats best trade defaults to zero");
+    require(stats.worstTrade == 0.0, "BacktestStats worst trade defaults to zero");
+    require(stats.avgBarsHeld == 0.0, "BacktestStats avg bars held defaults to zero");
+    require(stats.maxDrawdown == 0.0, "BacktestStats max drawdown defaults to zero");
+}
+
 void testCandleCacheFreshness()
 {
     std::vector<Candle> candles;
@@ -194,6 +205,7 @@ int main()
     testDonchian();
     testRiskManager();
     testBacktestValidation();
+    testBacktestStatsDefaults();
     testCandleCacheFreshness();
 
     std::cout << "All TradeSoft tests passed\n";
