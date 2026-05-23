@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setFixedComboSize(ui->comboTimeframe, 72, 30);
     setFixedComboSize(ui->cbStrategy, 120, 30);
     setFixedComboSize(ui->cbStrategyTf, 72, 30);
+    setupMarketDataStatusIndicator();
 
     if (auto* strategyLayout = qobject_cast<QHBoxLayout*>(ui->SetStrategyFrame->layout())) {
         strategyLayout->setContentsMargins(10, 7, 10, 7);
@@ -306,6 +307,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(marketData_, &MarketDataService::signal_candleClosed, ui->chartWidget, &ChartWidget::slot_onCandleClosed);
     connect(marketData_, &MarketDataService::signal_connectionStateChanged, this, [this](const QString& state) {
         statusBar()->showMessage(state);
+        updateMarketDataStatusIndicator(state);
         qDebug() << "[MarketDataStatus]" << state;
     });
 
@@ -319,6 +321,84 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::setupMarketDataStatusIndicator()
+{
+    if (marketDataStatusLabel_) {
+        return;
+    }
+
+    marketDataStatusLabel_ = new QLabel("OFFLINE", ui->horizontalFrame);
+    marketDataStatusLabel_->setFixedSize(84, 30);
+    marketDataStatusLabel_->setAlignment(Qt::AlignCenter);
+    marketDataStatusLabel_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    if (auto* chartToolbar = qobject_cast<QHBoxLayout*>(ui->horizontalFrame->layout())) {
+        const int spacerIndex = chartToolbar->count() - 1;
+        chartToolbar->insertWidget(spacerIndex, marketDataStatusLabel_);
+    }
+
+    updateMarketDataStatusIndicator("offline");
+}
+
+void MainWindow::updateMarketDataStatusIndicator(const QString& state)
+{
+    if (!marketDataStatusLabel_) {
+        return;
+    }
+
+    const QString normalized = state.toLower();
+    QString text = "OFFLINE";
+    QString background = "#4A1E1A";
+    QString foreground = "#D0D0D0";
+
+    if (normalized.contains("websocket")) {
+        if (normalized.contains("failed") || normalized.contains("unavailable")) {
+            text = "WS ERR";
+            background = "#6B2B16";
+        } else if (normalized.contains("starting")) {
+            text = "WS...";
+            background = "#284767";
+        } else {
+            text = "WS LIVE";
+            background = "#146B38";
+            foreground = "#F2FFF6";
+        }
+    } else if (normalized.contains("polling")) {
+        text = "POLLING";
+        background = "#34495E";
+        foreground = "#EEF6FF";
+    } else if (normalized.contains("cache")) {
+        text = "CACHE";
+        background = "#665117";
+        foreground = "#FFF7D6";
+    } else if (normalized.contains("exchange failed")
+               || normalized.contains("no candles")
+               || normalized.contains("not configured")
+               || normalized.contains("empty")) {
+        text = "OFFLINE";
+        background = "#5A1E1E";
+    } else if (normalized.contains("loading")) {
+        text = "LOAD";
+        background = "#333333";
+    } else if (normalized.contains("exchange")) {
+        text = "HTTP";
+        background = "#34495E";
+        foreground = "#EEF6FF";
+    }
+
+    marketDataStatusLabel_->setText(text);
+    marketDataStatusLabel_->setStyleSheet(QString(
+        "QLabel {"
+        "background-color: %1;"
+        "color: %2;"
+        "border: 2px solid #161616;"
+        "border-radius: 4px;"
+        "font-size: 12px;"
+        "font-weight: bold;"
+        "padding: 0 6px;"
+        "}").arg(background, foreground));
 }
 
 void MainWindow::on_comboSymbol_currentIndexChanged(int index)

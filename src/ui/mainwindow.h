@@ -1,5 +1,7 @@
 #pragma once
 #include <QMainWindow>
+#include <QLabel>
+
 #include "core/appconfig.h"
 #include "service/marketdataservice.h"
 #include "service/indicatorservice.h"
@@ -19,6 +21,7 @@ class MainWindow : public QMainWindow {
     IndicatorService* indicatorService_ = nullptr;
     StrategyController* strategyController_ = nullptr;
     BacktestController* backtestController = nullptr;
+    QLabel* marketDataStatusLabel_ = nullptr;
 
     AccountStore accounts_;
     AppConfig config_;
@@ -39,5 +42,6 @@ public:
 
 private:
     void reloadAndStart();
+    void setupMarketDataStatusIndicator();
+    void updateMarketDataStatusIndicator(const QString& state);
 };
-
