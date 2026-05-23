@@ -279,18 +279,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboTimeframe->blockSignals(false);
 
     //IExchangeClient
-    std::shared_ptr<IExchangeClient> ex = std::make_shared<BingXSwapClient>();
+    std::shared_ptr<IExchangeClient> chartExchange = std::make_shared<BingXSwapClient>();
+    std::shared_ptr<IExchangeClient> strategyExchange = std::make_shared<BingXSwapClient>();
+    std::shared_ptr<IExchangeClient> backtestExchange = std::make_shared<BingXSwapClient>();
 
     //BacktestController
-    backtestController = new BacktestController(ui, ex, this);
+    backtestController = new BacktestController(ui, backtestExchange, this);
 
     //MarketDataService
-    MarketDataService* market = new MarketDataService(ex, this);
+    MarketDataService* market = new MarketDataService(chartExchange, this);
     market->setRealtimePollingMs(config_.realtimePollingMs);
     marketData_ = market;
 
     //MarketDataStrategy
-    marketDataStrategy_ = new MarketDataService(ex, this);
+    marketDataStrategy_ = new MarketDataService(strategyExchange, this);
     marketDataStrategy_->setRealtimePollingMs(config_.realtimePollingMs);
 
     // StrategyController

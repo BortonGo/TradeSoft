@@ -22,5 +22,19 @@ public:
     using LastKlineCallback = std::function<void(bool ok, const Candle& c)>;
     virtual void fetchLastKlineAsync(const QString& symbolId, Timeframe tf, LastKlineCallback cb) = 0;
 
+    // realtime websocket support
+    virtual bool supportsWebSocketRealtime() const { return false; }
+
+    using RealtimeKlineCallback = std::function<void(bool ok, const Candle& c)>;
+    virtual void startKlineStream(const QString& symbolId, Timeframe tf, RealtimeKlineCallback cb)
+    {
+        Q_UNUSED(symbolId);
+        Q_UNUSED(tf);
+        if (cb) {
+            cb(false, Candle{});
+        }
+    }
+    virtual void stopKlineStream() {}
+
     virtual ~IExchangeClient() = default;
 };

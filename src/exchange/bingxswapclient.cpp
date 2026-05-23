@@ -10,9 +10,19 @@
 #include <QDebug>
 #include <QTimer>
 
+#if TRADESOFT_HAS_WEBSOCKETS
+#include <QDateTime>
+#include <QAbstractSocket>
+#include <QWebSocketProtocol>
+#endif
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+
+#if TRADESOFT_HAS_WEBSOCKETS
+#include <zlib.h>
+#endif
 
 #include <algorithm>
 
@@ -45,6 +55,33 @@ static QString toBingXSymbol(const QString& neutralId) {
     return neutralId;
 }
 
+#if TRADESOFT_HAS_WEBSOCKETS
+static QString tfToBingXWsInterval(Timeframe tf) {
+    return tfToBingXInterval(tf);
+}
+
+static qint64 jsonToInt64(const QJsonValue& value) {
+    bool ok = false;
+    if (value.isString()) {
+        const qint64 out = value.toString().toLongLong(&ok);
+        return ok ? out : 0;
+    }
+    if (value.isDouble()) {
+        return static_cast<qint64>(value.toDouble());
+    }
+    return 0;
+}
+
+static double jsonToDouble(const QJsonValue& value) {
+    bool ok = false;
+    if (value.isString()) {
+        const double out = value.toString().toDouble(&ok);
+        return ok ? out : 0.0;
+    }
+    return value.toDouble();
+}
+#endif
+
 static bool parseSingleKlineObj(const QJsonObject& o, Candle& c) {
     if (!o.contains("time")) return false;
 
@@ -56,6 +93,71 @@ static bool parseSingleKlineObj(const QJsonObject& o, Candle& c) {
     c.volume_ = o.value("volume").toString().toDouble();
     c.isFinal_ = false;
     return true;
+}
+
+#if TRADESOFT_HAS_WEBSOCKETS
+static bool parseWebSocketKline(const QJsonObject& root, Candle& c) {
+    const QJsonObject data = root.value("data").toObject();
+    if (data.isEmpty()) {
+        return false;
+    }
+
+    QJsonObject kline = data.value("K").toObject();
+    if (kline.isEmpty()) {
+        kline = data;
+    }
+
+    const qint64 timestamp = jsonToInt64(kline.value("t"));
+    if (timestamp <= 0) {
+        return false;
+    }
+
+    c.timestamp_ = timestamp;
+    c.open_ = jsonToDouble(kline.value("o"));
+    c.high_ = jsonToDouble(kline.value("h"));
+    c.low_ = jsonToDouble(kline.value("l"));
+    c.close_ = jsonToDouble(kline.value("c"));
+    c.volume_ = jsonToDouble(kline.value("v"));
+    c.isFinal_ = false;
+    return true;
+}
+
+static QByteArray gzipDecompress(const QByteArray& input)
+{
+    if (input.isEmpty()) {
+        return {};
+    }
+
+    z_stream stream{};
+    stream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(input.constData()));
+    stream.avail_in = static_cast<uInt>(input.size());
+
+    if (inflateInit2(&stream, 16 + MAX_WBITS) != Z_OK) {
+        return {};
+    }
+
+    QByteArray output;
+    char buffer[32768];
+
+    int ret = Z_OK;
+    while (ret == Z_OK) {
+        stream.next_out = reinterpret_cast<Bytef*>(buffer);
+        stream.avail_out = sizeof(buffer);
+
+        ret = inflate(&stream, Z_NO_FLUSH);
+        if (output.size() < static_cast<int>(stream.total_out)) {
+            output.append(buffer, static_cast<int>(stream.total_out) - output.size());
+        }
+    }
+
+    inflateEnd(&stream);
+    return ret == Z_STREAM_END ? output : QByteArray{};
+}
+#endif
+
+BingXSwapClient::~BingXSwapClient()
+{
+    stopKlineStream();
 }
 
 std::vector<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timeframe tf)
@@ -459,3 +561,171 @@ void BingXSwapClient::fetchLastKlineAsync(const QString& symbolId, Timeframe tf,
         if (cb) cb(true, best);
     });
 }
+
+void BingXSwapClient::startKlineStream(const QString& symbolId, Timeframe tf, RealtimeKlineCallback cb)
+{
+#if TRADESOFT_HAS_WEBSOCKETS
+    if (symbolId.isEmpty()) {
+        if (cb) {
+            cb(false, Candle{});
+        }
+        return;
+    }
+
+    ensureWebSocket();
+    if (!ws_) {
+        if (cb) {
+            cb(false, Candle{});
+        }
+        return;
+    }
+
+    wsCallback_ = std::move(cb);
+    wsDataType_ = toBingXSymbol(symbolId) + "@kline_" + tfToBingXWsInterval(tf);
+
+    if (ws_->state() == QAbstractSocket::ConnectedState) {
+        sendKlineSubscription();
+        return;
+    }
+
+    if (ws_->state() != QAbstractSocket::ConnectingState) {
+        qDebug() << "[BingXSwapClient WS] Connecting to swap market stream";
+        ws_->open(QUrl("wss://open-api-swap.bingx.com/swap-market"));
+    }
+#else
+    Q_UNUSED(symbolId);
+    Q_UNUSED(tf);
+    if (cb) {
+        cb(false, Candle{});
+    }
+#endif
+}
+
+void BingXSwapClient::stopKlineStream()
+{
+#if TRADESOFT_HAS_WEBSOCKETS
+    wsCallback_ = nullptr;
+    wsDataType_.clear();
+
+    if (ws_) {
+        ws_->close();
+        ws_->deleteLater();
+        ws_ = nullptr;
+    }
+#endif
+}
+
+#if TRADESOFT_HAS_WEBSOCKETS
+void BingXSwapClient::ensureWebSocket()
+{
+    if (ws_) {
+        return;
+    }
+
+    QCoreApplication* app = QCoreApplication::instance();
+    if (!app) {
+        qWarning() << "[BingXSwapClient WS] No QCoreApplication instance!";
+        return;
+    }
+
+    ws_ = new QWebSocket(QStringLiteral("TradeSoft-MVP/1.0"), QWebSocketProtocol::VersionLatest, app);
+
+    QObject::connect(ws_, &QWebSocket::connected, ws_, [this]() {
+        qDebug() << "[BingXSwapClient WS] Connected";
+        sendKlineSubscription();
+    });
+
+    QObject::connect(ws_, &QWebSocket::disconnected, ws_, [this]() {
+        qWarning() << "[BingXSwapClient WS] Disconnected";
+        if (wsCallback_) {
+            wsCallback_(false, Candle{});
+        }
+    });
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    QObject::connect(ws_, &QWebSocket::errorOccurred, ws_, [this](QAbstractSocket::SocketError) {
+#else
+    QObject::connect(ws_, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), ws_, [this](QAbstractSocket::SocketError) {
+#endif
+        qWarning() << "[BingXSwapClient WS] Error:" << ws_->errorString();
+        if (wsCallback_) {
+            wsCallback_(false, Candle{});
+        }
+    });
+
+    QObject::connect(ws_, &QWebSocket::textMessageReceived, ws_, [this](const QString& message) {
+        handleWebSocketPayload(message.toUtf8());
+    });
+
+    QObject::connect(ws_, &QWebSocket::binaryMessageReceived, ws_, [this](const QByteArray& message) {
+        const QByteArray decompressed = gzipDecompress(message);
+        handleWebSocketPayload(decompressed.isEmpty() ? message : decompressed);
+    });
+}
+
+void BingXSwapClient::sendKlineSubscription()
+{
+    if (!ws_ || ws_->state() != QAbstractSocket::ConnectedState || wsDataType_.isEmpty()) {
+        return;
+    }
+
+    QJsonObject request;
+    request["id"] = "tradesoft-" + QString::number(QDateTime::currentMSecsSinceEpoch());
+    request["reqType"] = "sub";
+    request["dataType"] = wsDataType_;
+
+    const QByteArray payload = QJsonDocument(request).toJson(QJsonDocument::Compact);
+    qDebug().noquote() << "[BingXSwapClient WS] Subscribe" << QString::fromUtf8(payload);
+    ws_->sendTextMessage(QString::fromUtf8(payload));
+}
+
+void BingXSwapClient::handleWebSocketPayload(const QByteArray& payload)
+{
+    if (payload.isEmpty()) {
+        return;
+    }
+
+    const QString text = QString::fromUtf8(payload).trimmed();
+    if (text.compare("Ping", Qt::CaseInsensitive) == 0) {
+        if (ws_) {
+            ws_->sendTextMessage("Pong");
+        }
+        return;
+    }
+
+    QJsonParseError error;
+    const QJsonDocument doc = QJsonDocument::fromJson(payload, &error);
+    if (error.error != QJsonParseError::NoError || !doc.isObject()) {
+        qWarning().noquote() << "[BingXSwapClient WS] Invalid payload:" << text.left(200);
+        return;
+    }
+
+    const QJsonObject root = doc.object();
+    if (root.contains("code")) {
+        const int code = root.value("code").toInt(-1);
+        if (code != 0) {
+            qWarning() << "[BingXSwapClient WS] Subscription/API error:"
+                       << code << root.value("msg").toString();
+            if (wsCallback_) {
+                wsCallback_(false, Candle{});
+            }
+        }
+        return;
+    }
+
+    const QString dataType = root.value("dataType").toString();
+    if (dataType != wsDataType_) {
+        return;
+    }
+
+    Candle candle{};
+    if (!parseWebSocketKline(root, candle)) {
+        qWarning().noquote() << "[BingXSwapClient WS] Failed to parse kline:" << text.left(200);
+        return;
+    }
+
+    if (wsCallback_) {
+        wsCallback_(true, candle);
+    }
+}
+#endif

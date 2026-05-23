@@ -19,6 +19,8 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WebSockets QUIET)
+find_package(ZLIB QUIET)
 
 file(GLOB_RECURSE TRADESOFT_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
@@ -45,6 +47,17 @@ target_link_libraries(TradeSoftCore PUBLIC
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
 )
+
+if(TARGET Qt${QT_VERSION_MAJOR}::WebSockets AND ZLIB_FOUND)
+    target_link_libraries(TradeSoftCore PUBLIC
+        Qt${QT_VERSION_MAJOR}::WebSockets
+        ZLIB::ZLIB
+    )
+    target_compile_definitions(TradeSoftCore PUBLIC TRADESOFT_HAS_WEBSOCKETS=1)
+else()
+    target_compile_definitions(TradeSoftCore PUBLIC TRADESOFT_HAS_WEBSOCKETS=0)
+    message(STATUS "Qt WebSockets or zlib not found; TradeSoft will use polling realtime")
+endif()
 
 add_executable(TradeSoft
     MACOSX_BUNDLE

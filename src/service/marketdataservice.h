@@ -16,6 +16,7 @@ class MarketDataService final : public QObject {
     Timeframe rtTimeframe_;
 
     bool useExchangeRealtime_ = false;
+    bool useWebSocketRealtime_ = false;
     bool requestInFlight_ = false;
     int realtimePollingMs_ = 1000;
     int consecutiveRealtimeFailures_ = 0;
@@ -40,5 +41,7 @@ private slots:
     void onRtTick();
 
 private:
+    void startPollingRealtime();
+    void applyRealtimeCandle(const Candle& freshIn);
     void setRealtimeIntervalForFailures();
 };

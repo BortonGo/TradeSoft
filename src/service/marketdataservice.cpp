@@ -77,6 +77,32 @@ void MarketDataService::startRealTime()
         return;
     }
 
+    if (exchange_->supportsWebSocketRealtime()) {
+        useWebSocketRealtime_ = true;
+        exchange_->startKlineStream(rtSymbolId_, rtTimeframe_,
+            [this](bool ok, const Candle& fresh) {
+                if (!ok) {
+                    if (!useWebSocketRealtime_) {
+                        return;
+                    }
+                    useWebSocketRealtime_ = false;
+                    emit signal_connectionStateChanged("Market data: websocket failed, using polling");
+                    startPollingRealtime();
+                    return;
+                }
+
+                consecutiveRealtimeFailures_ = 0;
+                applyRealtimeCandle(fresh);
+            });
+        emit signal_connectionStateChanged("Market data: websocket starting");
+        return;
+    }
+
+    startPollingRealtime();
+}
+
+void MarketDataService::startPollingRealtime()
+{
     if (!rtTimer_) {
         rtTimer_ = new QTimer(this);
         connect(rtTimer_, &QTimer::timeout, this, &MarketDataService::onRtTick);
@@ -99,6 +125,10 @@ void MarketDataService::setRealtimePollingMs(int intervalMs)
 }
 
 void MarketDataService::stopRealTime() {
+    useWebSocketRealtime_ = false;
+    if (exchange_) {
+        exchange_->stopKlineStream();
+    }
     if (rtTimer_) {
         rtTimer_->stop();
     }
@@ -138,37 +168,46 @@ void MarketDataService::onRtTick()
                     emit signal_connectionStateChanged("Market data: realtime recovered");
                 }
 
-                Candle fresh = freshIn;
-                Candle last = currentSeries_->last();
-
-                // same candle -> update
-                if (fresh.timestamp_ == last.timestamp_) {
-                    fresh.isFinal_ = false;
-                    currentSeries_->updateLastCandle(fresh);
-                    CandleCache::save(rtSymbolId_, rtTimeframe_, currentSeries_->getCandles());
-                    emit signal_candleUpdated(fresh);
-                    return;
-                }
-
-                // new candle -> close old + add new
-                if (fresh.timestamp_ > last.timestamp_) {
-                    last.isFinal_ = true;
-                    currentSeries_->updateLastCandle(last);
-                    emit signal_candleClosed(last);
-
-                    fresh.isFinal_ = false;
-                    currentSeries_->addCandle(fresh);
-                    CandleCache::save(rtSymbolId_, rtTimeframe_, currentSeries_->getCandles());
-                    emit signal_candleUpdated(fresh);
-                    return;
-                }
-
-                // if fresh.timestamp_ < last.timestamp_ -> ignore (old data)
+                applyRealtimeCandle(freshIn);
             }
         );
 
         return;
     }
+}
+
+void MarketDataService::applyRealtimeCandle(const Candle& freshIn)
+{
+    if (!currentSeries_ || currentSeries_->getCount() == 0) {
+        return;
+    }
+
+    Candle fresh = freshIn;
+    Candle last = currentSeries_->last();
+
+    // same candle -> update
+    if (fresh.timestamp_ == last.timestamp_) {
+        fresh.isFinal_ = false;
+        currentSeries_->updateLastCandle(fresh);
+        CandleCache::save(rtSymbolId_, rtTimeframe_, currentSeries_->getCandles());
+        emit signal_candleUpdated(fresh);
+        return;
+    }
+
+    // new candle -> close old + add new
+    if (fresh.timestamp_ > last.timestamp_) {
+        last.isFinal_ = true;
+        currentSeries_->updateLastCandle(last);
+        emit signal_candleClosed(last);
+
+        fresh.isFinal_ = false;
+        currentSeries_->addCandle(fresh);
+        CandleCache::save(rtSymbolId_, rtTimeframe_, currentSeries_->getCandles());
+        emit signal_candleUpdated(fresh);
+        return;
+    }
+
+    // if fresh.timestamp_ < last.timestamp_ -> ignore (old data)
 }
 
 void MarketDataService::setRealtimeIntervalForFailures()
