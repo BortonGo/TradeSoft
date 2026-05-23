@@ -59,6 +59,7 @@ static QString toBingXSymbol(const QString& neutralId) {
 static QString tfToBingXWsInterval(Timeframe tf) {
     return tfToBingXInterval(tf);
 }
+#endif
 
 static qint64 jsonToInt64(const QJsonValue& value) {
     bool ok = false;
@@ -80,7 +81,6 @@ static double jsonToDouble(const QJsonValue& value) {
     }
     return value.toDouble();
 }
-#endif
 
 static bool parseSingleKlineObj(const QJsonObject& o, Candle& c) {
     if (!o.contains("time")) return false;
@@ -95,7 +95,6 @@ static bool parseSingleKlineObj(const QJsonObject& o, Candle& c) {
     return true;
 }
 
-#if TRADESOFT_HAS_WEBSOCKETS
 static bool parseWebSocketKline(const QJsonObject& root, Candle& c) {
     const QJsonObject data = root.value("data").toObject();
     if (data.isEmpty()) {
@@ -122,6 +121,7 @@ static bool parseWebSocketKline(const QJsonObject& root, Candle& c) {
     return true;
 }
 
+#if TRADESOFT_HAS_WEBSOCKETS
 static QByteArray gzipDecompress(const QByteArray& input)
 {
     if (input.isEmpty()) {
@@ -158,6 +158,36 @@ static QByteArray gzipDecompress(const QByteArray& input)
 BingXSwapClient::~BingXSwapClient()
 {
     stopKlineStream();
+}
+
+bool BingXSwapClient::parseKlineStreamPayload(const QByteArray& payload, const QString& expectedDataType, Candle& candle)
+{
+    if (payload.isEmpty()) {
+        return false;
+    }
+
+    const QString text = QString::fromUtf8(payload).trimmed();
+    if (text.compare("Ping", Qt::CaseInsensitive) == 0) {
+        return false;
+    }
+
+    QJsonParseError error;
+    const QJsonDocument doc = QJsonDocument::fromJson(payload, &error);
+    if (error.error != QJsonParseError::NoError || !doc.isObject()) {
+        return false;
+    }
+
+    const QJsonObject root = doc.object();
+    if (root.contains("code")) {
+        return false;
+    }
+
+    const QString dataType = root.value("dataType").toString();
+    if (!expectedDataType.isEmpty() && dataType != expectedDataType) {
+        return false;
+    }
+
+    return parseWebSocketKline(root, candle);
 }
 
 std::vector<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timeframe tf)
@@ -582,6 +612,8 @@ void BingXSwapClient::startKlineStream(const QString& symbolId, Timeframe tf, Re
 
     wsCallback_ = std::move(cb);
     wsDataType_ = toBingXSymbol(symbolId) + "@kline_" + tfToBingXWsInterval(tf);
+    wsStopRequested_ = false;
+    wsReconnectAttempts_ = 0;
 
     if (ws_->state() == QAbstractSocket::ConnectedState) {
         sendKlineSubscription();
@@ -604,8 +636,13 @@ void BingXSwapClient::startKlineStream(const QString& symbolId, Timeframe tf, Re
 void BingXSwapClient::stopKlineStream()
 {
 #if TRADESOFT_HAS_WEBSOCKETS
+    wsStopRequested_ = true;
     wsCallback_ = nullptr;
     wsDataType_.clear();
+    wsReconnectAttempts_ = 0;
+    if (wsReconnectTimer_) {
+        wsReconnectTimer_->stop();
+    }
 
     if (ws_) {
         ws_->close();
@@ -630,15 +667,28 @@ void BingXSwapClient::ensureWebSocket()
 
     ws_ = new QWebSocket(QStringLiteral("TradeSoft-MVP/1.0"), QWebSocketProtocol::VersionLatest, app);
 
+    if (!wsReconnectTimer_) {
+        wsReconnectTimer_ = new QTimer(app);
+        wsReconnectTimer_->setSingleShot(true);
+        QObject::connect(wsReconnectTimer_, &QTimer::timeout, wsReconnectTimer_, [this]() {
+            if (!ws_ || wsStopRequested_ || wsDataType_.isEmpty()) {
+                return;
+            }
+            qDebug() << "[BingXSwapClient WS] Reconnecting attempt" << wsReconnectAttempts_;
+            ws_->open(QUrl("wss://open-api-swap.bingx.com/swap-market"));
+        });
+    }
+
     QObject::connect(ws_, &QWebSocket::connected, ws_, [this]() {
         qDebug() << "[BingXSwapClient WS] Connected";
+        wsReconnectAttempts_ = 0;
         sendKlineSubscription();
     });
 
     QObject::connect(ws_, &QWebSocket::disconnected, ws_, [this]() {
         qWarning() << "[BingXSwapClient WS] Disconnected";
-        if (wsCallback_) {
-            wsCallback_(false, Candle{});
+        if (!wsStopRequested_ && !wsDataType_.isEmpty()) {
+            scheduleReconnect();
         }
     });
 
@@ -648,8 +698,8 @@ void BingXSwapClient::ensureWebSocket()
     QObject::connect(ws_, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), ws_, [this](QAbstractSocket::SocketError) {
 #endif
         qWarning() << "[BingXSwapClient WS] Error:" << ws_->errorString();
-        if (wsCallback_) {
-            wsCallback_(false, Candle{});
+        if (!wsStopRequested_ && !wsDataType_.isEmpty()) {
+            scheduleReconnect();
         }
     });
 
@@ -686,6 +736,11 @@ void BingXSwapClient::handleWebSocketPayload(const QByteArray& payload)
     }
 
     const QString text = QString::fromUtf8(payload).trimmed();
+    if (wsDebugPayloadsLeft_ > 0) {
+        qDebug().noquote() << "[BingXSwapClient WS] Payload sample:" << text.left(400);
+        --wsDebugPayloadsLeft_;
+    }
+
     if (text.compare("Ping", Qt::CaseInsensitive) == 0) {
         if (ws_) {
             ws_->sendTextMessage("Pong");
@@ -719,13 +774,36 @@ void BingXSwapClient::handleWebSocketPayload(const QByteArray& payload)
     }
 
     Candle candle{};
-    if (!parseWebSocketKline(root, candle)) {
+    if (!parseKlineStreamPayload(payload, wsDataType_, candle)) {
         qWarning().noquote() << "[BingXSwapClient WS] Failed to parse kline:" << text.left(200);
         return;
     }
 
     if (wsCallback_) {
         wsCallback_(true, candle);
+    }
+}
+
+void BingXSwapClient::scheduleReconnect()
+{
+    if (!wsReconnectTimer_ || wsStopRequested_ || wsDataType_.isEmpty()) {
+        return;
+    }
+
+    constexpr int maxReconnectAttempts = 5;
+    if (wsReconnectAttempts_ >= maxReconnectAttempts) {
+        qWarning() << "[BingXSwapClient WS] Reconnect attempts exhausted";
+        if (wsCallback_) {
+            wsCallback_(false, Candle{});
+        }
+        return;
+    }
+
+    ++wsReconnectAttempts_;
+    const int delayMs = std::min(30000, 1000 * wsReconnectAttempts_);
+    if (!wsReconnectTimer_->isActive()) {
+        qWarning() << "[BingXSwapClient WS] Scheduling reconnect in" << delayMs << "ms";
+        wsReconnectTimer_->start(delayMs);
     }
 }
 #endif

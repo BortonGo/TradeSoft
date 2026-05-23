@@ -7,6 +7,7 @@
 #include "domain/risk/riskconfig.h"
 #include "domain/risk/riskmanager.h"
 #include "domain/strategy/strategysignal.h"
+#include "exchange/bingxswapclient.h"
 #include "indicators/atr.h"
 #include "indicators/donchian.h"
 #include "indicators/ema.h"
@@ -229,6 +230,47 @@ void testRealtimeTransportConfig()
             "RealtimeTransport falls back to auto");
 }
 
+void testBingXKlineStreamParser()
+{
+    const QByteArray payload = R"({
+        "dataType": "ETH-USDT@kline_1m",
+        "data": {
+            "e": "kline",
+            "E": 1716469200123,
+            "s": "ETH-USDT",
+            "K": {
+                "t": 1716469200000,
+                "o": "2070.10",
+                "h": "2074.50",
+                "l": "2069.80",
+                "c": "2072.25",
+                "v": "123.456"
+            }
+        }
+    })";
+
+    Candle parsed{};
+    require(BingXSwapClient::parseKlineStreamPayload(payload, "ETH-USDT@kline_1m", parsed),
+            "BingX websocket parser accepts matching kline payload");
+    require(parsed.timestamp_ == 1716469200000,
+            "BingX websocket parser reads timestamp");
+    requireNear(parsed.open_, 2070.10, 1e-9,
+                "BingX websocket parser reads open");
+    requireNear(parsed.high_, 2074.50, 1e-9,
+                "BingX websocket parser reads high");
+    requireNear(parsed.low_, 2069.80, 1e-9,
+                "BingX websocket parser reads low");
+    requireNear(parsed.close_, 2072.25, 1e-9,
+                "BingX websocket parser reads close");
+    requireNear(parsed.volume_, 123.456, 1e-9,
+                "BingX websocket parser reads volume");
+    require(!parsed.isFinal_,
+            "BingX websocket parser treats stream candle as non-final");
+
+    require(!BingXSwapClient::parseKlineStreamPayload(payload, "BTC-USDT@kline_1m", parsed),
+            "BingX websocket parser rejects mismatched stream");
+}
+
 } // namespace
 
 int main()
@@ -243,6 +285,7 @@ int main()
     testBacktestReportPaths();
     testCandleCacheFreshness();
     testRealtimeTransportConfig();
+    testBingXKlineStreamParser();
 
     std::cout << "All TradeSoft tests passed\n";
     return 0;
