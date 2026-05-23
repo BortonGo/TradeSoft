@@ -96,7 +96,19 @@ static bool parseSingleKlineObj(const QJsonObject& o, Candle& c) {
 }
 
 static bool parseWebSocketKline(const QJsonObject& root, Candle& c) {
-    const QJsonObject data = root.value("data").toObject();
+    const QJsonValue dataValue = root.value("data");
+    QJsonObject data;
+
+    if (dataValue.isArray()) {
+        const QJsonArray arr = dataValue.toArray();
+        if (arr.isEmpty() || !arr.first().isObject()) {
+            return false;
+        }
+        data = arr.first().toObject();
+    } else if (dataValue.isObject()) {
+        data = dataValue.toObject();
+    }
+
     if (data.isEmpty()) {
         return false;
     }
@@ -106,7 +118,10 @@ static bool parseWebSocketKline(const QJsonObject& root, Candle& c) {
         kline = data;
     }
 
-    const qint64 timestamp = jsonToInt64(kline.value("t"));
+    qint64 timestamp = jsonToInt64(kline.value("t"));
+    if (timestamp <= 0) {
+        timestamp = jsonToInt64(kline.value("T"));
+    }
     if (timestamp <= 0) {
         return false;
     }
@@ -179,7 +194,10 @@ bool BingXSwapClient::parseKlineStreamPayload(const QByteArray& payload, const Q
 
     const QJsonObject root = doc.object();
     if (root.contains("code")) {
-        return false;
+        const int code = root.value("code").toInt(-1);
+        if (code != 0) {
+            return false;
+        }
     }
 
     const QString dataType = root.value("dataType").toString();
@@ -764,8 +782,12 @@ void BingXSwapClient::handleWebSocketPayload(const QByteArray& payload)
             if (wsCallback_) {
                 wsCallback_(false, Candle{});
             }
+            return;
         }
-        return;
+
+        if (root.value("dataType").toString().isEmpty() && root.value("data").isNull()) {
+            return;
+        }
     }
 
     const QString dataType = root.value("dataType").toString();
@@ -778,6 +800,10 @@ void BingXSwapClient::handleWebSocketPayload(const QByteArray& payload)
         qWarning().noquote() << "[BingXSwapClient WS] Failed to parse kline:" << text.left(200);
         return;
     }
+
+    qDebug() << "[BingXSwapClient WS] Parsed kline"
+             << candle.timestamp_ << candle.open_ << candle.high_
+             << candle.low_ << candle.close_;
 
     if (wsCallback_) {
         wsCallback_(true, candle);

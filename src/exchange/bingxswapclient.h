@@ -18,7 +18,14 @@ public:
     bool supportsPollingRealtime() const override { return true; }
     void fetchLastKlineAsync(const QString& symbolId, Timeframe tf, LastKlineCallback cb) override;
 
-    bool supportsWebSocketRealtime() const override { return true; }
+    bool supportsWebSocketRealtime() const override
+    {
+#if TRADESOFT_HAS_WEBSOCKETS
+        return true;
+#else
+        return false;
+#endif
+    }
     void startKlineStream(const QString& symbolId, Timeframe tf, RealtimeKlineCallback cb) override;
     void stopKlineStream() override;
 

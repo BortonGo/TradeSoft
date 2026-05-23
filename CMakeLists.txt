@@ -56,7 +56,12 @@ if(TARGET Qt${QT_VERSION_MAJOR}::WebSockets AND ZLIB_FOUND)
     target_compile_definitions(TradeSoftCore PUBLIC TRADESOFT_HAS_WEBSOCKETS=1)
 else()
     target_compile_definitions(TradeSoftCore PUBLIC TRADESOFT_HAS_WEBSOCKETS=0)
-    message(STATUS "Qt WebSockets or zlib not found; TradeSoft will use polling realtime")
+    if(NOT TARGET Qt${QT_VERSION_MAJOR}::WebSockets)
+        message(STATUS "Qt WebSockets not found; TradeSoft will use polling realtime")
+    endif()
+    if(NOT ZLIB_FOUND)
+        message(STATUS "zlib not found; TradeSoft will use polling realtime")
+    endif()
 endif()
 
 add_executable(TradeSoft

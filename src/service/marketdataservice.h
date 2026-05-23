@@ -19,6 +19,7 @@ class MarketDataService final : public QObject {
 
     bool useExchangeRealtime_ = false;
     bool useWebSocketRealtime_ = false;
+    bool webSocketLiveNotified_ = false;
     bool requestInFlight_ = false;
     int realtimePollingMs_ = 1000;
     RealtimeTransport realtimeTransport_ = RealtimeTransport::Auto;

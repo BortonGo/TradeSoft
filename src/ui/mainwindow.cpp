@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
              << "defaultTimeframe=" << toUiString(config_.defaultTimeframe)
              << "pollingMs=" << config_.realtimePollingMs
              << "transport=" << toConfigString(config_.realtimeTransport);
+    qDebug() << "[BuildConfig] TRADESOFT_HAS_WEBSOCKETS=" << TRADESOFT_HAS_WEBSOCKETS;
 
     const auto setFixedComboSize = [](QComboBox* combo, int width, int height) {
         if (!combo) {

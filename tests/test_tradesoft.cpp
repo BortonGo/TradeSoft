@@ -233,20 +233,17 @@ void testRealtimeTransportConfig()
 void testBingXKlineStreamParser()
 {
     const QByteArray payload = R"({
+        "code": 0,
         "dataType": "ETH-USDT@kline_1m",
-        "data": {
-            "e": "kline",
-            "E": 1716469200123,
-            "s": "ETH-USDT",
-            "K": {
-                "t": 1716469200000,
-                "o": "2070.10",
-                "h": "2074.50",
-                "l": "2069.80",
-                "c": "2072.25",
-                "v": "123.456"
-            }
-        }
+        "s": "ETH-USDT",
+        "data": [{
+            "o": "2070.10",
+            "h": "2074.50",
+            "l": "2069.80",
+            "c": "2072.25",
+            "v": "123.456",
+            "T": 1716469200000
+        }]
     })";
 
     Candle parsed{};

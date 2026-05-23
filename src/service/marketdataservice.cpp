@@ -77,11 +77,18 @@ void MarketDataService::startRealTime()
         return;
     }
 
+    qDebug() << "[MarketDataService] Realtime start"
+             << "transport=" << toConfigString(realtimeTransport_)
+             << "websocketSupported=" << exchange_->supportsWebSocketRealtime()
+             << "pollingSupported=" << exchange_->supportsPollingRealtime();
+
     const bool canUseWebSocket = realtimeTransport_ != RealtimeTransport::Polling
         && exchange_->supportsWebSocketRealtime();
 
     if (canUseWebSocket) {
         useWebSocketRealtime_ = true;
+        webSocketLiveNotified_ = false;
+        emit signal_connectionStateChanged("Market data: websocket starting");
         exchange_->startKlineStream(rtSymbolId_, rtTimeframe_,
             [this](bool ok, const Candle& fresh) {
                 if (!ok) {
@@ -99,15 +106,22 @@ void MarketDataService::startRealTime()
                 }
 
                 consecutiveRealtimeFailures_ = 0;
+                if (!webSocketLiveNotified_) {
+                    webSocketLiveNotified_ = true;
+                    emit signal_connectionStateChanged("Market data: websocket live");
+                }
                 applyRealtimeCandle(fresh);
             });
-        emit signal_connectionStateChanged("Market data: websocket starting");
         return;
     }
 
     if (realtimeTransport_ == RealtimeTransport::WebSocket) {
         emit signal_connectionStateChanged("Market data: websocket unavailable");
         return;
+    }
+
+    if (realtimeTransport_ == RealtimeTransport::Auto && !exchange_->supportsWebSocketRealtime()) {
+        emit signal_connectionStateChanged("Market data: websocket unavailable, using polling");
     }
 
     startPollingRealtime();
@@ -143,6 +157,7 @@ void MarketDataService::setRealtimeTransport(RealtimeTransport transport)
 
 void MarketDataService::stopRealTime() {
     useWebSocketRealtime_ = false;
+    webSocketLiveNotified_ = false;
     if (exchange_) {
         exchange_->stopKlineStream();
     }
