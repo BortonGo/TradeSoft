@@ -207,6 +207,13 @@ ctest --test-dir build --output-on-failure
 
 - macOS: `~/Library/Caches/BortonGo/TradeSoft/marketdata`
 
+### Backtest Reports
+
+После запуска backtest приложение сохраняет последние результаты:
+
+- summary JSON: `~/Library/Application Support/BortonGo/TradeSoft/reports/latest_backtest_summary.json`
+- trades CSV: `~/Library/Application Support/BortonGo/TradeSoft/reports/latest_backtest_trades.csv`
+
 ---
 
 ## Скриншоты

@@ -1,4 +1,5 @@
 #include "backtest/backtestengine.h"
+#include "backtest/backtestreportexporter.h"
 #include "core/candle.h"
 #include "core/timeframe.h"
 #include "domain/order/order.h"
@@ -176,6 +177,14 @@ void testBacktestStatsDefaults()
     require(stats.maxDrawdown == 0.0, "BacktestStats max drawdown defaults to zero");
 }
 
+void testBacktestReportPaths()
+{
+    require(BacktestReportExporter::summaryPath().endsWith("latest_backtest_summary.json"),
+            "BacktestReportExporter exposes summary path");
+    require(BacktestReportExporter::tradesPath().endsWith("latest_backtest_trades.csv"),
+            "BacktestReportExporter exposes trades path");
+}
+
 void testCandleCacheFreshness()
 {
     std::vector<Candle> candles;
@@ -206,6 +215,7 @@ int main()
     testRiskManager();
     testBacktestValidation();
     testBacktestStatsDefaults();
+    testBacktestReportPaths();
     testCandleCacheFreshness();
 
     std::cout << "All TradeSoft tests passed\n";

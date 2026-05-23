@@ -1,4 +1,5 @@
 #include "backtestcontroller.h"
+#include "backtest/backtestreportexporter.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <utility>
@@ -179,6 +180,13 @@ void BacktestController::onStart() {
     setResultsToUi();
     setTradesToUi();
     ui_->editBtCandles->setText(QString::number(candles.size()));
+
+    QString exportError;
+    if (BacktestReportExporter::exportLatest(lastRequest_, lastResult_, &exportError)) {
+        qDebug() << "[BACKTEST REPORT] exported to" << BacktestReportExporter::reportsDir();
+    } else {
+        qWarning() << "[BACKTEST REPORT] export failed:" << exportError;
+    }
 }
 
 void BacktestController::onBuildGraph() {
