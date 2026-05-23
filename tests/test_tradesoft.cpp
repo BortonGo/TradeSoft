@@ -1,5 +1,6 @@
 #include "backtest/backtestengine.h"
 #include "backtest/backtestreportexporter.h"
+#include "core/appconfig.h"
 #include "core/candle.h"
 #include "core/timeframe.h"
 #include "domain/order/order.h"
@@ -211,6 +212,23 @@ void testCandleCacheFreshness()
             "CandleCache sanitizes symbol path parts");
 }
 
+void testRealtimeTransportConfig()
+{
+    require(toConfigString(RealtimeTransport::Auto) == "auto",
+            "RealtimeTransport serializes auto mode");
+    require(toConfigString(RealtimeTransport::WebSocket) == "websocket",
+            "RealtimeTransport serializes websocket mode");
+    require(toConfigString(RealtimeTransport::Polling) == "polling",
+            "RealtimeTransport serializes polling mode");
+
+    require(realtimeTransportFromConfigString("ws") == RealtimeTransport::WebSocket,
+            "RealtimeTransport accepts ws alias");
+    require(realtimeTransportFromConfigString("HTTP") == RealtimeTransport::Polling,
+            "RealtimeTransport accepts http alias");
+    require(realtimeTransportFromConfigString("unknown") == RealtimeTransport::Auto,
+            "RealtimeTransport falls back to auto");
+}
+
 } // namespace
 
 int main()
@@ -224,6 +242,7 @@ int main()
     testBacktestStatsDefaults();
     testBacktestReportPaths();
     testCandleCacheFreshness();
+    testRealtimeTransportConfig();
 
     std::cout << "All TradeSoft tests passed\n";
     return 0;

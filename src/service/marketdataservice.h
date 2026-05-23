@@ -1,4 +1,6 @@
 #pragma once
+#include "core/appconfig.h"
+
 #include <exchange/iexchangeclient.h>
 #include <core/candleseries.h>
 #include <memory>
@@ -19,6 +21,7 @@ class MarketDataService final : public QObject {
     bool useWebSocketRealtime_ = false;
     bool requestInFlight_ = false;
     int realtimePollingMs_ = 1000;
+    RealtimeTransport realtimeTransport_ = RealtimeTransport::Auto;
     int consecutiveRealtimeFailures_ = 0;
 
 
@@ -29,6 +32,7 @@ public:
     void startRealTime();
     void stopRealTime();
     void setRealtimePollingMs(int intervalMs);
+    void setRealtimeTransport(RealtimeTransport transport);
 
 signals:
 

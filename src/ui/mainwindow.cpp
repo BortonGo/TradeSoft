@@ -30,7 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[AppConfig] Loaded from" << AppConfig::configFilePath()
              << "defaultSymbol=" << config_.defaultSymbolId
              << "defaultTimeframe=" << toUiString(config_.defaultTimeframe)
-             << "pollingMs=" << config_.realtimePollingMs;
+             << "pollingMs=" << config_.realtimePollingMs
+             << "transport=" << toConfigString(config_.realtimeTransport);
 
     const auto setFixedComboSize = [](QComboBox* combo, int width, int height) {
         if (!combo) {
@@ -289,11 +290,13 @@ MainWindow::MainWindow(QWidget *parent) :
     //MarketDataService
     MarketDataService* market = new MarketDataService(chartExchange, this);
     market->setRealtimePollingMs(config_.realtimePollingMs);
+    market->setRealtimeTransport(config_.realtimeTransport);
     marketData_ = market;
 
     //MarketDataStrategy
     marketDataStrategy_ = new MarketDataService(strategyExchange, this);
     marketDataStrategy_->setRealtimePollingMs(config_.realtimePollingMs);
+    marketDataStrategy_->setRealtimeTransport(config_.realtimeTransport);
 
     // StrategyController
     strategyController_ = new StrategyController(ui, marketDataStrategy_, this);

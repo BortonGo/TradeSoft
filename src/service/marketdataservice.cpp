@@ -77,7 +77,10 @@ void MarketDataService::startRealTime()
         return;
     }
 
-    if (exchange_->supportsWebSocketRealtime()) {
+    const bool canUseWebSocket = realtimeTransport_ != RealtimeTransport::Polling
+        && exchange_->supportsWebSocketRealtime();
+
+    if (canUseWebSocket) {
         useWebSocketRealtime_ = true;
         exchange_->startKlineStream(rtSymbolId_, rtTimeframe_,
             [this](bool ok, const Candle& fresh) {
@@ -86,6 +89,10 @@ void MarketDataService::startRealTime()
                         return;
                     }
                     useWebSocketRealtime_ = false;
+                    if (realtimeTransport_ == RealtimeTransport::WebSocket) {
+                        emit signal_connectionStateChanged("Market data: websocket failed");
+                        return;
+                    }
                     emit signal_connectionStateChanged("Market data: websocket failed, using polling");
                     startPollingRealtime();
                     return;
@@ -95,6 +102,11 @@ void MarketDataService::startRealTime()
                 applyRealtimeCandle(fresh);
             });
         emit signal_connectionStateChanged("Market data: websocket starting");
+        return;
+    }
+
+    if (realtimeTransport_ == RealtimeTransport::WebSocket) {
+        emit signal_connectionStateChanged("Market data: websocket unavailable");
         return;
     }
 
@@ -122,6 +134,11 @@ void MarketDataService::setRealtimePollingMs(int intervalMs)
     if (rtTimer_) {
         rtTimer_->setInterval(realtimePollingMs_);
     }
+}
+
+void MarketDataService::setRealtimeTransport(RealtimeTransport transport)
+{
+    realtimeTransport_ = transport;
 }
 
 void MarketDataService::stopRealTime() {

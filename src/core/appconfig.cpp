@@ -56,6 +56,28 @@ QList<Symbol> symbolsFromJson(const QJsonValue& value)
 
 } // namespace
 
+QString toConfigString(RealtimeTransport transport)
+{
+    switch (transport) {
+    case RealtimeTransport::Auto: return "auto";
+    case RealtimeTransport::WebSocket: return "websocket";
+    case RealtimeTransport::Polling: return "polling";
+    }
+    return "auto";
+}
+
+RealtimeTransport realtimeTransportFromConfigString(const QString& value)
+{
+    const QString normalized = value.trimmed().toLower();
+    if (normalized == "websocket" || normalized == "ws") {
+        return RealtimeTransport::WebSocket;
+    }
+    if (normalized == "polling" || normalized == "http") {
+        return RealtimeTransport::Polling;
+    }
+    return RealtimeTransport::Auto;
+}
+
 QString AppConfig::configFilePath()
 {
     return appDataDir() + "/config.json";
@@ -90,6 +112,8 @@ AppConfig AppConfig::load()
     config.defaultTimeframe = timeframeFromUiString(root.value("defaultTimeframe").toString(toUiString(config.defaultTimeframe)));
     config.realtimePollingMs = root.value("realtimePollingMs").toInt(config.realtimePollingMs);
     config.realtimePollingMs = qBound(250, config.realtimePollingMs, 60000);
+    config.realtimeTransport = realtimeTransportFromConfigString(
+        root.value("realtimeTransport").toString(toConfigString(config.realtimeTransport)));
 
     const QList<Symbol> parsedSymbols = symbolsFromJson(root.value("symbols"));
     if (!parsedSymbols.isEmpty()) {
@@ -105,6 +129,7 @@ bool AppConfig::save() const
     root["defaultSymbol"] = defaultSymbolId;
     root["defaultTimeframe"] = toUiString(defaultTimeframe);
     root["realtimePollingMs"] = realtimePollingMs;
+    root["realtimeTransport"] = toConfigString(realtimeTransport);
     root["symbols"] = symbolsToJson(symbols);
 
     QFile file(configFilePath());
