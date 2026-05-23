@@ -179,10 +179,17 @@ void testBacktestStatsDefaults()
 
 void testBacktestReportPaths()
 {
+    BacktestRequest request;
+    request.symbol = "ETH/USDT";
+    request.timeframe = Timeframe::M1;
+    request.strategyName = "EMA Cross";
+
     require(BacktestReportExporter::summaryPath().endsWith("latest_backtest_summary.json"),
             "BacktestReportExporter exposes summary path");
     require(BacktestReportExporter::tradesPath().endsWith("latest_backtest_trades.csv"),
             "BacktestReportExporter exposes trades path");
+    require(BacktestReportExporter::snapshotBaseName(request).contains("ETH_USDT_M1_EMA_Cross"),
+            "BacktestReportExporter creates sanitized snapshot names");
 }
 
 void testCandleCacheFreshness()

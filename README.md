@@ -214,6 +214,8 @@ ctest --test-dir build --output-on-failure
 - summary JSON: `~/Library/Application Support/BortonGo/TradeSoft/reports/latest_backtest_summary.json`
 - trades CSV: `~/Library/Application Support/BortonGo/TradeSoft/reports/latest_backtest_trades.csv`
 
+Также сохраняются timestamped snapshots рядом с `latest_*`, чтобы история прогонов не перезаписывалась.
+
 ---
 
 ## Скриншоты

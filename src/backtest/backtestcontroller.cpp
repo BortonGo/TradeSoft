@@ -1,7 +1,14 @@
 #include "backtestcontroller.h"
 #include "backtest/backtestreportexporter.h"
 #include "ui_mainwindow.h"
+#include <QDesktopServices>
 #include <QDebug>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QSizePolicy>
+#include <QUrl>
 #include <utility>
 #include <memory>
 
@@ -19,6 +26,8 @@ BacktestController::BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExch
     connect(ui_->btCbGraphType, &QComboBox::currentTextChanged, this, &BacktestController::onGraphTypeChanged);
     connect(ui_->btCbXAxis, &QComboBox::currentTextChanged, this, &BacktestController::onGraphAxisChanged);
     connect(ui_->btCbYAxis, &QComboBox::currentTextChanged, this, &BacktestController::onGraphAxisChanged);
+
+    setupReportUi();
 
     tradesModel_ = new BacktestTradesModel(this);
     ui_->btTableTrades->setModel(tradesModel_);
@@ -51,6 +60,105 @@ BacktestController::BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExch
     }
 
     layout->addWidget(graphWidget_);
+}
+
+static QLineEdit* makeReadonlyMetric(QWidget* parent)
+{
+    auto* edit = new QLineEdit(parent);
+    edit->setReadOnly(true);
+    edit->setFixedHeight(26);
+    edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    edit->setStyleSheet("background-color: rgb(35, 35, 35); color: white;");
+    return edit;
+}
+
+static QLabel* makeMetricLabel(const QString& text, QWidget* parent)
+{
+    auto* label = new QLabel(text, parent);
+    label->setFixedHeight(26);
+    label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    label->setStyleSheet("color: #9A9A9A;");
+    return label;
+}
+
+void BacktestController::setupReportUi()
+{
+    auto* parent = ui_->BtGbBacktestResults;
+    auto* grid = ui_->gridLayout_8;
+
+    ui_->BtResultsFrame->setFixedHeight(126);
+    parent->setFixedHeight(104);
+    grid->setContentsMargins(10, 18, 10, 8);
+    grid->setVerticalSpacing(6);
+    grid->setHorizontalSpacing(8);
+
+    const auto normalizeMetricWidget = [](QWidget* widget) {
+        if (!widget) return;
+        widget->setFixedHeight(24);
+        widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    };
+
+    const QList<QWidget*> existingMetricWidgets = {
+        ui_->btLabelTradesValue, ui_->btPf, ui_->btWR, ui_->btNetPnl,
+        ui_->btAvgWin, ui_->btMaxDD, ui_->btAvgLoss, ui_->btEcpecrancy,
+        ui_->label_27, ui_->label_28, ui_->label_29, ui_->label_30,
+        ui_->label_31, ui_->label_32, ui_->label_33, ui_->label_34
+    };
+    for (QWidget* widget : existingMetricWidgets) {
+        normalizeMetricWidget(widget);
+    }
+
+    for (int row = 0; row < 2; ++row) {
+        grid->setRowMinimumHeight(row, 24);
+        grid->setRowStretch(row, 0);
+    }
+    for (int col = 0; col < 14; ++col) {
+        grid->setColumnStretch(col, (col % 2 == 0) ? 0 : 1);
+    }
+
+    grossPnlEdit_ = makeReadonlyMetric(parent);
+    feesEdit_ = makeReadonlyMetric(parent);
+    bestTradeEdit_ = makeReadonlyMetric(parent);
+    worstTradeEdit_ = makeReadonlyMetric(parent);
+    avgBarsHeldEdit_ = makeReadonlyMetric(parent);
+
+    grid->addWidget(ui_->label_27, 0, 0);
+    grid->addWidget(ui_->btLabelTradesValue, 0, 1);
+    grid->addWidget(ui_->label_29, 0, 2);
+    grid->addWidget(ui_->btWR, 0, 3);
+    grid->addWidget(ui_->label_28, 0, 4);
+    grid->addWidget(ui_->btPf, 0, 5);
+    grid->addWidget(ui_->label_30, 0, 6);
+    grid->addWidget(ui_->btNetPnl, 0, 7);
+    grid->addWidget(makeMetricLabel("Gross:", parent), 0, 8);
+    grid->addWidget(grossPnlEdit_, 0, 9);
+    grid->addWidget(makeMetricLabel("Fees:", parent), 0, 10);
+    grid->addWidget(feesEdit_, 0, 11);
+    grid->addWidget(ui_->label_32, 0, 12);
+    grid->addWidget(ui_->btMaxDD, 0, 13);
+
+    grid->addWidget(ui_->label_31, 1, 0);
+    grid->addWidget(ui_->btAvgWin, 1, 1);
+    grid->addWidget(ui_->label_33, 1, 2);
+    grid->addWidget(ui_->btAvgLoss, 1, 3);
+    grid->addWidget(ui_->label_34, 1, 4);
+    grid->addWidget(ui_->btEcpecrancy, 1, 5);
+    grid->addWidget(makeMetricLabel("Best:", parent), 1, 6);
+    grid->addWidget(bestTradeEdit_, 1, 7);
+    grid->addWidget(makeMetricLabel("Worst:", parent), 1, 8);
+    grid->addWidget(worstTradeEdit_, 1, 9);
+    grid->addWidget(makeMetricLabel("Avg bars:", parent), 1, 10);
+    grid->addWidget(avgBarsHeldEdit_, 1, 11);
+
+    openReportsButton_ = new QPushButton("Reports", parent);
+    openReportsButton_->setFixedHeight(24);
+    openReportsButton_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    openReportsButton_->setStyleSheet(
+        "QPushButton { background-color: #2b2b2b; color: white; font-weight: bold; border-radius: 4px; }"
+        "QPushButton:hover { background-color: #333333; }");
+    grid->addWidget(makeMetricLabel("Reports:", parent), 1, 12);
+    grid->addWidget(openReportsButton_, 1, 13);
+    connect(openReportsButton_, &QPushButton::clicked, this, &BacktestController::openReportsFolder);
 }
 
 std::vector<Candle> BacktestController::loadHistory(const HistoryRequest& rec) const {
@@ -182,8 +290,12 @@ void BacktestController::onStart() {
     ui_->editBtCandles->setText(QString::number(candles.size()));
 
     QString exportError;
-    if (BacktestReportExporter::exportLatest(lastRequest_, lastResult_, &exportError)) {
-        qDebug() << "[BACKTEST REPORT] exported to" << BacktestReportExporter::reportsDir();
+    BacktestReportExporter::ReportPaths reportPaths;
+    if (BacktestReportExporter::exportLatest(lastRequest_, lastResult_, &exportError, &reportPaths)) {
+        qDebug() << "[BACKTEST REPORT] exported latest summary =" << reportPaths.latestSummary
+                 << ", latest trades =" << reportPaths.latestTrades
+                 << ", snapshot summary =" << reportPaths.snapshotSummary
+                 << ", snapshot trades =" << reportPaths.snapshotTrades;
     } else {
         qWarning() << "[BACKTEST REPORT] export failed:" << exportError;
     }
@@ -352,10 +464,21 @@ void BacktestController::setResultsToUi() {
                               .arg(lastResult_.stats.maxDrawdown, 0, 'f', 2)
                               .arg(lastResult_.stats.MaxDDPct, 0, 'f', 2));
     ui_->btEcpecrancy->setText(QString::number(lastResult_.stats.expectancy, 'f', 2));
+
+    if (grossPnlEdit_) grossPnlEdit_->setText(QString::number(lastResult_.stats.grossPnl, 'f', 2));
+    if (feesEdit_) feesEdit_->setText(QString::number(lastResult_.stats.totalFees, 'f', 2));
+    if (bestTradeEdit_) bestTradeEdit_->setText(QString::number(lastResult_.stats.bestTrade, 'f', 2));
+    if (worstTradeEdit_) worstTradeEdit_->setText(QString::number(lastResult_.stats.worstTrade, 'f', 2));
+    if (avgBarsHeldEdit_) avgBarsHeldEdit_->setText(QString::number(lastResult_.stats.avgBarsHeld, 'f', 2));
 }
 
 void BacktestController::setTradesToUi() {
     tradesModel_->setTrades(lastResult_.trades);
+}
+
+void BacktestController::openReportsFolder() const
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile(BacktestReportExporter::reportsDir()));
 }
 
 std::vector<BacktestTrade> BacktestController::filterTrades(const BacktestResult& res, const GraphRequest& gr) const {

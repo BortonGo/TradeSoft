@@ -9,6 +9,8 @@
 #include <vector>
 
 namespace Ui {class MainWindow;}
+class QLineEdit;
+class QPushButton;
 
 class BacktestController final : public QObject {
     Q_OBJECT
@@ -23,6 +25,13 @@ class BacktestController final : public QObject {
     BacktestRequest lastRequest_;
     BacktestResult lastResult_;
     bool hasResult_ = false;
+
+    QLineEdit* grossPnlEdit_ = nullptr;
+    QLineEdit* feesEdit_ = nullptr;
+    QLineEdit* bestTradeEdit_ = nullptr;
+    QLineEdit* worstTradeEdit_ = nullptr;
+    QLineEdit* avgBarsHeldEdit_ = nullptr;
+    QPushButton* openReportsButton_ = nullptr;
 public:
     explicit BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExchangeClient> exchange, QObject* parent = nullptr);
 
@@ -41,9 +50,10 @@ private:
     std::vector<GraphPoint> buildDrawdownGraph(const BacktestResult& res, const GraphRequest& gr) const;
     std::vector<GraphPoint> buildPnlByTradeGraph(const BacktestResult& res, const GraphRequest& gr) const;
     GraphRequest buildGraphRequest() const;
+    void setupReportUi();
     void setResultsToUi();
     void setTradesToUi();
+    void openReportsFolder() const;
     std::vector<BacktestTrade> filterTrades(const BacktestResult& res, const GraphRequest& gr) const;
     std::vector<EquityPoint> buildEquityCurveFromTrades(const std::vector<BacktestTrade>& trades, double initialBalance) const;
 };
-

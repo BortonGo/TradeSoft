@@ -1,5 +1,6 @@
 #include "backtest/backtestreportexporter.h"
 
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -7,6 +8,7 @@
 #include <QJsonObject>
 #include <QStandardPaths>
 #include <QTextStream>
+#include <QRegularExpression>
 
 namespace {
 
@@ -36,6 +38,13 @@ QString csvEscape(QString value)
     return value;
 }
 
+QString safePart(QString value)
+{
+    value = value.trimmed();
+    value.replace(QRegularExpression("[^A-Za-z0-9_-]"), "_");
+    return value.isEmpty() ? "unknown" : value;
+}
+
 QJsonObject tradeToJson(const BacktestTrade& trade)
 {
     QJsonObject obj;
@@ -53,7 +62,7 @@ QJsonObject tradeToJson(const BacktestTrade& trade)
     return obj;
 }
 
-bool writeSummary(const BacktestRequest& request, const BacktestResult& result, QString* errorText)
+bool writeSummary(const BacktestRequest& request, const BacktestResult& result, const QString& path, QString* errorText)
 {
     QJsonObject root;
     root["symbol"] = request.symbol;
@@ -87,7 +96,7 @@ bool writeSummary(const BacktestRequest& request, const BacktestResult& result, 
     }
     root["trades"] = trades;
 
-    QFile file(BacktestReportExporter::summaryPath());
+    QFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         if (errorText) {
             *errorText = file.errorString();
@@ -99,9 +108,9 @@ bool writeSummary(const BacktestRequest& request, const BacktestResult& result, 
     return true;
 }
 
-bool writeTradesCsv(const BacktestResult& result, QString* errorText)
+bool writeTradesCsv(const BacktestResult& result, const QString& path, QString* errorText)
 {
-    QFile file(BacktestReportExporter::tradesPath());
+    QFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         if (errorText) {
             *errorText = file.errorString();
@@ -146,10 +155,27 @@ QString BacktestReportExporter::tradesPath()
     return reportsDir() + "/latest_backtest_trades.csv";
 }
 
-bool BacktestReportExporter::exportLatest(const BacktestRequest& request, const BacktestResult& result, QString* errorText)
+QString BacktestReportExporter::snapshotBaseName(const BacktestRequest& request)
 {
+    const QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss");
+    return timestamp + "_" + safePart(request.symbol) + "_" + safePart(toUiString(request.timeframe))
+        + "_" + safePart(request.strategyName);
+}
+
+bool BacktestReportExporter::exportLatest(const BacktestRequest& request, const BacktestResult& result,
+                                          QString* errorText, ReportPaths* paths)
+{
+    const QString baseName = snapshotBaseName(request);
+    const ReportPaths outPaths {
+        summaryPath(),
+        tradesPath(),
+        reportsDir() + "/" + baseName + "_summary.json",
+        reportsDir() + "/" + baseName + "_trades.csv"
+    };
+
     QString summaryError;
-    if (!writeSummary(request, result, &summaryError)) {
+    if (!writeSummary(request, result, outPaths.latestSummary, &summaryError)
+        || !writeSummary(request, result, outPaths.snapshotSummary, &summaryError)) {
         if (errorText) {
             *errorText = "summary: " + summaryError;
         }
@@ -157,11 +183,16 @@ bool BacktestReportExporter::exportLatest(const BacktestRequest& request, const 
     }
 
     QString tradesError;
-    if (!writeTradesCsv(result, &tradesError)) {
+    if (!writeTradesCsv(result, outPaths.latestTrades, &tradesError)
+        || !writeTradesCsv(result, outPaths.snapshotTrades, &tradesError)) {
         if (errorText) {
             *errorText = "trades: " + tradesError;
         }
         return false;
+    }
+
+    if (paths) {
+        *paths = outPaths;
     }
 
     return true;

@@ -12,6 +12,12 @@
 #include <QHeaderView>
 #include <QDebug>
 #include <QStatusBar>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QHBoxLayout>
 
 #include <memory>
 
@@ -25,6 +31,125 @@ MainWindow::MainWindow(QWidget *parent) :
              << "defaultSymbol=" << config_.defaultSymbolId
              << "defaultTimeframe=" << toUiString(config_.defaultTimeframe)
              << "pollingMs=" << config_.realtimePollingMs;
+
+    const auto setFixedComboSize = [](QComboBox* combo, int width, int height) {
+        if (!combo) {
+            return;
+        }
+        combo->setFixedSize(width, height);
+        combo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    };
+
+    setFixedComboSize(ui->comboSymbol, 120, 30);
+    setFixedComboSize(ui->comboTimeframe, 72, 30);
+    setFixedComboSize(ui->cbStrategy, 120, 30);
+    setFixedComboSize(ui->cbStrategyTf, 72, 30);
+
+    if (auto* strategyLayout = qobject_cast<QHBoxLayout*>(ui->SetStrategyFrame->layout())) {
+        strategyLayout->setContentsMargins(10, 7, 10, 7);
+        strategyLayout->setSpacing(8);
+    }
+
+    if (auto* strategyBlocksLayout = qobject_cast<QHBoxLayout*>(ui->RmFrame->layout())) {
+        strategyBlocksLayout->setContentsMargins(10, 10, 10, 10);
+        strategyBlocksLayout->setSpacing(10);
+        strategyBlocksLayout->setStretch(0, 1);
+        strategyBlocksLayout->setStretch(1, 1);
+    }
+
+    ui->gbRM->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    ui->gbAccount->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    ui->gbRM->setMinimumWidth(0);
+    ui->gbAccount->setMinimumWidth(0);
+
+    if (auto* rmGrid = qobject_cast<QGridLayout*>(ui->gbRM->layout())) {
+        rmGrid->setVerticalSpacing(8);
+        rmGrid->setHorizontalSpacing(10);
+        rmGrid->setColumnStretch(0, 0);
+        rmGrid->setColumnStretch(1, 1);
+        for (int row = 0; row < 7; ++row) {
+            rmGrid->setRowMinimumHeight(row, 34);
+        }
+    }
+
+    const QList<QWidget*> rmControls = {
+        ui->cbRiskMode,
+        ui->spinRiskPct,
+        ui->spinMaxPosUSDT,
+        ui->spinLeverage,
+        ui->spinFeePct,
+        ui->spinSlippageBps
+    };
+    for (QWidget* widget : rmControls) {
+        if (widget) {
+            widget->setFixedHeight(34);
+            widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        }
+    }
+
+    const QList<QCheckBox*> rmCheckBoxes = {
+        ui->chkAllowLong,
+        ui->chkAllowShort
+    };
+    for (QCheckBox* checkbox : rmCheckBoxes) {
+        if (checkbox) {
+            checkbox->setFixedHeight(34);
+            checkbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        }
+    }
+
+    if (auto* rmGrid = qobject_cast<QGridLayout*>(ui->gbRM->layout())) {
+        auto* checkBoxRow = new QWidget(ui->gbRM);
+        auto* checkBoxLayout = new QHBoxLayout(checkBoxRow);
+        checkBoxLayout->setContentsMargins(0, 0, 0, 0);
+        checkBoxLayout->setSpacing(28);
+        checkBoxLayout->addStretch(1);
+        checkBoxLayout->addWidget(ui->chkAllowLong);
+        checkBoxLayout->addWidget(ui->chkAllowShort);
+        checkBoxLayout->addStretch(1);
+        rmGrid->addWidget(checkBoxRow, 4, 0, 1, 2);
+    }
+
+    const QList<QWidget*> rmLabels = {
+        ui->label,
+        ui->label_2,
+        ui->label_3,
+        ui->label_4,
+        ui->label_7,
+        ui->label_8
+    };
+    for (QWidget* widget : rmLabels) {
+        if (widget) {
+            widget->setFixedHeight(34);
+            widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        }
+    }
+
+    if (auto* accountGrid = qobject_cast<QGridLayout*>(ui->gbAccount->layout())) {
+        accountGrid->setVerticalSpacing(8);
+        accountGrid->setHorizontalSpacing(10);
+        accountGrid->setColumnStretch(0, 0);
+        accountGrid->setColumnStretch(1, 1);
+        for (int row = 0; row < 6; ++row) {
+            accountGrid->setRowMinimumHeight(row, 34);
+        }
+    }
+
+    const QList<QWidget*> accountControls = {
+        ui->cbAccountType,
+        ui->cbAccount,
+        ui->lblBalanceValue,
+        ui->lblEquityValue,
+        ui->lblFreeValue,
+        ui->lblUsedValue,
+        ui->lblUPnlValie
+    };
+    for (QWidget* widget : accountControls) {
+        if (widget) {
+            widget->setFixedHeight(34);
+            widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        }
+    }
 
     // table model, to header dont crash (idk why crash)
     ui->tableTrades->setModel(new QStandardItemModel(0, 7, ui->tableTrades));
