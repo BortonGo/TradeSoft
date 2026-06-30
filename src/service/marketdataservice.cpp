@@ -221,7 +221,6 @@ void MarketDataService::applyRealtimeCandle(const Candle& freshIn)
     if (fresh.timestamp_ == last.timestamp_) {
         fresh.isFinal_ = false;
         currentSeries_->updateLastCandle(fresh);
-        CandleCache::save(rtSymbolId_, rtTimeframe_, currentSeries_->getCandles());
         emit signal_candleUpdated(fresh);
         return;
     }
@@ -234,7 +233,6 @@ void MarketDataService::applyRealtimeCandle(const Candle& freshIn)
 
         fresh.isFinal_ = false;
         currentSeries_->addCandle(fresh);
-        CandleCache::save(rtSymbolId_, rtTimeframe_, currentSeries_->getCandles());
         emit signal_candleUpdated(fresh);
         return;
     }
