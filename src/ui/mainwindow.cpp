@@ -11,6 +11,7 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 #include <QDebug>
+#include <QLoggingCategory>
 #include <QStatusBar>
 #include <QGridLayout>
 #include <QLabel>
@@ -21,18 +22,21 @@
 
 #include <memory>
 
+Q_LOGGING_CATEGORY(logMainWindow, "tradesoft.ui.mainwindow")
+Q_LOGGING_CATEGORY(logMarketDataStatus, "tradesoft.marketdata.status")
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     config_ = AppConfig::load();
-    qDebug() << "[AppConfig] Loaded from" << AppConfig::configFilePath()
-             << "defaultSymbol=" << config_.defaultSymbolId
-             << "defaultTimeframe=" << toUiString(config_.defaultTimeframe)
-             << "pollingMs=" << config_.realtimePollingMs
-             << "transport=" << toConfigString(config_.realtimeTransport);
-    qDebug() << "[BuildConfig] TRADESOFT_HAS_WEBSOCKETS=" << TRADESOFT_HAS_WEBSOCKETS;
+    qCInfo(logMainWindow) << "AppConfig loaded from" << AppConfig::configFilePath()
+                          << "defaultSymbol=" << config_.defaultSymbolId
+                          << "defaultTimeframe=" << toUiString(config_.defaultTimeframe)
+                          << "pollingMs=" << config_.realtimePollingMs
+                          << "transport=" << toConfigString(config_.realtimeTransport);
+    qCInfo(logMainWindow) << "TRADESOFT_HAS_WEBSOCKETS=" << TRADESOFT_HAS_WEBSOCKETS;
 
     const auto setFixedComboSize = [](QComboBox* combo, int width, int height) {
         if (!combo) {
@@ -309,7 +313,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(marketData_, &MarketDataService::signal_connectionStateChanged, this, [this](const QString& state) {
         statusBar()->showMessage(state);
         updateMarketDataStatusIndicator(state);
-        qDebug() << "[MarketDataStatus]" << state;
+        qCDebug(logMarketDataStatus) << state;
     });
 
     indicatorService_ = new IndicatorService(marketData_, this);

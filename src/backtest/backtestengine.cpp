@@ -1,8 +1,11 @@
 #include "backtestengine.h"
 #include "domain/strategy/strategyfactory.h"
 #include <QDebug>
+#include <QLoggingCategory>
 #include <cmath>
 #include <limits>
+
+Q_LOGGING_CATEGORY(logBacktestEngine, "tradesoft.backtest.engine")
 
 static StrategyConfig buildStrategyConfig(const BacktestRequest& request) {
     StrategyConfig cfg;
@@ -195,13 +198,13 @@ BacktestResult BacktestEngine::run(const BacktestRequest& request, const std::ve
         res.stats.avgBarsHeld = static_cast<double>(barsHeldSum) / static_cast<double>(res.stats.trades);
     }
 
-    qDebug() << "[BACKTEST ENGINE]  Total trades = " << res.stats.trades <<
-                ", strategy = " << cfg.strategy.name <<
-                ", Wins = " << winCount <<
-                ", Losses = " << lossCount <<
-                ", WinSum = " << winSum <<
-                ", LossSum = " << lossSum <<
-                ", Winrate = " << res.stats.winratePct;
+    qCDebug(logBacktestEngine) << "Total trades =" << res.stats.trades
+                               << "strategy =" << cfg.strategy.name
+                               << "Wins =" << winCount
+                               << "Losses =" << lossCount
+                               << "WinSum =" << winSum
+                               << "LossSum =" << lossSum
+                               << "Winrate =" << res.stats.winratePct;
 
     double equityCurveEquity = request.initialbalance;
     for (const auto& a : res.trades) {

@@ -1,6 +1,10 @@
 #include "strategyrunner.h"
 #include <utility>
 #include <QDebug>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(logStrategy, "tradesoft.strategy")
+Q_LOGGING_CATEGORY(logStrategyTicks, "tradesoft.strategy.ticks")
 
 StrategyRunner::StrategyRunner(MarketDataService* mds, QObject* parent) : QObject(parent), mds_(mds) {
     Q_ASSERT(mds_);
@@ -17,11 +21,11 @@ void StrategyRunner::start(const QString& symbolId, Timeframe tf) {
     if (running_) return;
 
     if (!strategy_) {
-        qWarning() << "[RUNNER] Can't start: strategy == nullptr";
+        qCWarning(logStrategy) << "Can't start: strategy == nullptr";
         return;
     }
     if (!risk_ || !exec_ || !journal_) {
-        qWarning() << "[RUNNER] Can't start: pipeline services not set (risk/exec/journal)";
+        qCWarning(logStrategy) << "Can't start: pipeline services not set (risk/exec/journal)";
         return;
     }
 
@@ -36,7 +40,7 @@ void StrategyRunner::start(const QString& symbolId, Timeframe tf) {
     mds_->startRealTime();
 
     emit signal_started();
-    qDebug() << "[RUNNER] START symbol =" << symbolId << ", tf =" << toUiString(tf);
+    qCInfo(logStrategy) << "Start symbol =" << symbolId << ", tf =" << toUiString(tf);
 }
 
 void StrategyRunner::stop() {
@@ -50,15 +54,15 @@ void StrategyRunner::stop() {
     if (journal_) {
         const TradeReport r = journal_->report();
         const double winRate = (r.closedTrades > 0) ? (100.0 * r.winTrades / r.closedTrades) : 0.0;
-        qDebug() << "[RUNNER] REPORT netPnl=" << r.netPnl
-                 << " equity=" << r.equity
-                 << " fees=" << r.fees
-                 << " trades=" << r.closedTrades
-                 << " winrate=" << winRate
-                 << " maxDD=" << r.maxDrawdown;
+        qCInfo(logStrategy) << "Report netPnl=" << r.netPnl
+                            << " equity=" << r.equity
+                            << " fees=" << r.fees
+                            << " trades=" << r.closedTrades
+                            << " winrate=" << winRate
+                            << " maxDD=" << r.maxDrawdown;
     }
 
-    qDebug() << "[RUNNER] STOP";
+    qCInfo(logStrategy) << "Stop";
 }
 
 void StrategyRunner::onSeriesLoaded(std::shared_ptr<CandleSeries> series) {
@@ -66,7 +70,7 @@ void StrategyRunner::onSeriesLoaded(std::shared_ptr<CandleSeries> series) {
     ctx_.series = series;
 
     strategy_->onStart(ctx_);
-    qDebug() << "[RUNNER] series loaded, candles =" << series->getCount();
+    qCInfo(logStrategy) << "Series loaded, candles =" << series->getCount();
 }
 
 void StrategyRunner::onCandleClosed(Candle c)
@@ -78,10 +82,10 @@ void StrategyRunner::onCandleClosed(Candle c)
     for (const auto& s : signal) {
         if (s.type == StrategySignalType::None) continue;
 
-        qDebug() << "[Runner] CLOSED SIGNAL type=" << static_cast<int>(s.type)
-                 << " symbol=" << s.symbolId
-                 << " tf=" << toUiString(s.tf)
-                 << " reason=" << s.reason;
+        qCDebug(logStrategy) << "Closed signal type=" << static_cast<int>(s.type)
+                             << " symbol=" << s.symbolId
+                             << " tf=" << toUiString(s.tf)
+                             << " reason=" << s.reason;
 
         handleSignal(s, c);
         emit signal_signalGenerated(s);
@@ -102,10 +106,10 @@ void StrategyRunner::onCandleUpdated(Candle c)
     for (const auto& s : signal) {
         if (s.type == StrategySignalType::None) continue;
 
-            qDebug() << "[Runner] UPDATE SIGNAL type=" << static_cast<int>(s.type)
-                 << " symbol=" << s.symbolId
-                 << " tf=" << toUiString(s.tf)
-                 << " reason=" << s.reason;
+            qCDebug(logStrategyTicks) << "Update signal type=" << static_cast<int>(s.type)
+                                      << " symbol=" << s.symbolId
+                                      << " tf=" << toUiString(s.tf)
+                                      << " reason=" << s.reason;
 
         handleSignal(s, c);
         emit signal_signalGenerated(s);
@@ -167,13 +171,13 @@ void StrategyRunner::handleSignal(const StrategySignal& s, const Candle& closed)
     journal_->onFill(f);
 
     // Optional debug each fill
-    qDebug() << "[RUNNER] FILL sym=" << f.symbol
-             << " side=" << (f.side == TradeSide::Buy ? "Buy" : "Sell")
-             << " qty=" << f.qty
-             << " price=" << f.price
-             << " fee=" << f.fee
-             << " reduceOnly=" << f.reduceOnly
-             << " tp=" << f.tpPrice
-             << " sl=" << f.slPrice
-             << " equity=" << journal_->equity();
+    qCDebug(logStrategy) << "Fill sym=" << f.symbol
+                         << " side=" << (f.side == TradeSide::Buy ? "Buy" : "Sell")
+                         << " qty=" << f.qty
+                         << " price=" << f.price
+                         << " fee=" << f.fee
+                         << " reduceOnly=" << f.reduceOnly
+                         << " tp=" << f.tpPrice
+                         << " sl=" << f.slPrice
+                         << " equity=" << journal_->equity();
 }

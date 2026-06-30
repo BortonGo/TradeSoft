@@ -5,12 +5,15 @@
 #include <QDebug>
 #include <QGridLayout>
 #include <QLabel>
+#include <QLoggingCategory>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSizePolicy>
 #include <QUrl>
 #include <utility>
 #include <memory>
+
+Q_LOGGING_CATEGORY(logBacktestUi, "tradesoft.backtest.ui")
 
 BacktestController::BacktestController(Ui::MainWindow* ui, std::shared_ptr<IExchangeClient> exchange, QObject* parent) :
     QObject(parent), ui_(ui), exchange_(std::move(exchange)),
@@ -274,16 +277,18 @@ void BacktestController::onStart() {
     lastRequest_ = BtReq;
     lastResult_ = engine_.run(BtReq, candles);
     hasResult_ = true;
-    qDebug() << "[BACKTEST] START  symbol =" << req.symbolId << ", tf =" << toUiString(req.timeframe)
-           << ", begin =" << req.begin.toString("yyyy-MM-dd HH:mm:ss") << ", end =" << req.end.toString("yyyy-MM-dd HH:mm:ss") << ", size =" << candles.size();
-    qDebug() << "[BACKTEST RESULT]   state =" << toString(lastResult_.state) << ", err =" << lastResult_.errorText;
-    qDebug() << "[BACKTEST RESULT EQUITY CURVE]   size =" << lastResult_.equityCurve.size();
+    qCInfo(logBacktestUi) << "Start symbol =" << req.symbolId << ", tf =" << toUiString(req.timeframe)
+                          << ", begin =" << req.begin.toString("yyyy-MM-dd HH:mm:ss")
+                          << ", end =" << req.end.toString("yyyy-MM-dd HH:mm:ss")
+                          << ", size =" << candles.size();
+    qCDebug(logBacktestUi) << "Result state =" << toString(lastResult_.state) << ", err =" << lastResult_.errorText;
+    qCDebug(logBacktestUi) << "Equity curve size =" << lastResult_.equityCurve.size();
     if (!lastResult_.equityCurve.empty()) {
-        qDebug() << "[BACKTEST RESULT EQCURVE]   start time ="
-                 << lastResult_.equityCurve.front().time.toString("yyyy-MM-dd HH:mm:ss") <<
-                    ", end time =" << lastResult_.equityCurve.back().time.toString("yyyy-MM-dd HH:mm:ss") <<
-                    ", start equity =" << lastResult_.equityCurve.front().equity <<
-                    ", end equity =" << lastResult_.equityCurve.back().equity;
+        qCDebug(logBacktestUi) << "Equity curve start time ="
+                               << lastResult_.equityCurve.front().time.toString("yyyy-MM-dd HH:mm:ss")
+                               << ", end time =" << lastResult_.equityCurve.back().time.toString("yyyy-MM-dd HH:mm:ss")
+                               << ", start equity =" << lastResult_.equityCurve.front().equity
+                               << ", end equity =" << lastResult_.equityCurve.back().equity;
     }
     setResultsToUi();
     setTradesToUi();
@@ -292,18 +297,18 @@ void BacktestController::onStart() {
     QString exportError;
     BacktestReportExporter::ReportPaths reportPaths;
     if (BacktestReportExporter::exportLatest(lastRequest_, lastResult_, &exportError, &reportPaths)) {
-        qDebug() << "[BACKTEST REPORT] exported latest summary =" << reportPaths.latestSummary
-                 << ", latest trades =" << reportPaths.latestTrades
-                 << ", snapshot summary =" << reportPaths.snapshotSummary
-                 << ", snapshot trades =" << reportPaths.snapshotTrades;
+        qCInfo(logBacktestUi) << "Exported latest summary =" << reportPaths.latestSummary
+                              << ", latest trades =" << reportPaths.latestTrades
+                              << ", snapshot summary =" << reportPaths.snapshotSummary
+                              << ", snapshot trades =" << reportPaths.snapshotTrades;
     } else {
-        qWarning() << "[BACKTEST REPORT] export failed:" << exportError;
+        qCWarning(logBacktestUi) << "Export failed:" << exportError;
     }
 }
 
 void BacktestController::onBuildGraph() {
     if (!hasResult_) {
-        qDebug() << "[BUILD BT GRAPH] Don't have BacktestResult";
+        qCDebug(logBacktestUi) << "Build graph skipped: no BacktestResult";
         return;
     }
     GraphRequest gr = buildGraphRequest();
@@ -311,37 +316,37 @@ void BacktestController::onBuildGraph() {
     switch (gr.type) {
         case GraphType::EquityCurve : {
             std::vector<GraphPoint> points = buildEquityGraph(lastResult_, gr);
-            qDebug() << "[BUILD EQ GRAPH]   size =" << points.size();
+            qCDebug(logBacktestUi) << "Build equity graph size =" << points.size();
             if (!points.empty()) {
-                qDebug() << "[BUILD EQ GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
-                            ", last x =" << points.back().x << ", last y =" << points.back().y;
+                qCDebug(logBacktestUi) << "Build equity graph fst x =" << points.front().x << ", fst y =" << points.front().y
+                                       << ", last x =" << points.back().x << ", last y =" << points.back().y;
             }
             graphWidget_->setPoints(points);
             break;
         }
         case GraphType::DrawdownCurve : {
             std::vector<GraphPoint> points = buildDrawdownGraph(lastResult_, gr);
-            qDebug() << "[BUILD DD GRAPH]   size =" << points.size();
+            qCDebug(logBacktestUi) << "Build drawdown graph size =" << points.size();
             if (!points.empty()) {
-                qDebug() << "[BUILD DD GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
-                            ", last x =" << points.back().x << ", last y =" << points.back().y;
+                qCDebug(logBacktestUi) << "Build drawdown graph fst x =" << points.front().x << ", fst y =" << points.front().y
+                                       << ", last x =" << points.back().x << ", last y =" << points.back().y;
             }
             graphWidget_->setPoints(points);
             break;
         }
     case GraphType::PnlByTrade : {
         std::vector<GraphPoint> points = buildPnlByTradeGraph(lastResult_, gr);
-        qDebug() << "[BUILD DD GRAPH]   size =" << points.size();
+        qCDebug(logBacktestUi) << "Build PnL graph size =" << points.size();
         if (!points.empty()) {
-            qDebug() << "[BUILD DD GRAPH]   fst x =" << points.front().x << ", fst y =" << points.front().y <<
-                        ", last x =" << points.back().x << ", last y =" << points.back().y;
+            qCDebug(logBacktestUi) << "Build PnL graph fst x =" << points.front().x << ", fst y =" << points.front().y
+                                   << ", last x =" << points.back().x << ", last y =" << points.back().y;
         }
         graphWidget_->setPoints(points);
         break;
     }
         default : {
             graphWidget_->clearPoints();
-            qDebug() << "[BUILD BT GRAPH] graph type not implemented";
+            qCDebug(logBacktestUi) << "Graph type not implemented";
             break;
         }
     }

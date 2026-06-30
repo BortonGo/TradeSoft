@@ -7,6 +7,9 @@
 #include <QJsonObject>
 #include <QStandardPaths>
 #include <QDebug>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(logConfig, "tradesoft.config")
 
 namespace {
 
@@ -90,20 +93,20 @@ AppConfig AppConfig::load()
 
     if (!file.exists()) {
         if (!config.save()) {
-            qWarning() << "[AppConfig] Failed to write default config:" << configFilePath();
+            qCWarning(logConfig) << "Failed to write default config:" << configFilePath();
         }
         return config;
     }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "[AppConfig] Failed to open config:" << file.errorString();
+        qCWarning(logConfig) << "Failed to open config:" << file.errorString();
         return config;
     }
 
     QJsonParseError error;
     const QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
     if (error.error != QJsonParseError::NoError || !doc.isObject()) {
-        qWarning() << "[AppConfig] Invalid config JSON:" << error.errorString();
+        qCWarning(logConfig) << "Invalid config JSON:" << error.errorString();
         return config;
     }
 

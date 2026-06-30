@@ -1,7 +1,10 @@
 #include "marketdataservice.h"
 #include "service/marketdata/candlecache.h"
 #include <QDebug>
+#include <QLoggingCategory>
 #include <QtGlobal>
+
+Q_LOGGING_CATEGORY(logMarketData, "tradesoft.marketdata")
 
 MarketDataService::MarketDataService(std::shared_ptr<IExchangeClient> exchange, QObject *parent) :
     QObject(parent), exchange_(exchange)
@@ -11,13 +14,13 @@ MarketDataService::MarketDataService(std::shared_ptr<IExchangeClient> exchange, 
 
 void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
     if (symbolId.isEmpty()){
-        qWarning() << "[MarketDataService] symbolId is empty!";
+        qCWarning(logMarketData) << "symbolId is empty";
         emit signal_connectionStateChanged("Market data: symbol is empty");
         return;
     }
 
     if (exchange_ == nullptr){
-        qWarning() << "[MarketDataService] exchange_ == nullptr";
+        qCWarning(logMarketData) << "exchange_ == nullptr";
         emit signal_connectionStateChanged("Market data: exchange is not configured");
         return;
     }
@@ -30,20 +33,20 @@ void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
     if (CandleCache::isFresh(cachedCandles, tf)) {
         candles = cachedCandles;
         emit signal_connectionStateChanged("Market data: loaded fresh cache");
-        qDebug() << "[MarketDataService] Loaded fresh candles from cache"
-                 << symbolId << toUiString(tf) << candles.size();
+        qCDebug(logMarketData) << "Loaded fresh candles from cache"
+                               << symbolId << toUiString(tf) << candles.size();
     } else {
         candles = exchange_->fetchKlines(symbolId, tf);
         if (!candles.empty()) {
             CandleCache::save(symbolId, tf, candles);
             emit signal_connectionStateChanged("Market data: loaded from exchange");
-            qDebug() << "[MarketDataService] Saved candles to cache"
-                     << symbolId << toUiString(tf) << candles.size();
+            qCDebug(logMarketData) << "Saved candles to cache"
+                                   << symbolId << toUiString(tf) << candles.size();
         } else if (!cachedCandles.empty()) {
             candles = cachedCandles;
             emit signal_connectionStateChanged("Market data: exchange failed, using stale cache");
-            qWarning() << "[MarketDataService] Exchange returned no candles; using stale cache"
-                       << symbolId << toUiString(tf) << candles.size();
+            qCWarning(logMarketData) << "Exchange returned no candles; using stale cache"
+                                     << symbolId << toUiString(tf) << candles.size();
         } else {
             emit signal_connectionStateChanged("Market data: no candles loaded");
         }
@@ -71,15 +74,15 @@ void MarketDataService::loadHistory(const QString& symbolId, Timeframe tf) {
 void MarketDataService::startRealTime()
 {
     if (!currentSeries_) {
-        qWarning() << "[MarketDataService] currentSeries_ == nullptr";
+        qCWarning(logMarketData) << "currentSeries_ == nullptr";
         emit signal_connectionStateChanged("Market data: realtime cannot start without series");
         return;
     }
 
-    qDebug() << "[MarketDataService] Realtime start"
-             << "transport=" << toConfigString(realtimeTransport_)
-             << "websocketSupported=" << exchange_->supportsWebSocketRealtime()
-             << "pollingSupported=" << exchange_->supportsPollingRealtime();
+    qCInfo(logMarketData) << "Realtime start"
+                          << "transport=" << toConfigString(realtimeTransport_)
+                          << "websocketSupported=" << exchange_->supportsWebSocketRealtime()
+                          << "pollingSupported=" << exchange_->supportsPollingRealtime();
 
     const bool canUseWebSocket = realtimeTransport_ != RealtimeTransport::Polling
         && exchange_->supportsWebSocketRealtime();

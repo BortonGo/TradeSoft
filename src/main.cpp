@@ -5,12 +5,12 @@
 #include <QIcon>
 #include <QMetaType>
 #include <QSslSocket>
-#include <QDebug>
 #include <QLoggingCategory>
 #include <memory>
 
 #include <QFileInfo>
-#include <QDebug>
+
+Q_LOGGING_CATEGORY(logApp, "tradesoft.app")
 
 int main(int argc, char *argv[])
 {
@@ -25,11 +25,10 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    QLoggingCategory::setFilterRules("qt.network.ssl.debug=true\nqt.network.access.debug=true\n");
-    qDebug() << "SSL supported:" << QSslSocket::supportsSsl();
-    qDebug() << "SSL build:" << QSslSocket::sslLibraryBuildVersionString();
-    qDebug() << "SSL runtime:" << QSslSocket::sslLibraryVersionString();
-    qDebug() << "Log file:" << AppLogging::logFilePath();
+    qCInfo(logApp) << "SSL supported:" << QSslSocket::supportsSsl();
+    qCInfo(logApp) << "SSL build:" << QSslSocket::sslLibraryBuildVersionString();
+    qCInfo(logApp) << "SSL runtime:" << QSslSocket::sslLibraryVersionString();
+    qCInfo(logApp) << "Log file:" << AppLogging::logFilePath();
 
     return a.exec();
 }

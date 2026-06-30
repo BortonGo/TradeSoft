@@ -9,6 +9,9 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include <QDebug>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(logCandleCache, "tradesoft.marketdata.cache")
 
 namespace {
 
@@ -81,14 +84,14 @@ std::vector<Candle> CandleCache::load(const QString& symbolId, Timeframe tf)
     }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "[CandleCache] Failed to open cache:" << file.errorString();
+        qCWarning(logCandleCache) << "Failed to open cache:" << file.errorString();
         return candles;
     }
 
     QJsonParseError error;
     const QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
     if (error.error != QJsonParseError::NoError || !doc.isObject()) {
-        qWarning() << "[CandleCache] Invalid cache JSON:" << error.errorString();
+        qCWarning(logCandleCache) << "Invalid cache JSON:" << error.errorString();
         return candles;
     }
 
@@ -123,7 +126,7 @@ bool CandleCache::save(const QString& symbolId, Timeframe tf, const std::vector<
 
     QFile file(filePath(symbolId, tf));
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        qWarning() << "[CandleCache] Failed to write cache:" << file.errorString();
+        qCWarning(logCandleCache) << "Failed to write cache:" << file.errorString();
         return false;
     }
 

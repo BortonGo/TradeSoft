@@ -2,8 +2,11 @@
 #include "ui_mainwindow.h"
 #include <QPushButton>
 #include <QDebug>
+#include <QLoggingCategory>
 #include <QHeaderView>
 #include <cmath>
+
+Q_LOGGING_CATEGORY(logStrategyUi, "tradesoft.ui.strategy")
 
 StrategyController::StrategyController(Ui::MainWindow* ui, MarketDataService* mds, QObject* parent)
     : QObject(parent), ui_(ui), marketData_(mds) {
@@ -48,21 +51,21 @@ void StrategyController::onStart() {
 
     // минимальная валидация
     if (cfg_.strategy.name.isEmpty()) {
-        qDebug() << "[STRATEGY] Can't start: strategy not selected";
+        qCWarning(logStrategyUi) << "Can't start: strategy not selected";
         return;
     }
     if (!cfg_.risk.allowLong && !cfg_.risk.allowShort) {
-        qDebug() << "[STRATEGY] Can't start: both long/short disabled";
+        qCWarning(logStrategyUi) << "Can't start: both long/short disabled";
         return;
     }
     if (cfg_.accountId.isEmpty()) {
-        qDebug() << "[STRATEGY] Can't start: account not selected";
+        qCWarning(logStrategyUi) << "Can't start: account not selected";
         return;
     }
 
     const QString symbolId = ui_->comboSymbol->currentData().toString();
     if (symbolId.isEmpty()) {
-        qDebug() << "[STRATEGY] Can't start: symbol not selected";
+        qCWarning(logStrategyUi) << "Can't start: symbol not selected";
         return;
     }
     runner_->setStrategy(StrategyFactory::create(cfg_));
@@ -72,11 +75,11 @@ void StrategyController::onStart() {
 
     runner_->start(symbolId, cfg_.strategy.tf);
 
-    qDebug() << "[STRATEGY] START"
-             << cfg_.strategy.name
-             << toUiString(cfg_.strategy.tf)
-             << "symbol=" << symbolId
-             << "accountId=" << cfg_.accountId;
+    qCInfo(logStrategyUi) << "Start"
+                          << cfg_.strategy.name
+                          << toUiString(cfg_.strategy.tf)
+                          << "symbol=" << symbolId
+                          << "accountId=" << cfg_.accountId;
 }
 
 void StrategyController::onStop()
@@ -88,16 +91,16 @@ void StrategyController::onStop()
 
     setParamsLocked(false);
     ui_->tab_strategy->setFocus();
-    qDebug() << "[STRATEGY] STOP";
+    qCInfo(logStrategyUi) << "Stop";
 
     clearChartLevels();
 }
 
 void StrategyController::onRunnerSignal(StrategySignal s) {
-    qDebug() << "[UI] StrategySignal type=" << (int)s.type
-             << "symbol=" << s.symbolId
-             << "tf=" << toUiString(s.tf)
-             << "reason=" << s.reason;
+    qCDebug(logStrategyUi) << "StrategySignal type=" << (int)s.type
+                           << "symbol=" << s.symbolId
+                           << "tf=" << toUiString(s.tf)
+                           << "reason=" << s.reason;
 
     switch (s.type) {
     case StrategySignalType::EnterLong:
@@ -201,35 +204,34 @@ void StrategyController::clearChartLevels() {
 
 void StrategyController::showLevelsForSignal(const StrategySignal& s) {
     if (!ui_ || !ui_->chartWidget || !tradesModel_) {
-        qDebug() << "[UI] showLevelsForSignal aborted (null pointers)";
+        qCWarning(logStrategyUi) << "showLevelsForSignal aborted (null pointers)";
         return;
     }
 
-    qDebug() << "[UI] showLevelsForSignal called"
-             << "symbol=" << s.symbolId
-             << "rows=" << tradesModel_->rowCount();
+    qCDebug(logStrategyUi) << "showLevelsForSignal called"
+                           << "symbol=" << s.symbolId
+                           << "rows=" << tradesModel_->rowCount();
 
     for (int row = tradesModel_->rowCount() - 1; row >= 0; --row) {
         const TradeRecord t = tradesModel_->tradeAt(row);
 
-        qDebug() << "[UI] checking row" << row
-                 << "symbol=" << t.symbol
-                 << "status=" << static_cast<int>(t.status)
-                 << "tp=" << t.tpPrice
-                 << "sl=" << t.slPrice;
+        qCDebug(logStrategyUi) << "checking row" << row
+                               << "symbol=" << t.symbol
+                               << "status=" << static_cast<int>(t.status)
+                               << "tp=" << t.tpPrice
+                               << "sl=" << t.slPrice;
 
         if (t.symbol == s.symbolId && t.status == TradeStatus::Open) {
 
-            qDebug() << "[UI] FOUND OPEN TRADE"
-                     << "tp=" << t.tpPrice
-                     << "sl=" << t.slPrice;
+            qCDebug(logStrategyUi) << "Found open trade"
+                                   << "tp=" << t.tpPrice
+                                   << "sl=" << t.slPrice;
 
             ui_->chartWidget->setTradeLevels(t.tpPrice, t.slPrice);
             return;
         }
     }
 
-    qDebug() << "[UI] no open trade found for symbol" << s.symbolId;
+    qCDebug(logStrategyUi) << "No open trade found for symbol" << s.symbolId;
 }
-
 

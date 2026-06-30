@@ -9,6 +9,7 @@
 #include <QEventLoop>
 #include <QDebug>
 #include <QTimer>
+#include <QLoggingCategory>
 
 #if TRADESOFT_HAS_WEBSOCKETS
 #include <QDateTime>
@@ -25,6 +26,10 @@
 #endif
 
 #include <algorithm>
+
+Q_LOGGING_CATEGORY(logWs, "tradesoft.ws")
+Q_LOGGING_CATEGORY(logWsTicks, "tradesoft.ws.ticks")
+Q_LOGGING_CATEGORY(logBingX, "tradesoft.exchange.bingx")
 
 // --- helpers ---
 static void enableRedirects(QNetworkRequest& req) {
@@ -216,7 +221,7 @@ std::vector<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timefr
     if (!mgr_) {
         QCoreApplication* app = QCoreApplication::instance();
         if (!app) {
-            qWarning() << "[BingXSwapClient] No QCoreApplication instance yet!";
+            qCWarning(logBingX) << "No QCoreApplication instance yet";
             return out;
         }
         mgr_ = new QNetworkAccessManager(app);
@@ -233,7 +238,7 @@ std::vector<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timefr
     q.addQueryItem("limit", QString::number(limit));
     url.setQuery(q);
 
-    qDebug() << "[BingXSwapClient] GET" << url.toString();
+    qCDebug(logBingX) << "GET" << url.toString();
 
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::UserAgentHeader, "TradeSoft-MVP/1.0");
@@ -255,17 +260,17 @@ std::vector<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timefr
     loop.exec();
 
     if (!timer.isActive()) {
-        qWarning() << "[BingXSwapClient] TIMEOUT";
+        qCWarning(logBingX) << "Timeout while loading recent klines";
         reply->deleteLater();
         return out;
     }
     timer.stop();
 
     const QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-    qDebug() << "[BingXSwapClient] HTTP status:" << statusCode;
+    qCDebug(logBingX) << "HTTP status:" << statusCode;
 
     if (reply->error() != QNetworkReply::NoError) {
-        qWarning() << "[BingXSwapClient] Network error:" << reply->errorString();
+        qCWarning(logBingX) << "Network error:" << reply->errorString();
         reply->deleteLater();
         return out;
     }
@@ -277,22 +282,22 @@ std::vector<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timefr
     QJsonParseError jerr;
     const QJsonDocument doc = QJsonDocument::fromJson(body, &jerr);
     if (jerr.error != QJsonParseError::NoError || doc.isNull() || !doc.isObject()) {
-        qWarning() << "[BingXSwapClient] JSON parse error:" << jerr.errorString();
-        qDebug().noquote() << "[BingXSwapClient] Body head:" << QString::fromUtf8(body.left(200));
+        qCWarning(logBingX) << "JSON parse error:" << jerr.errorString();
+        qCDebug(logBingX).noquote() << "Body head:" << QString::fromUtf8(body.left(200));
         return out;
     }
 
     const QJsonObject root = doc.object();
     const int code = root.value("code").toInt(-1);
     if (code != 0) {
-        qWarning() << "[BingXSwapClient] API error code:" << code
-                   << "msg:" << root.value("msg").toString();
+        qCWarning(logBingX) << "API error code:" << code
+                            << "msg:" << root.value("msg").toString();
         return out;
     }
 
     const QJsonValue dataVal = root.value("data");
     if (!dataVal.isArray()) {
-        qWarning() << "[BingXSwapClient] 'data' is not array";
+        qCWarning(logBingX) << "'data' is not array";
         return out;
     }
 
@@ -323,11 +328,11 @@ std::vector<Candle> BingXSwapClient::fetchKlines(const QString& symbolId, Timefr
     std::reverse(out.begin(), out.end());
 
     if (!out.empty()) {
-        qDebug() << "[BingXSwapClient] Parsed candles:" << out.size()
-                 << "first ts:" << out.front().timestamp_
-                 << "last ts:" << out.back().timestamp_;
+        qCDebug(logBingX) << "Parsed candles:" << out.size()
+                          << "first ts:" << out.front().timestamp_
+                          << "last ts:" << out.back().timestamp_;
     } else {
-        qWarning() << "[BingXSwapClient] Parsed 0 candles";
+        qCWarning(logBingX) << "Parsed 0 candles";
     }
 
     return out;
@@ -342,19 +347,19 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
     if (!mgr_) {
         QCoreApplication* app = QCoreApplication::instance();
         if (!app) {
-            qWarning() << "[BingXSwapClient fetchHistory] No QCoreApplication instance yet!";
+            qCWarning(logBingX) << "No QCoreApplication instance yet while fetching history";
             return out;
         }
         mgr_ = new QNetworkAccessManager(app);
     }
 
     if (request.symbolId.isEmpty()) {
-        qWarning() << "[BingXSwapClient fetchHistory] symbolId is empty!";
+        qCWarning(logBingX) << "History request symbolId is empty";
         return out;
     }
 
     if (!request.begin.isValid() || !request.end.isValid()) {
-        qWarning() << "[BingXSwapClient fetchHistory] degin or end - invalid!";
+        qCWarning(logBingX) << "History request begin or end is invalid";
         return out;
     }
 
@@ -365,7 +370,7 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
     const qint64 endMs = request.end.toMSecsSinceEpoch();
 
     if (beginMs >= endMs) {
-        qWarning() << "[BingXSwapClient fetchHistory] begin >= end!";
+        qCWarning(logBingX) << "History request begin >= end";
         return out;
     }
 
@@ -382,7 +387,7 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         q.addQueryItem("limit", QString::number(limit));
         url.setQuery(q);
 
-        qDebug() << "[BingXSwapClient fetchHistory] GET" << url.toString();
+        qCDebug(logBingX) << "History GET" << url.toString();
 
         QNetworkRequest req(url);
         req.setHeader(QNetworkRequest::UserAgentHeader, "TradeSoft-MVP/1.0");
@@ -404,17 +409,17 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         loop.exec();
 
         if (!timer.isActive()) {
-            qWarning() << "[BingXSwapClient fetchHistory] TIMEOUT";
+            qCWarning(logBingX) << "Timeout while fetching history";
             reply->deleteLater();
             break;
         }
         timer.stop();
 
         const QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-        qDebug() << "[BingXSwapClient fetchHistory] HTTP status:" << statusCode;
+        qCDebug(logBingX) << "History HTTP status:" << statusCode;
 
         if (reply->error() != QNetworkReply::NoError) {
-            qWarning() << "[BingXSwapClient fetchHistory] Network error:" << reply->errorString();
+            qCWarning(logBingX) << "History network error:" << reply->errorString();
             reply->deleteLater();
             break;
         }
@@ -426,22 +431,22 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         QJsonParseError jerr;
         const QJsonDocument doc = QJsonDocument::fromJson(body, &jerr);
         if (jerr.error != QJsonParseError::NoError || doc.isNull() || !doc.isObject()) {
-            qWarning() << "[BingXSwapClient fetchHistory] JSON parse error:" << jerr.errorString();
-            qDebug().noquote() << "[BingXSwapClient fetchHistory] Body head:" << QString::fromUtf8(body.left(200));
+            qCWarning(logBingX) << "History JSON parse error:" << jerr.errorString();
+            qCDebug(logBingX).noquote() << "History body head:" << QString::fromUtf8(body.left(200));
             break;
         }
 
         const QJsonObject root = doc.object();
         const int code = root.value("code").toInt(-1);
         if (code != 0) {
-            qWarning() << "[BingXSwapClient fetchHistory] API error code:" << code
-                       << "msg:" << root.value("msg").toString();
+            qCWarning(logBingX) << "History API error code:" << code
+                                << "msg:" << root.value("msg").toString();
             break;
         }
 
         const QJsonValue dataVal = root.value("data");
         if (!dataVal.isArray()) {
-            qWarning() << "[BingXSwapClient fetchHistory] 'data' is not array";
+            qCWarning(logBingX) << "History 'data' is not array";
             break;
         }
 
@@ -490,7 +495,7 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
         const qint64 nextCursorMs = earliestTs - tfMs;
 
         if (nextCursorMs >= cursorMs) {
-            qWarning() << "[BingXSwapClient fetchHistory] cursor did not advance";
+            qCWarning(logBingX) << "History cursor did not advance";
             break;
         }
 
@@ -500,11 +505,11 @@ std::vector<Candle> BingXSwapClient::fetchHistory(const HistoryRequest& request)
     std::reverse(out.begin(), out.end());
 
     if (!out.empty()) {
-        qDebug() << "[BingXSwapClient fetchHistory] Parsed candles:" << out.size()
-                 << "first ts:" << out.front().timestamp_
-                 << "last ts:" << out.back().timestamp_;
+        qCDebug(logBingX) << "History parsed candles:" << out.size()
+                          << "first ts:" << out.front().timestamp_
+                          << "last ts:" << out.back().timestamp_;
     } else {
-        qWarning() << "[BingXSwapClient fetchHistory] Parsed 0 candles";
+        qCWarning(logBingX) << "History parsed 0 candles";
     }
 
     return out;
@@ -518,7 +523,7 @@ void BingXSwapClient::fetchLastKlineAsync(const QString& symbolId, Timeframe tf,
     if (!mgr_) {
         QCoreApplication* app = QCoreApplication::instance();
         if (!app) {
-            qWarning() << "[BingXSwapClient] No QCoreApplication instance!";
+            qCWarning(logBingX) << "No QCoreApplication instance";
             if (cb) cb(false, Candle{});
             return;
         }
@@ -639,7 +644,7 @@ void BingXSwapClient::startKlineStream(const QString& symbolId, Timeframe tf, Re
     }
 
     if (ws_->state() != QAbstractSocket::ConnectingState) {
-        qDebug() << "[BingXSwapClient WS] Connecting to swap market stream";
+        qCInfo(logWs) << "Connecting to swap market stream";
         ws_->open(QUrl("wss://open-api-swap.bingx.com/swap-market"));
     }
 #else
@@ -679,7 +684,7 @@ void BingXSwapClient::ensureWebSocket()
 
     QCoreApplication* app = QCoreApplication::instance();
     if (!app) {
-        qWarning() << "[BingXSwapClient WS] No QCoreApplication instance!";
+        qCWarning(logWs) << "No QCoreApplication instance";
         return;
     }
 
@@ -692,19 +697,19 @@ void BingXSwapClient::ensureWebSocket()
             if (!ws_ || wsStopRequested_ || wsDataType_.isEmpty()) {
                 return;
             }
-            qDebug() << "[BingXSwapClient WS] Reconnecting attempt" << wsReconnectAttempts_;
+            qCInfo(logWs) << "Reconnecting attempt" << wsReconnectAttempts_;
             ws_->open(QUrl("wss://open-api-swap.bingx.com/swap-market"));
         });
     }
 
     QObject::connect(ws_, &QWebSocket::connected, ws_, [this]() {
-        qDebug() << "[BingXSwapClient WS] Connected";
+        qCInfo(logWs) << "Connected";
         wsReconnectAttempts_ = 0;
         sendKlineSubscription();
     });
 
     QObject::connect(ws_, &QWebSocket::disconnected, ws_, [this]() {
-        qWarning() << "[BingXSwapClient WS] Disconnected";
+        qCInfo(logWs) << "Disconnected";
         if (!wsStopRequested_ && !wsDataType_.isEmpty()) {
             scheduleReconnect();
         }
@@ -715,7 +720,7 @@ void BingXSwapClient::ensureWebSocket()
 #else
     QObject::connect(ws_, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), ws_, [this](QAbstractSocket::SocketError) {
 #endif
-        qWarning() << "[BingXSwapClient WS] Error:" << ws_->errorString();
+        qCWarning(logWs) << "Error:" << ws_->errorString();
         if (!wsStopRequested_ && !wsDataType_.isEmpty()) {
             scheduleReconnect();
         }
@@ -743,7 +748,7 @@ void BingXSwapClient::sendKlineSubscription()
     request["dataType"] = wsDataType_;
 
     const QByteArray payload = QJsonDocument(request).toJson(QJsonDocument::Compact);
-    qDebug().noquote() << "[BingXSwapClient WS] Subscribe" << QString::fromUtf8(payload);
+    qCInfo(logWs).noquote() << "Subscribe" << QString::fromUtf8(payload);
     ws_->sendTextMessage(QString::fromUtf8(payload));
 }
 
@@ -755,7 +760,7 @@ void BingXSwapClient::handleWebSocketPayload(const QByteArray& payload)
 
     const QString text = QString::fromUtf8(payload).trimmed();
     if (wsDebugPayloadsLeft_ > 0) {
-        qDebug().noquote() << "[BingXSwapClient WS] Payload sample:" << text.left(400);
+        qCDebug(logWsTicks).noquote() << "Payload sample:" << text.left(400);
         --wsDebugPayloadsLeft_;
     }
 
@@ -769,7 +774,7 @@ void BingXSwapClient::handleWebSocketPayload(const QByteArray& payload)
     QJsonParseError error;
     const QJsonDocument doc = QJsonDocument::fromJson(payload, &error);
     if (error.error != QJsonParseError::NoError || !doc.isObject()) {
-        qWarning().noquote() << "[BingXSwapClient WS] Invalid payload:" << text.left(200);
+        qCWarning(logWs).noquote() << "Invalid payload:" << text.left(200);
         return;
     }
 
@@ -777,8 +782,8 @@ void BingXSwapClient::handleWebSocketPayload(const QByteArray& payload)
     if (root.contains("code")) {
         const int code = root.value("code").toInt(-1);
         if (code != 0) {
-            qWarning() << "[BingXSwapClient WS] Subscription/API error:"
-                       << code << root.value("msg").toString();
+            qCWarning(logWs) << "Subscription/API error:"
+                             << code << root.value("msg").toString();
             if (wsCallback_) {
                 wsCallback_(false, Candle{});
             }
@@ -797,13 +802,13 @@ void BingXSwapClient::handleWebSocketPayload(const QByteArray& payload)
 
     Candle candle{};
     if (!parseKlineStreamPayload(payload, wsDataType_, candle)) {
-        qWarning().noquote() << "[BingXSwapClient WS] Failed to parse kline:" << text.left(200);
+        qCWarning(logWs).noquote() << "Failed to parse kline:" << text.left(200);
         return;
     }
 
-    qDebug() << "[BingXSwapClient WS] Parsed kline"
-             << candle.timestamp_ << candle.open_ << candle.high_
-             << candle.low_ << candle.close_;
+    qCDebug(logWsTicks) << "Parsed kline"
+                        << candle.timestamp_ << candle.open_ << candle.high_
+                        << candle.low_ << candle.close_;
 
     if (wsCallback_) {
         wsCallback_(true, candle);
@@ -818,7 +823,7 @@ void BingXSwapClient::scheduleReconnect()
 
     constexpr int maxReconnectAttempts = 5;
     if (wsReconnectAttempts_ >= maxReconnectAttempts) {
-        qWarning() << "[BingXSwapClient WS] Reconnect attempts exhausted";
+        qCWarning(logWs) << "Reconnect attempts exhausted";
         if (wsCallback_) {
             wsCallback_(false, Candle{});
         }
@@ -828,7 +833,7 @@ void BingXSwapClient::scheduleReconnect()
     ++wsReconnectAttempts_;
     const int delayMs = std::min(30000, 1000 * wsReconnectAttempts_);
     if (!wsReconnectTimer_->isActive()) {
-        qWarning() << "[BingXSwapClient WS] Scheduling reconnect in" << delayMs << "ms";
+        qCWarning(logWs) << "Scheduling reconnect in" << delayMs << "ms";
         wsReconnectTimer_->start(delayMs);
     }
 }

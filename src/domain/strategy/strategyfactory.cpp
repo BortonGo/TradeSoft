@@ -2,10 +2,13 @@
 
 #include <QtGlobal>
 #include <QDebug>
+#include <QLoggingCategory>
 
 #include "domain/strategy/emacrossstrategy.h"
 #include "domain/strategy/emapullbackstrategy.h"
 #include "domain/strategy/emascalpstrategy.h"
+
+Q_LOGGING_CATEGORY(logStrategyFactory, "tradesoft.strategy.factory")
 
 std::unique_ptr<IStrategy> StrategyFactory::create(const StrategyConfig& cfg) {
     const QString name = cfg.strategy.name.trimmed();
@@ -81,7 +84,7 @@ std::unique_ptr<IStrategy> StrategyFactory::create(const StrategyConfig& cfg) {
     }
 
     // fallback: если в UI что-то другое выбрали — не падаем
-    qWarning() << "[StrategyFactory] Unknown strategy name:" << name << " -> fallback to EMA Cross";
+    qCWarning(logStrategyFactory) << "Unknown strategy name:" << name << " -> fallback to EMA Cross";
 
     return std::unique_ptr<IStrategy>(
         new EmaCrossStrategy(9, 21, cfg.risk.allowLong, cfg.risk.allowShort)
