@@ -45,7 +45,7 @@ void IndicatorService::onSeriesLoaded(std::shared_ptr<CandleSeries> s)
 void IndicatorService::onCandleUpdated(Candle /*c*/)
 {
     // MVP: просто пересчёт (500 свечей раз в 1с — ок)
-    rebuildAndEmit();
+    //rebuildAndEmit();
     /* Дальше должно быть что-то типо:
      * при обновлении текущей свечи → обновляется только последняя точка индикатора
      * при закрытии свечи → добавляется новая точка индикатора

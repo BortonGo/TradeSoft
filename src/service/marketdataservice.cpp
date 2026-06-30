@@ -1,6 +1,5 @@
 #include "marketdataservice.h"
 #include "service/marketdata/candlecache.h"
-#include <iostream>
 #include <QDebug>
 #include <QtGlobal>
 
