@@ -1,7 +1,8 @@
 #pragma once
 #include <QHash>
 #include <QString>
-#include "ui/models/tradesmodel.h"
+#include <functional>
+#include <vector>
 #include "domain/order/fill.h"
 
 struct TradeReport final {
@@ -16,7 +17,32 @@ struct TradeReport final {
 };
 
 class TradeJournal final {
-    TradesModel* model_ = nullptr;
+public:
+    using TradeAddedCallback = std::function<void (const TradeRecord&)>;
+    using TradeUpdatedCallback = std::function<void (int, const TradeRecord&)>;
+
+    explicit TradeJournal(double startEquityUsdt);
+
+    void setTradeAddedCallback(TradeAddedCallback cb);
+    void setTradeUpdatedCallback(TradeUpdatedCallback cb);
+
+    bool hasOpen(const QString& symbol) const;
+    TradeSide openSide(const QString& symbol) const;
+    double openQty(const QString& symbol) const;
+
+    // Apply execution result
+    void onFill(const Fill& f);
+
+    TradeReport report() const;
+    double equity() const { return equity_; }
+
+    void onPriceUpdate(const QString& symbol, double markPrice, double feePct);
+
+private:
+    std::vector<TradeRecord> trades_;
+
+    TradeAddedCallback onTradeAdded_;
+    TradeUpdatedCallback onTradeUpdated_;
 
     // open trade row by symbol
     QHash<QString, int> openRowBySymbol_;
@@ -32,19 +58,4 @@ class TradeJournal final {
     int closedTrades_ = 0;
     int winTrades_ = 0;
     double maxDD_ = 0.0;
-
-public:
-    explicit TradeJournal(TradesModel* model, double startEquityUsdt);
-
-    bool hasOpen(const QString& symbol) const;
-    TradeSide openSide(const QString& symbol) const;
-    double openQty(const QString& symbol) const;
-
-    // Apply execution result
-    void onFill(const Fill& f);
-
-    TradeReport report() const;
-    double equity() const { return equity_; }
-
-    void onPriceUpdate(const QString& symbol, double markPrice, double feePct);
 };

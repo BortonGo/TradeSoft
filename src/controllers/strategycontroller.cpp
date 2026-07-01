@@ -178,7 +178,13 @@ void StrategyController::ensureDemoPipeline() {
         demoExec_ = new DemoExecutionService();
     }
     if (!journal_) {
-        journal_ = new TradeJournal(tradesModel_, 1000.0);
+        journal_ = new TradeJournal(1000.0);
+        journal_->setTradeAddedCallback([this](const TradeRecord& trade){
+            tradesModel_->appendTrade(trade);
+        });
+        journal_->setTradeUpdatedCallback([this](int row, const TradeRecord& trade){
+            tradesModel_->updateTrade(row, trade);
+        });
     }
 }
 
@@ -190,7 +196,14 @@ void StrategyController::resetDemoSession() {
         journal_ = nullptr;
     }
 
-    journal_ = new TradeJournal(tradesModel_, 1000.0);
+    journal_ = new TradeJournal(1000.0);
+    journal_->setTradeAddedCallback([this](const TradeRecord& trade){
+        tradesModel_->appendTrade(trade);
+    });
+    journal_->setTradeUpdatedCallback([this](int row, const TradeRecord& trade){
+        tradesModel_->updateTrade(row, trade);
+    });
+
     if (runner_) {
         runner_->setTradeJournal(journal_);
     }

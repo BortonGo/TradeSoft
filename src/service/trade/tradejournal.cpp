@@ -1,10 +1,18 @@
 #include "tradejournal.h"
 #include <QtGlobal>
 #include <cmath>
+#include <utility>
 
-TradeJournal::TradeJournal(TradesModel* model, double startEquityUsdt) : model_(model), startEquity_(startEquityUsdt),
+TradeJournal::TradeJournal(double startEquityUsdt) : startEquity_(startEquityUsdt),
     equity_(startEquityUsdt), peakEquity_(startEquityUsdt) {
-    Q_ASSERT(model_);
+}
+
+void TradeJournal::setTradeAddedCallback(TradeAddedCallback cb) {
+    onTradeAdded_ = std::move(cb);
+}
+
+void TradeJournal::setTradeUpdatedCallback(TradeUpdatedCallback cb) {
+    onTradeUpdated_ = std::move(cb);
 }
 
 bool TradeJournal::hasOpen(const QString& symbol) const {
@@ -14,19 +22,18 @@ bool TradeJournal::hasOpen(const QString& symbol) const {
 TradeSide TradeJournal::openSide(const QString& symbol) const {
     if (!openRowBySymbol_.contains(symbol)) return TradeSide::Buy;
     const int row = openRowBySymbol_.value(symbol);
-    const TradeRecord t = model_->tradeAt(row);
-    return t.side;
+    if (row < 0 || row >= static_cast<int>(trades_.size())) return TradeSide::Buy;
+    return trades_[row].side;
 }
 
 double TradeJournal::openQty(const QString& symbol) const {
     if (!openRowBySymbol_.contains(symbol)) return 0.0;
     const int row = openRowBySymbol_.value(symbol);
-    const TradeRecord t = model_->tradeAt(row);
-    return t.qty;
+    if (row < 0 || row >= static_cast<int>(trades_.size())) return 0.0;
+    return trades_[row].qty;
 }
 
 void TradeJournal::onFill(const Fill& f) {
-    if (!model_) return;
     if (f.qty <= 0.0 || f.price <= 0.0) return;
 
     fees_ += f.fee;
@@ -51,9 +58,12 @@ void TradeJournal::onFill(const Fill& f) {
         t.tpPrice = f.tpPrice;
         t.slPrice = f.slPrice;
 
-        model_->appendTrade(t);
-        const int row = model_->rowCount() - 1;
+        trades_.push_back(t);
+        const int row = static_cast<int>(trades_.size()) - 1;
         openRowBySymbol_.insert(f.symbol, row);
+        if (onTradeAdded_) {
+            onTradeAdded_(t);
+        }
         return;
     }
 
@@ -63,7 +73,12 @@ void TradeJournal::onFill(const Fill& f) {
     }
 
     const int row = openRowBySymbol_.value(f.symbol);
-    TradeRecord t = model_->tradeAt(row);
+    if (row < 0 || row >= static_cast<int>(trades_.size())) {
+        openRowBySymbol_.remove(f.symbol);
+        return;
+    }
+
+    TradeRecord t = trades_[row];
     if (t.status != TradeStatus::Open) {
         openRowBySymbol_.remove(f.symbol);
         return;
@@ -92,7 +107,10 @@ void TradeJournal::onFill(const Fill& f) {
     t.fee = totalFees;         // показываем суммарные комиссии
     t.status = TradeStatus::Closed;
 
-    model_->updateTrade(row, t);
+    trades_[row] = t;
+    if (onTradeUpdated_) {
+        onTradeUpdated_(row, t);
+    }
     openRowBySymbol_.remove(f.symbol);
 
     // stats
@@ -120,14 +138,17 @@ TradeReport TradeJournal::report() const {
 }
 
 void TradeJournal::onPriceUpdate(const QString& symbol, double markPrice, double feePct) {
-    if (!model_) return;
     if (markPrice <= 0.0) return;
 
     auto it = openRowBySymbol_.find(symbol);
     if (it == openRowBySymbol_.end()) return;
 
     const int row = it.value();
-    TradeRecord t = model_->tradeAt(row);
+    if (row < 0 || row >= static_cast<int>(trades_.size())) {
+        openRowBySymbol_.remove(symbol);
+        return;
+    }
+    TradeRecord t = trades_[row];
     if (t.status != TradeStatus::Open) return;
 
     // ticks: считаем обновлениями realtime (раз в секунду)
@@ -145,5 +166,8 @@ void TradeJournal::onPriceUpdate(const QString& symbol, double markPrice, double
 
     t.pnl = unrealizedNet;
 
-    model_->updateTrade(row, t);
+    trades_[row] = t;
+    if (onTradeUpdated_) {
+        onTradeUpdated_(row, t);
+    }
 }
