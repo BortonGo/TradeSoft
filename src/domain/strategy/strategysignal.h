@@ -11,9 +11,9 @@ enum StrategySignalType {
 };
 
 struct StrategySignal final {
-    StrategySignalType type = StrategySignalType::None;
     QString symbolId;
-    Timeframe tf {};
-    int64_t timestamp = 0;
     QString reason;
+    int64_t timestamp = 0;
+    StrategySignalType type = StrategySignalType::None;
+    Timeframe tf {};
 };

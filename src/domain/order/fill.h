@@ -6,14 +6,13 @@
 struct Fill final {
     QDateTime time;
     QString symbol;
-    TradeSide side = TradeSide::Buy;
 
     double qty = 0.0;
     double price = 0.0;
-
     double fee = 0.0;
-    bool reduceOnly = false;
-
     double tpPrice = 0.0;
     double slPrice = 0.0;
+
+    TradeSide side = TradeSide::Buy;
+    bool reduceOnly = false;
 };
