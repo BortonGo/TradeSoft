@@ -358,6 +358,17 @@ namespace {
         require(s.meanNs == 20, "LatencyStats stores mean");
     }
 
+    void testEmptyLatencyStatsSnapshot() {
+        LatencyStats stats;
+
+        const LatencyStatsSnapshot s = stats.snapshot();
+        require(s.count == 0, "LatencyStats stores sample count");
+        require(s.minNs == 0, "LatencyStats stores min");
+        require(s.p50Ns == 0, "LatencyStats computes p50");
+        require(s.maxNs == 0, "LatencyStats stores max");
+        require(s.meanNs == 0, "LatencyStats stores mean");
+    }
+
     void testLatencyCollector() {
         LatencyTimestamp ts;
         ts.receivedNs = 100;
@@ -374,6 +385,42 @@ namespace {
         require(s.tickToStrategy.p50Ns == 60, "LatencyCollector records tick-to-strategy");
         require(s.strategyToOrder.p50Ns == 50, "LatencyCollector records strategy-to-order");
         require(s.orderToFill.p50Ns == 90, "LatencyCollector records order-to-fill");
+    }
+
+    void testLatencyCollectorReverseTimestamp() {
+        LatencyTimestamp ts;
+        ts.receivedNs = 100;
+        ts.strategyDoneNs = 90;
+        ts.orderCreatedNs = 300;
+        ts.fillHandledNs = 210;
+
+        LatencyCollector collector;
+        collector.recordTickToStrategy(ts);
+        collector.recordStrategyToOrder(ts);
+        collector.recordOrderToFill(ts);
+
+        const LatencyCollectorSnapshot s = collector.snapshot();
+        require(s.tickToStrategy.p50Ns == 0, "LatencyCollector records tick-to-strategy");
+        require(s.strategyToOrder.p50Ns == 210, "LatencyCollector records strategy-to-order");
+        require(s.orderToFill.p50Ns == 0, "LatencyCollector records order-to-fill");
+    }
+
+    void testLatencyCollectorZeroTimestamp() {
+        LatencyTimestamp ts;
+        ts.receivedNs = 0;
+        ts.strategyDoneNs = 160;
+        ts.orderCreatedNs = 0;
+        ts.fillHandledNs = 300;
+
+        LatencyCollector collector;
+        collector.recordTickToStrategy(ts);
+        collector.recordStrategyToOrder(ts);
+        collector.recordOrderToFill(ts);
+
+        const LatencyCollectorSnapshot s = collector.snapshot();
+        require(s.tickToStrategy.count == 0, "LatencyCollector ignores zero received timestamp");
+        require(s.strategyToOrder.count == 0, "LatencyCollector ignores zero order timestamp");
+        require(s.orderToFill.count == 0, "LatencyCollector ignores zero order timestamp for fill latency");
     }
 
 }
@@ -393,7 +440,10 @@ int main() {
     testTradeJournalOwnsState();
     testCoreEventsDefaults();
     testLatencyStatsSnapshot();
+    testEmptyLatencyStatsSnapshot();
     testLatencyCollector();
+    testLatencyCollectorReverseTimestamp();
+    testLatencyCollectorZeroTimestamp();
 
     std::cout << "All TradeSoft tests passed\n";
     return 0;
