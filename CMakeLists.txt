@@ -5,7 +5,7 @@ project(TradeSoft
     LANGUAGES CXX
 )
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -69,7 +69,6 @@ add_executable(TradeSoft
     MACOSX_BUNDLE
     "${TRADESOFT_APP_MAIN}"
     "${CMAKE_CURRENT_SOURCE_DIR}/resources.qrc"
-    src/core/events/tradeevent.h
 )
 
 target_include_directories(TradeSoft PRIVATE

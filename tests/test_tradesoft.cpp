@@ -17,6 +17,8 @@
 #include "core/events/marketevent.h"
 #include "core/events/orderevent.h"
 #include "core/events/tradeevent.h"
+#include "core/latency/latencystats.h"
+#include "core/latency/latencycollector.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -342,6 +344,38 @@ namespace {
         require(trade.row == 3, "TradeEvent stores row");
     }
 
+    void testLatencyStatsSnapshot() {
+        LatencyStats stats;
+        stats.addSample(10);
+        stats.addSample(20);
+        stats.addSample(30);
+
+        const LatencyStatsSnapshot s = stats.snapshot();
+        require(s.count == 3, "LatencyStats stores sample count");
+        require(s.minNs == 10, "LatencyStats stores min");
+        require(s.p50Ns == 20, "LatencyStats computes p50");
+        require(s.maxNs == 30, "LatencyStats stores max");
+        require(s.meanNs == 20, "LatencyStats stores mean");
+    }
+
+    void testLatencyCollector() {
+        LatencyTimestamp ts;
+        ts.receivedNs = 100;
+        ts.strategyDoneNs = 160;
+        ts.orderCreatedNs = 210;
+        ts.fillHandledNs = 300;
+
+        LatencyCollector collector;
+        collector.recordTickToStrategy(ts);
+        collector.recordStrategyToOrder(ts);
+        collector.recordOrderToFill(ts);
+
+        const LatencyCollectorSnapshot s = collector.snapshot();
+        require(s.tickToStrategy.p50Ns == 60, "LatencyCollector records tick-to-strategy");
+        require(s.strategyToOrder.p50Ns == 50, "LatencyCollector records strategy-to-order");
+        require(s.orderToFill.p50Ns == 90, "LatencyCollector records order-to-fill");
+    }
+
 }
 
 int main() {
@@ -358,6 +392,8 @@ int main() {
     testBingXKlineStreamParser();
     testTradeJournalOwnsState();
     testCoreEventsDefaults();
+    testLatencyStatsSnapshot();
+    testLatencyCollector();
 
     std::cout << "All TradeSoft tests passed\n";
     return 0;
