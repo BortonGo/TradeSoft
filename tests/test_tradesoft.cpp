@@ -14,6 +14,9 @@
 #include "indicators/rsi.h"
 #include "service/marketdata/candlecache.h"
 #include "service/trade/tradejournal.h"
+#include "core/events/marketevent.h"
+#include "core/events/orderevent.h"
+#include "core/events/tradeevent.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -315,6 +318,30 @@ namespace {
         require(report.winTrades == 1, "TradeJournal reports winning trade");
     }
 
+    void testCoreEventsDefaults() {
+        MarketEvent market;
+        market.symbolId = "ETHUSDT";
+        market.timeframe = Timeframe::M1;
+        market.candle.close_ = 2000.0;
+        market.latency.receivedNs = 10;
+
+        require(market.type == MarketEventType::CandleUpdated, "MarketEvent defaults to candle updated");
+        require(market.symbolId == "ETHUSDT", "MarketEvent stores symbol");
+        requireNear(market.candle.close_, 2000.0, 1e-9, "MarketEvent stores candle");
+        require(market.latency.receivedNs == 10, "MarketEvent stores latency timestamps");
+
+        OrderEvent order;
+        order.type = OrderEventType::RiskRejected;
+        order.reason = "qty <= 0";
+        require(order.type == OrderEventType::RiskRejected, "OrderEvent stores type");
+        require(order.reason == "qty <= 0", "OrderEvent stores rejection reason");
+
+        TradeEvent trade;
+        trade.type = TradeEventType::Added;
+        trade.row = 3;
+        require(trade.row == 3, "TradeEvent stores row");
+    }
+
 }
 
 int main() {
@@ -330,6 +357,7 @@ int main() {
     testRealtimeTransportConfig();
     testBingXKlineStreamParser();
     testTradeJournalOwnsState();
+    testCoreEventsDefaults();
 
     std::cout << "All TradeSoft tests passed\n";
     return 0;

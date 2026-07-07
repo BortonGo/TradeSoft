@@ -39,6 +39,7 @@ add_library(TradeSoftCore STATIC
 target_include_directories(TradeSoftCore PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/core/events"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/ui"
     "${CMAKE_CURRENT_BINARY_DIR}"
 )
@@ -68,6 +69,7 @@ add_executable(TradeSoft
     MACOSX_BUNDLE
     "${TRADESOFT_APP_MAIN}"
     "${CMAKE_CURRENT_SOURCE_DIR}/resources.qrc"
+    src/core/events/tradeevent.h
 )
 
 target_include_directories(TradeSoft PRIVATE
