@@ -77,7 +77,11 @@ void StrategyRunner::onCandleClosed(Candle c)
 {
     if (!running_ || !strategy_ || !ctx_.series) return;
 
+    LatencyTimestamp latency;
+
+    latency.receivedNs = LatencyClock::nowNs();
     const auto signal = strategy_->onCandleClosed(ctx_, c);
+    latency.strategyDoneNs = LatencyClock::nowNs();
 
     for (const auto& s : signal) {
         if (s.type == StrategySignalType::None) continue;
@@ -87,9 +91,11 @@ void StrategyRunner::onCandleClosed(Candle c)
                              << " tf=" << toUiString(s.tf)
                              << " reason=" << s.reason;
 
-        handleSignal(s, c);
+        handleSignal(s, c, latency);
         emit signal_signalGenerated(s);
     }
+
+    latencyCollector_.recordTickToStrategy(latency);
 
     // Можно оставить и тут тоже, чтобы на закрытии свечи журнал точно обновился
     if (journal_) {
@@ -101,7 +107,11 @@ void StrategyRunner::onCandleUpdated(Candle c)
 {
     if (!running_ || !strategy_ || !ctx_.series) return;
 
+    LatencyTimestamp latency;
+
+    latency.receivedNs = LatencyClock::nowNs();
     const auto signal = strategy_->onCandleUpdated(ctx_, c);
+    latency.strategyDoneNs = LatencyClock::nowNs();
 
     for (const auto& s : signal) {
         if (s.type == StrategySignalType::None) continue;
@@ -111,7 +121,7 @@ void StrategyRunner::onCandleUpdated(Candle c)
                                       << " tf=" << toUiString(s.tf)
                                       << " reason=" << s.reason;
 
-        handleSignal(s, c);
+        handleSignal(s, c, latency);
         emit signal_signalGenerated(s);
     }
 
@@ -120,7 +130,7 @@ void StrategyRunner::onCandleUpdated(Candle c)
     }
 }
 
-void StrategyRunner::handleSignal(const StrategySignal& s, const Candle& closed)
+void StrategyRunner::handleSignal(const StrategySignal& s, const Candle& closed, LatencyTimestamp& latency)
 {
     if (!risk_ || !exec_ || !journal_) return;
 
@@ -139,6 +149,8 @@ void StrategyRunner::handleSignal(const StrategySignal& s, const Candle& closed)
         hasOpen,
         openSide
     );
+
+    latency.orderCreatedNs = LatencyClock::nowNs();
 
     // RiskManager can return empty order
     if (o.symbol.isEmpty()) return;
@@ -169,6 +181,10 @@ void StrategyRunner::handleSignal(const StrategySignal& s, const Candle& closed)
 
     // Journal updates TradesModel + stats
     journal_->onFill(f);
+
+    latency.fillHandledNs = LatencyClock::nowNs();
+    latencyCollector_.recordStrategyToOrder(latency);
+    latencyCollector_.recordOrderToFill(latency);
 
     // Optional debug each fill
     qCDebug(logStrategy) << "Fill sym=" << f.symbol

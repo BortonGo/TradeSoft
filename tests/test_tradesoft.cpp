@@ -19,6 +19,7 @@
 #include "core/events/tradeevent.h"
 #include "core/latency/latencystats.h"
 #include "core/latency/latencycollector.h"
+#include "core/latency/latencyclock.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -421,6 +422,13 @@ namespace {
         require(s.tickToStrategy.count == 0, "LatencyCollector ignores zero received timestamp");
         require(s.strategyToOrder.count == 0, "LatencyCollector ignores zero order timestamp");
         require(s.orderToFill.count == 0, "LatencyCollector ignores zero order timestamp for fill latency");
+    }
+
+    void testLatencyClock() {
+        const std::uint64_t first = LatencyClock::nowNs();
+        const std::uint64_t second = LatencyClock::nowNs();
+        require(first > 0, "LatencyClock returns non-zero timestamp");
+        require(second >= first, "LatencyClock is monotonic for consecutive reads");
     }
 
 }

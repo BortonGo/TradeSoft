@@ -10,6 +10,9 @@
 #include "domain/risk/riskmanager.h"
 #include "service/execution/demoexecutionservice.h"
 #include "service/trade/tradejournal.h"
+#include "core/events/latencytimestamp.h"
+#include "core/latency/latencyclock.h"
+#include "core/latency/latencycollector.h"
 
 class StrategyRunner final : public QObject {
     Q_OBJECT
@@ -22,6 +25,8 @@ class StrategyRunner final : public QObject {
     TradeJournal* journal_ = nullptr;
     RiskSettings riskSettings_;
     StrategyConfig cfg_;
+
+    LatencyCollector latencyCollector_;
 
     StrategyContext ctx_;
     bool running_ = false;
@@ -36,7 +41,11 @@ public:
     void setExecutionService(DemoExecutionService* e) { exec_ = e; }
     void setTradeJournal(TradeJournal* j) { journal_ = j; }
     void setRiskSettings(const RiskSettings& r) { riskSettings_ = r; }
-        void setConfig(const StrategyConfig& c) { cfg_ = c; }
+    void setConfig(const StrategyConfig& c) { cfg_ = c; }
+
+    LatencyCollectorSnapshot latencySnapshot() {
+        return latencyCollector_.snapshot();
+    }
 
 public slots:
     void start(const QString& symbolId, Timeframe tf);
@@ -53,5 +62,5 @@ private slots:
     void onCandleUpdated(Candle c);
 
 private:
-    void handleSignal(const StrategySignal& s, const Candle& closed);
+    void handleSignal(const StrategySignal& s, const Candle& closed, LatencyTimestamp& latency);
 };
