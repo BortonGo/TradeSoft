@@ -1,0 +1,119 @@
+@startuml TradeSoft_BacktestAndLatency
+title TradeSoft - Backtest And Low-Latency Preparation
+
+top to bottom direction
+skinparam backgroundColor #0D1117
+skinparam defaultFontColor #F0F6FC
+skinparam TitleFontColor #F0F6FC
+skinparam ArrowColor #C9D1D9
+skinparam ArrowFontColor #F0F6FC
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam dpi 180
+skinparam nodesep 45
+skinparam ranksep 55
+skinparam package {
+  BackgroundColor #161B22
+  BorderColor #8B949E
+  FontColor #F0F6FC
+}
+skinparam class {
+  BackgroundColor #21262D
+  BorderColor #8B949E
+  FontColor #F0F6FC
+  HeaderBackgroundColor #30363D
+  HeaderFontColor #F0F6FC
+}
+
+package "Backtest" {
+  class BacktestController {
+    - BacktestEngine engine_
+    - BacktestResult lastResult_
+    + onStart()
+    + onBuildGraph()
+  }
+
+  class BacktestMarketDataService {
+    + loadHistory(request)
+  }
+
+  class BacktestEngine {
+    + run(request, candles)
+  }
+
+  class StrategyFactory {
+    + create(config)
+  }
+
+  class BacktestResult
+  class BacktestStats
+  class BacktestTrade
+  class EquityPoint
+  class BacktestTradesModel
+  class BacktestWidget
+  class BacktestReportExporter {
+    + exportResult(request, result)
+  }
+}
+
+package "Low-Latency Prep" {
+  class LatencyTimestamp {
+    + uint64_t receivedNs
+    + uint64_t parsedNs
+    + uint64_t strategyDoneNs
+    + uint64_t riskDoneNs
+    + uint64_t orderCreatedNs
+    + uint64_t fillHandledNs
+  }
+
+  class LatencyCollector {
+    + recordTickToStrategy(latency)
+    + recordStrategyToOrder(latency)
+    + recordOrderToFill(latency)
+    + snapshot()
+  }
+
+  class LatencyStats {
+    - vector<uint64_t> samples_
+    + addSample(latencyNs)
+    + snapshot()
+  }
+
+  class LatencyStatsSnapshot {
+    + count
+    + minNs
+    + p50Ns
+    + p95Ns
+    + p99Ns
+    + maxNs
+    + meanNs
+  }
+
+  class MarketEvent
+  class SignalEvent
+  class OrderEvent
+  class FillEvent
+  class TradeEvent
+}
+
+BacktestController --> BacktestMarketDataService
+BacktestController --> BacktestEngine
+BacktestController --> BacktestTradesModel
+BacktestController --> BacktestWidget
+BacktestController --> BacktestReportExporter
+
+BacktestEngine --> StrategyFactory
+BacktestEngine --> BacktestResult
+BacktestResult *-- BacktestStats
+BacktestResult *-- BacktestTrade
+BacktestResult *-- EquityPoint
+
+MarketEvent --> LatencyTimestamp
+SignalEvent --> LatencyTimestamp
+OrderEvent --> LatencyTimestamp
+FillEvent --> LatencyTimestamp
+TradeEvent --> LatencyTimestamp
+LatencyCollector *-- LatencyStats
+LatencyStats --> LatencyStatsSnapshot
+
+@enduml
