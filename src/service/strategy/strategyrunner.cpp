@@ -5,6 +5,7 @@
 
 Q_LOGGING_CATEGORY(logStrategy, "tradesoft.strategy")
 Q_LOGGING_CATEGORY(logStrategyTicks, "tradesoft.strategy.ticks")
+Q_LOGGING_CATEGORY(logLatency, "tradesoft.latency")
 
 StrategyRunner::StrategyRunner(MarketDataService* mds, QObject* parent) : QObject(parent), mds_(mds) {
     Q_ASSERT(mds_);
@@ -15,6 +16,18 @@ StrategyRunner::StrategyRunner(MarketDataService* mds, QObject* parent) : QObjec
 
 void StrategyRunner::setStrategy(std::unique_ptr<IStrategy> s) {
     strategy_ = std::move(s);
+}
+
+QString formatLatencyStats(const LatencyStatsSnapshot& snap) {
+    auto us = [](std::uint64_t ns) { return ns / 1000.0; };
+    if (snap.count == 0) return "count=0";
+    return "count=" + QString::number(snap.count) +
+           " min=" + QString::number(us(snap.minNs)) +
+           "us mean=" + QString::number(us(snap.meanNs)) +
+           "us max=" + QString::number(us(snap.maxNs)) +
+           "us p50=" + QString::number(us(snap.p50Ns)) +
+           "us p95=" + QString::number(us(snap.p95Ns)) +
+           "us p99=" + QString::number(us(snap.p99Ns)) + "us";
 }
 
 void StrategyRunner::start(const QString& symbolId, Timeframe tf) {
@@ -28,6 +41,8 @@ void StrategyRunner::start(const QString& symbolId, Timeframe tf) {
         qCWarning(logStrategy) << "Can't start: pipeline services not set (risk/exec/journal)";
         return;
     }
+
+    latencyCollector_.clear();
 
     ctx_.symbolId = symbolId;
     ctx_.tf = tf;
@@ -61,6 +76,10 @@ void StrategyRunner::stop() {
                             << " winrate=" << winRate
                             << " maxDD=" << r.maxDrawdown;
     }
+
+    qCInfo(logLatency) << "Latency tick-to-strategy: " << formatLatencyStats(latencyCollector_.snapshot().tickToStrategy);
+    qCInfo(logLatency) << "Latency strategy-to-order: " << formatLatencyStats(latencyCollector_.snapshot().strategyToOrder);
+    qCInfo(logLatency) << "Latency order-to-fill: " << formatLatencyStats(latencyCollector_.snapshot().orderToFill);
 
     qCInfo(logStrategy) << "Stop";
 }

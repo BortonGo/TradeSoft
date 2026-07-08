@@ -27,6 +27,9 @@
 #include <string>
 #include <vector>
 #include <QDateTime>
+#include <QString>
+
+QString formatLatencyStats(const LatencyStatsSnapshot& snap);
 
 namespace {
 
@@ -431,6 +434,28 @@ namespace {
         require(second >= first, "LatencyClock is monotonic for consecutive reads");
     }
 
+    void testFormatter() {
+        LatencyStatsSnapshot snap;
+        snap.count = 2;
+        snap.minNs = 1'000;
+        snap.p50Ns = 2'000;
+        snap.p95Ns = 3'000;
+        snap.p99Ns = 4'000;
+        snap.maxNs = 5'000;
+        snap.meanNs = 2'500;
+
+        const QString formatted = formatLatencyStats(snap);
+        require(formatted.contains("count=2"), "Latency formatter prints sample count");
+        require(formatted.contains("min=1us"), "Latency formatter converts min ns to us");
+        require(formatted.contains("mean=2.5us"), "Latency formatter converts mean ns to us");
+        require(formatted.contains("max=5us"), "Latency formatter converts max ns to us");
+        require(formatted.contains("p50=2us"), "Latency formatter converts p50 ns to us");
+        require(formatted.contains("p95=3us"), "Latency formatter converts p95 ns to us");
+        require(formatted.contains("p99=4us"), "Latency formatter converts p99 ns to us");
+
+        LatencyStatsSnapshot empty;
+        require(formatLatencyStats(empty) == "count=0", "Latency formatter keeps empty snapshot compact");
+    }
 }
 
 int main() {
@@ -453,6 +478,7 @@ int main() {
     testLatencyCollectorReverseTimestamp();
     testLatencyCollectorZeroTimestamp();
     testLatencyClock();
+    testFormatter();
 
     std::cout << "All TradeSoft tests passed\n";
     return 0;
