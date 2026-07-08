@@ -1,0 +1,80 @@
+@startuml TradeSoft_MarketDataFlow
+title TradeSoft - Market Data Flow
+
+skinparam backgroundColor #0D1117
+skinparam defaultFontColor #F0F6FC
+skinparam TitleFontColor #F0F6FC
+skinparam ArrowColor #C9D1D9
+skinparam ArrowFontColor #F0F6FC
+skinparam shadowing false
+skinparam dpi 180
+skinparam sequence {
+  ParticipantBackgroundColor #21262D
+  ParticipantBorderColor #8B949E
+  ParticipantFontColor #F0F6FC
+  LifeLineBackgroundColor #161B22
+  LifeLineBorderColor #8B949E
+  GroupBackgroundColor #161B22
+  GroupBorderColor #8B949E
+  GroupFontColor #F0F6FC
+}
+
+participant "MainWindow" as UI
+participant "MarketDataService" as MDS
+participant "CandleCache" as Cache
+participant "IExchangeClient / BingXSwapClient" as Exchange
+participant "CandleSeries" as Series
+participant "ChartWidget" as Chart
+participant "IndicatorService" as Indicators
+participant "StrategyRunner" as Runner
+
+UI -> MDS : loadHistory(symbolId, timeframe)
+activate MDS
+MDS -> Cache : load(symbolId, timeframe)
+
+alt fresh cache
+  Cache --> MDS : vector<Candle>
+else stale / empty cache
+  MDS -> Exchange : fetchKlines(symbolId, timeframe)
+  Exchange --> MDS : vector<Candle>
+  MDS -> Cache : save(symbolId, timeframe, candles)
+end
+
+MDS -> Series : addCandle(c) for history
+MDS --> Chart : signal_seriesLoaded(series)
+MDS --> Indicators : signal_seriesLoaded(series)
+MDS --> Runner : signal_seriesLoaded(series)
+deactivate MDS
+
+UI -> MDS : startRealTime()
+
+alt WebSocket available
+  MDS -> Exchange : startKlineStream(symbolId, timeframe, cb)
+else polling fallback
+  MDS -> Exchange : fetchLastKlineAsync(symbolId, timeframe, cb)
+end
+
+Exchange --> MDS : fresh Candle
+activate MDS
+
+alt same timestamp
+  MDS -> Series : updateLastCandle(fresh)
+  MDS --> Chart : signal_candleUpdated(fresh)
+  MDS --> Indicators : signal_candleUpdated(fresh)
+  MDS --> Runner : signal_candleUpdated(fresh)
+else new timestamp
+  MDS -> Series : updateLastCandle(last final)
+  MDS --> Chart : signal_candleClosed(last)
+  MDS --> Indicators : signal_candleClosed(last)
+  MDS --> Runner : signal_candleClosed(last)
+  MDS -> Series : addCandle(fresh forming)
+  MDS --> Chart : signal_candleUpdated(fresh)
+  MDS --> Indicators : signal_candleUpdated(fresh)
+  MDS --> Runner : signal_candleUpdated(fresh)
+else old timestamp
+  MDS --> MDS : ignore
+end
+
+deactivate MDS
+
+@enduml

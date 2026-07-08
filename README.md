@@ -1,112 +1,209 @@
 # TradeSoft — Trading Terminal (C++ / Qt)
 
-**TradeSoft** — разрабатываемый торговый терминал на C++ с использованием Qt, предназначенный для анализа рынка, визуализации графиков и дальнейшей интеграции с криптобиржами.
+**TradeSoft** — разрабатываемый торговый терминал на C++ и Qt для анализа рынка, визуализации свечей, проверки стратегий и постепенного перехода к более чистой low-latency архитектуре.
 
 > Статус: **Work in Progress / MVP in Development**
 
-Проект создаётся как pet-project и инженерное портфолио с акцентом на архитектуру, real-time обработку данных, UI/UX и торговую логику.
+Проект создаётся как pet-project и инженерное портфолио с акцентом на архитектуру, real-time обработку данных, UI/UX, торговую логику, backtesting и аккуратную подготовку hot path к измерениям latency.
 
 ---
 
 ## Цели проекта
 
 - Создать собственный trading-терминал
-- Подключение к биржам через API
-- Отображение свечных графиков
-- Индикаторы и аналитика
-- Paper-trading режим
-- Управление рисками
-- Подготовка к автоторговле
+- Подключаться к криптобирже через REST / WebSocket
+- Загружать историю и обновлять текущую свечу в realtime
+- Отображать свечной график и overlay-индикаторы
+- Запускать стратегии в demo / paper контуре
+- Управлять риском, SL / TP и журналом сделок
+- Проверять стратегии на истории через backtest
+- Постепенно отделять hot path от UI, логирования, диска и лишних аллокаций
 
 ---
 
 ## Используемые технологии
 
-- C++17 / C++20
-- Qt
-- CMake (планируется)
+- C++17
+- Qt Widgets / Network / WebSockets
+- CMake / CTest
 - REST / WebSocket API
-- Многопоточность
-- Паттерны проектирования
-- MVC / MVVM
+- JSON-конфигурация
+- QLoggingCategory
+- Unit-тесты без внешнего test framework
+- Подготовительный low-latency слой: core events, timestamps, latency stats
 
 ---
 
-## Architecture & UML (MVP)
+## Текущая архитектура
 
-На этапе MVP проект строится вокруг модульной архитектуры. UML-диаграммы используются для фиксации текущего дизайна и могут меняться по мере развития системы.
+На текущем этапе TradeSoft — это Qt MVP с несколькими независимыми контурами:
 
-<img width="1905" height="1801" alt="MarketData_MVP" src="https://github.com/user-attachments/assets/a51cd58f-ff24-4aa2-8f52-c6910cb857b6" />
+- `Market Data` — история, cache fallback, realtime polling / WebSocket
+- `Chart / Indicators` — свечной график, EMA, RSI, ATR, Donchian
+- `Trading Runtime` — strategy runner, risk manager, demo execution, trade journal
+- `Backtest` — загрузка истории, прогон стратегии, статистика, графики, экспорт отчётов
+- `Core Events / Latency` — подготовительный слой для будущего event pipeline и latency metrics
 
-<img width="1947" height="565" alt="MarketData_Sequences" src="https://github.com/user-attachments/assets/9410ff72-f3d3-4974-9e87-e676d953ca24" />
+Актуальные диаграммы проекта ведутся в PlantUML:
 
+- `TradeSoft UML/TradeSoft_Architecture.puml`
+- `TradeSoft UML/TradeSoft_MarketDataFlow.puml`
+- `TradeSoft UML/TradeSoft_TradingFlow.puml`
+- `TradeSoft UML/TradeSoft_BacktestAndLatency.puml`
 
-### High-Level Architecture
+Главное правило рефакторинга:
 
-- `UI` — Qt интерфейс и виджеты
-- `MarketData` — поток котировок и исторические данные
-- `Exchange` — клиенты бирж (через общий интерфейс)
-- `Network` — REST / WebSocket
-- `Strategy` — торговые алгоритмы
-- `Risk` — риск-менеджмент
-- `Core` — оркестрация и бизнес-логика
-
-Поток данных:
-
-```
-Exchange/API
-     │
-     ▼
-MarketData
-     │
-     ▼
-Strategy
-     │
-     ▼
-Risk
-     │
-     ▼
-Core
-     │
-     ▼
-UI
+```text
+В hot path не должно быть disk I/O, тяжелого логирования, обновления UI-моделей,
+полного пересчета индикаторов и лишних аллокаций.
 ```
 
 ---
 
+## Структура проекта
 
-### Core Classes (план)
+```text
+src/
+  backtest/              backtest engine, controller, graph widget, report exporter
+  controllers/           UI-facing controllers for strategy runtime
+  core/                  base domain primitives, config, logging, events, latency
+    events/              MarketEvent, SignalEvent, OrderEvent, FillEvent, TradeEvent
+    latency/             LatencyStats, LatencyCollector
+  domain/                account, order, risk, strategy, trade records
+  exchange/              IExchangeClient, BingXSwapClient
+  indicators/            EMA, RSI, ATR, Donchian, indicator engine
+  service/               market data, execution, account, strategy, trade journal
+  ui/                    Qt widgets, dialogs, table models, main window
+tests/                   lightweight unit tests
+resources/               app icon and Qt resources
+TradeSoft UML/           UML / architecture diagrams
+```
+
+---
+
+## Ключевые модули
+
+### Market Data
 
 - `MarketDataService`
 - `IExchangeClient`
-- `BingXClient` 
-- `ChartWidget`
-- `OrderManager`
-- `StrategyBase`
+- `BingXSwapClient`
+- `CandleSeries`
+- `CandleCache`
+
+Поддерживается:
+
+- загрузка исторических свечей;
+- cache fallback при сетевой ошибке;
+- realtime polling;
+- WebSocket realtime при доступности транспорта;
+- нормализация входящих свечей в `signal_candleUpdated` / `signal_candleClosed`.
+
+### Indicators
+
+- `IndicatorService`
+- `IndicatorEngine`
+- `EMA`
+- `RSI`
+- `ATR`
+- `Donchian`
+- `IndicatorDialog`
+
+Сейчас торговый контур уже не пересчитывает индикаторы на каждый intrabar tick. UI может перестраивать overlay-линии для отображения, но hot path постепенно отделяется.
+
+### Trading Runtime
+
+- `StrategyController`
+- `StrategyRunner`
+- `IStrategy`
+- `StrategyFactory`
 - `RiskManager`
-- `TradeController`
+- `DemoExecutionService`
+- `TradeJournal`
+- `TradesModel`
+
+Текущий поток:
+
+```text
+MarketDataService
+  -> StrategyRunner
+  -> IStrategy
+  -> RiskManager
+  -> DemoExecutionService
+  -> TradeJournal
+  -> TradesModel/UI callback
+```
+
+`TradeJournal` уже владеет своим состоянием и больше не зависит напрямую от `TradesModel`. UI получает изменения через callbacks.
+
+### Backtest
+
+- `BacktestController`
+- `BacktestMarketDataService`
+- `BacktestEngine`
+- `BacktestTypes`
+- `BacktestTradesModel`
+- `BacktestWidget`
+- `BacktestReportExporter`
+
+Backtest умеет строить equity / drawdown / PnL graphs, таблицу сделок и сохранять отчеты в JSON / CSV.
+
+### Core Events / Latency
+
+Подготовительный слой для будущей event-driven архитектуры:
+
+- `MarketEvent`
+- `SignalEvent`
+- `OrderEvent`
+- `FillEvent`
+- `TradeEvent`
+- `LatencyTimestamp`
+- `LatencyStats`
+- `LatencyCollector`
+
+Очереди и потоки пока специально не добавляются. Сначала фиксируются границы данных и baseline latency.
 
 ---
 
-## Планируемая структура проекта
+## UML / Architecture Docs
 
-- `core/` — бизнес-логика
-- `market/` — рыночные данные
-- `exchange/` — клиенты бирж
-- `network/` — сетевой слой
-- `ui/` — Qt интерфейс
-- `charts/` — визуализация
-- `strategy/` — стратегии
-- `risk/` — риск-менеджмент
-- `common/` — утилиты
-- `tests/` — тесты
-- `docs/uml/` — UML-диаграммы
+Единственный формат диаграмм в проекте — **PlantUML**.
+
+Файлы:
+
+- `TradeSoft UML/TradeSoft_Architecture.puml` — high-level class/component view
+- `TradeSoft UML/TradeSoft_MarketDataFlow.puml` — market data sequence
+- `TradeSoft UML/TradeSoft_TradingFlow.puml` — trading runtime sequence
+- `TradeSoft UML/TradeSoft_BacktestAndLatency.puml` — backtest + low-latency preparation
+
+PNG для README:
+
+<img src="TradeSoft%20UML/TradeSoft_Architecture.png" alt="TradeSoft Architecture" width="100%">
+
+<img src="TradeSoft%20UML/TradeSoft_MarketDataFlow.png" alt="TradeSoft Market Data Flow" width="100%">
+
+<img src="TradeSoft%20UML/TradeSoft_TradingFlow.png" alt="TradeSoft Trading Flow" width="100%">
+
+<img src="TradeSoft%20UML/TradeSoft_BacktestAndLatency.png" alt="TradeSoft Backtest And Latency" width="100%">
+
+Сгенерировать SVG:
+
+```bash
+PLANTUML_LIMIT_SIZE=16384 plantuml -tsvg "TradeSoft UML"/*.puml
+```
+
+Сгенерировать PNG:
+
+```bash
+PLANTUML_LIMIT_SIZE=16384 plantuml -tpng "TradeSoft UML"/*.puml
+```
 
 ---
 
 ## Roadmap
 
 ### Этап 1 — Основа приложения
+
 - [x] Базовая структура проекта
 - [x] Главное окно
 - [x] Виджет графика
@@ -117,14 +214,17 @@ UI
 - [x] Разделение на UI / core / service / exchange / domain
 
 ### Этап 2 — Market Data
+
 - [x] Загрузка исторических свечей
 - [x] Подключение биржевого клиента
-- [x] Обновление текущей свечи в realtime
-- [ ] WebSocket поток
-- [x] Кэширование / локальное хранение данных
-- [x] Повышение устойчивости data-layer
+- [x] Cache fallback
+- [x] Realtime polling
+- [x] WebSocket realtime foundation
+- [x] Устойчивость realtime при ошибках
+- [ ] Более строгая унификация REST / WebSocket events
 
 ### Этап 3 — Аналитика и визуализация
+
 - [x] EMA
 - [x] RSI
 - [x] ATR
@@ -133,35 +233,57 @@ UI
 - [x] Визуализация торговых уровней
 - [ ] SMA
 - [ ] MACD
-- [ ] Уровни в расширенном виде
 - [ ] Объёмы
+- [ ] Incremental indicators для trading hot path
 
 ### Этап 4 — Торговый контур
+
 - [x] Базовая архитектура торгового контура
+- [x] Strategy runner / controller
+- [x] Risk manager
 - [x] Demo / paper execution foundation
 - [x] Базовое управление позицией
 - [x] SL / TP логика
-- [x] Журнал сделок
-- [x] Риск-менеджмент
+- [x] TradeJournal owns state
+- [x] TradesModel подписан на callbacks
 - [ ] Полноценный paper trading сценарий
 - [ ] Расширенное управление позицией
 - [ ] Полировка торгового UX
 
 ### Этап 5 — Стратегии и backtesting
+
 - [x] Базовая архитектура стратегий
-- [x] Strategy runner / controller
-- [x] Первые стратегии
+- [x] EMA Cross
+- [x] EMA Pullback
+- [x] EMA Scalp
 - [x] Каркас backtest-модуля
-- [ ] Полноценный backtest engine
-- [ ] Метрики и отчёты
-- [ ] Проверка стратегий на истории
+- [x] Backtest engine
+- [x] Backtest stats / graph models
+- [x] JSON / CSV report exporter
+- [ ] Больше сценариев проверки стратегий
+- [ ] Intrabar execution model polish
 
 ### Этап 6 — Инфраструктура
+
 - [x] CMake
-- [x] Логирование
-- [x] Конфигурация
-- [x] Unit-тесты
-- [x] CI/CD
+- [x] CTest
+- [x] GitHub Actions CI
+- [x] QLoggingCategory
+- [x] JSON config
+- [x] App cache / reports folders
+- [x] Unit tests
+
+### Этап 7 — Low-Latency Refactor
+
+- [x] Убрать очевидные расходы из hot path
+- [x] Отвязать `TradeJournal` от `TradesModel`
+- [x] Ввести core event structs
+- [x] Добавить `LatencyTimestamp`
+- [x] Добавить `LatencyStats` / `LatencyCollector`
+- [ ] Подключить timestamps в текущий sync pipeline
+- [ ] Перейти к внутреннему event pipeline
+- [ ] Добавить thread boundaries
+- [ ] Добавить SPSC / queue границы там, где ownership уже чистый
 
 ---
 
@@ -199,11 +321,11 @@ ctest --test-dir build --output-on-failure
 
 - macOS: `~/Library/Application Support/BortonGo/TradeSoft/config.json`
 
-В нём можно менять дефолтный инструмент, таймфрейм, интервал realtime polling и список символов.
+В нём можно менять дефолтный инструмент, таймфрейм, realtime transport, интервал polling и список символов.
 
 ### Кэш свечей
 
-Свечи для графика кэшируются локально, чтобы ускорить повторные запуски и иметь fallback при сетевой ошибке:
+Свечи для графика кэшируются локально:
 
 - macOS: `~/Library/Caches/BortonGo/TradeSoft/marketdata`
 
@@ -230,10 +352,9 @@ ctest --test-dir build --output-on-failure
 
 ## Статус проекта
 
-Проект находится в активной разработке.  
-Архитектура и UML-диаграммы могут изменяться по мере появления новых компонентов.
+Проект находится в активной разработке. Сейчас основной фокус — довести trading runtime, backtest и low-latency refactor до состояния, где hot path можно измерять и постепенно отделять от UI.
 
-README обновляется вместе с развитием проекта.
+README и UML обновляются вместе с развитием проекта.
 
 ---
 

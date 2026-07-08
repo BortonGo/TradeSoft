@@ -1,0 +1,62 @@
+@startuml TradeSoft_TradingFlow
+title TradeSoft - Trading Runtime Flow
+
+skinparam backgroundColor #0D1117
+skinparam defaultFontColor #F0F6FC
+skinparam TitleFontColor #F0F6FC
+skinparam ArrowColor #C9D1D9
+skinparam ArrowFontColor #F0F6FC
+skinparam shadowing false
+skinparam dpi 180
+skinparam sequence {
+  ParticipantBackgroundColor #21262D
+  ParticipantBorderColor #8B949E
+  ParticipantFontColor #F0F6FC
+  LifeLineBackgroundColor #161B22
+  LifeLineBorderColor #8B949E
+  GroupBackgroundColor #161B22
+  GroupBorderColor #8B949E
+  GroupFontColor #F0F6FC
+}
+
+participant "MarketDataService" as MDS
+participant "StrategyRunner" as Runner
+participant "IStrategy" as Strategy
+participant "RiskManager" as Risk
+participant "DemoExecutionService" as Exec
+participant "TradeJournal" as Journal
+participant "TradesModel / UI" as UI
+
+MDS -> Runner : signal_candleClosed(c)\nor signal_candleUpdated(c)
+activate Runner
+
+Runner -> Strategy : onCandleClosed(ctx, c)\nor onCandleUpdated(ctx, c)
+activate Strategy
+Strategy --> Runner : vector<StrategySignal>
+deactivate Strategy
+
+loop for each non-empty signal
+  Runner -> Risk : buildOrder(signal, risk, markPrice, equity, position state)
+  activate Risk
+  Risk --> Runner : Order
+  deactivate Risk
+
+  alt order rejected / empty
+    Runner --> Runner : ignore signal
+  else valid order
+    Runner -> Exec : executeMarket(order, markPrice, risk)
+    activate Exec
+    Exec --> Runner : Fill
+    deactivate Exec
+
+    Runner -> Journal : onFill(fill)
+    activate Journal
+    Journal --> UI : trade added / updated callback
+    deactivate Journal
+  end
+end
+
+Runner -> Journal : onPriceUpdate(symbol, close, feePct)
+deactivate Runner
+
+@enduml

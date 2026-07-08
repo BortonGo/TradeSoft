@@ -1,0 +1,122 @@
+@startuml TradeSoft_Architecture
+title TradeSoft - Current Architecture
+
+left to right direction
+skinparam backgroundColor #0D1117
+skinparam defaultFontColor #F0F6FC
+skinparam TitleFontColor #F0F6FC
+skinparam ArrowColor #C9D1D9
+skinparam ArrowFontColor #F0F6FC
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam dpi 180
+skinparam componentStyle rectangle
+skinparam nodesep 55
+skinparam ranksep 70
+skinparam package {
+  BackgroundColor #161B22
+  BorderColor #8B949E
+  FontColor #F0F6FC
+}
+skinparam component {
+  BackgroundColor #21262D
+  BorderColor #8B949E
+  FontColor #F0F6FC
+}
+skinparam interface {
+  BackgroundColor #21262D
+  BorderColor #8B949E
+  FontColor #F0F6FC
+}
+skinparam actor {
+  BackgroundColor #21262D
+  BorderColor #8B949E
+  FontColor #F0F6FC
+}
+
+actor "User" as User
+
+package "UI Layer" {
+  component "MainWindow" as MainWindow
+  component "ChartWidget" as ChartWidget
+  component "TradesModel" as TradesModel
+  component "Backtest UI" as BacktestUI
+}
+
+package "Market Data" {
+  component "MarketDataService" as MarketDataService
+  component "CandleSeries" as CandleSeries
+  component "CandleCache" as CandleCache
+}
+
+package "Exchange" {
+  interface "IExchangeClient" as IExchangeClient
+  component "BingXSwapClient" as BingXSwapClient
+}
+
+package "Indicators" {
+  component "IndicatorService" as IndicatorService
+  component "IndicatorEngine" as IndicatorEngine
+  component "EMA / RSI / ATR / Donchian" as IndicatorSet
+}
+
+package "Trading Runtime" {
+  component "StrategyController" as StrategyController
+  component "StrategyRunner" as StrategyRunner
+  interface "IStrategy" as IStrategy
+  component "StrategyFactory" as StrategyFactory
+  component "RiskManager" as RiskManager
+  component "DemoExecutionService" as DemoExecutionService
+  component "TradeJournal" as TradeJournal
+}
+
+package "Backtest" {
+  component "BacktestController" as BacktestController
+  component "BacktestMarketDataService" as BacktestMarketDataService
+  component "BacktestEngine" as BacktestEngine
+  component "BacktestReportExporter" as BacktestReportExporter
+}
+
+package "Core Events / Latency" {
+  component "Core Event Structs" as CoreEvents
+  component "LatencyTimestamp" as LatencyTimestamp
+  component "LatencyCollector / LatencyStats" as LatencyMetrics
+}
+
+User --> MainWindow
+MainWindow --> MarketDataService
+MainWindow --> ChartWidget
+MainWindow --> StrategyController
+MainWindow --> BacktestController
+
+BingXSwapClient ..|> IExchangeClient
+MarketDataService --> IExchangeClient : history / realtime
+MarketDataService --> CandleCache : load / save
+MarketDataService --> CandleSeries : owns current series
+
+MarketDataService --> ChartWidget : candle signals
+MarketDataService --> IndicatorService : candle signals
+IndicatorService --> IndicatorEngine
+IndicatorEngine --> IndicatorSet
+IndicatorService --> ChartWidget : overlay lines
+
+StrategyController --> StrategyRunner
+StrategyRunner --> MarketDataService : candle signals
+StrategyRunner --> IStrategy
+StrategyRunner --> RiskManager
+StrategyRunner --> DemoExecutionService
+StrategyRunner --> TradeJournal
+TradeJournal --> TradesModel : callbacks
+
+BacktestController --> BacktestMarketDataService
+BacktestController --> BacktestEngine
+BacktestEngine --> StrategyFactory
+BacktestController --> BacktestReportExporter
+BacktestController --> BacktestUI
+
+CoreEvents --> LatencyTimestamp
+LatencyTimestamp --> LatencyMetrics
+StrategyRunner ..> LatencyTimestamp : next instrumentation step
+StrategyRunner ..> LatencyMetrics : next instrumentation step
+
+@enduml
