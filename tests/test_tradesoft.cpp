@@ -452,6 +452,7 @@ int main() {
     testLatencyCollector();
     testLatencyCollectorReverseTimestamp();
     testLatencyCollectorZeroTimestamp();
+    testLatencyClock();
 
     std::cout << "All TradeSoft tests passed\n";
     return 0;

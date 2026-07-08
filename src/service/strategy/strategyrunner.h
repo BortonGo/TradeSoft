@@ -43,7 +43,7 @@ public:
     void setRiskSettings(const RiskSettings& r) { riskSettings_ = r; }
     void setConfig(const StrategyConfig& c) { cfg_ = c; }
 
-    LatencyCollectorSnapshot latencySnapshot() {
+    LatencyCollectorSnapshot latencySnapshot() const {
         return latencyCollector_.snapshot();
     }
 

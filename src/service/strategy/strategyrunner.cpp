@@ -125,6 +125,8 @@ void StrategyRunner::onCandleUpdated(Candle c)
         emit signal_signalGenerated(s);
     }
 
+    latencyCollector_.recordTickToStrategy(latency);
+
     if (journal_) {
         journal_->onPriceUpdate(ctx_.symbolId, c.close_, riskSettings_.feePct);
     }

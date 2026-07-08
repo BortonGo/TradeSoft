@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <numeric>
 #include <cmath>
+#include <stdexcept>
 
 struct LatencyStatsSnapshot final {
     std::size_t count = 0;
@@ -20,7 +21,7 @@ class LatencyStats final {
     std::vector<std::uint64_t> samples_;
 
     std::uint64_t percentile(std::size_t p) const {
-        if (p < 0.0 || p > 100.0) throw std::out_of_range("p < 0 or p > 100");
+        if (p > 100.0) throw std::out_of_range("p > 100");
         if (samples_.empty()) return 0;
         std::vector<std::uint64_t> s = samples_;
         std::sort(s.begin(), s.end());
