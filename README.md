@@ -23,7 +23,7 @@
 
 ## Используемые технологии
 
-- C++17
+- C++20
 - Qt Widgets / Network / WebSockets
 - CMake / CTest
 - REST / WebSocket API
@@ -361,3 +361,9 @@ README и UML обновляются вместе с развитием прое
 ## Автор
 
 BortonGo
+
+---
+
+## Лицензия
+
+MIT License. Подробнее см. [LICENSE](LICENSE).
