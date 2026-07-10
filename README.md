@@ -51,13 +51,6 @@
 - `TradeSoft UML/TradeSoft_TradingFlow.puml`
 - `TradeSoft UML/TradeSoft_BacktestAndLatency.puml`
 
-Главное правило рефакторинга:
-
-```text
-В hot path не должно быть disk I/O, тяжелого логирования, обновления UI-моделей,
-полного пересчета индикаторов и лишних аллокаций.
-```
-
 ---
 
 ## Структура проекта
@@ -176,8 +169,6 @@ Backtest умеет строить equity / drawdown / PnL graphs, таблиц�
 - `TradeSoft UML/TradeSoft_TradingFlow.puml` — trading runtime sequence
 - `TradeSoft UML/TradeSoft_BacktestAndLatency.puml` — backtest + low-latency preparation
 
-PNG для README:
-
 <img src="TradeSoft%20UML/TradeSoft_Architecture.png" alt="TradeSoft Architecture" width="100%">
 
 <img src="TradeSoft%20UML/TradeSoft_MarketDataFlow.png" alt="TradeSoft Market Data Flow" width="100%">
@@ -185,18 +176,6 @@ PNG для README:
 <img src="TradeSoft%20UML/TradeSoft_TradingFlow.png" alt="TradeSoft Trading Flow" width="100%">
 
 <img src="TradeSoft%20UML/TradeSoft_BacktestAndLatency.png" alt="TradeSoft Backtest And Latency" width="100%">
-
-Сгенерировать SVG:
-
-```bash
-PLANTUML_LIMIT_SIZE=16384 plantuml -tsvg "TradeSoft UML"/*.puml
-```
-
-Сгенерировать PNG:
-
-```bash
-PLANTUML_LIMIT_SIZE=16384 plantuml -tpng "TradeSoft UML"/*.puml
-```
 
 ---
 
