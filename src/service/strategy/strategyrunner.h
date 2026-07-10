@@ -1,18 +1,24 @@
 #pragma once
 #include <memory>
 #include <QObject>
+#include <optional>
 
 #include "service/marketdataservice.h"
 #include "domain/strategy/istrategy.h"
 #include "domain/strategy/strategysignal.h"
 #include "domain/strategy/strategyconfig.h"
-
 #include "domain/risk/riskmanager.h"
 #include "service/execution/demoexecutionservice.h"
 #include "service/trade/tradejournal.h"
+
 #include "core/events/latencytimestamp.h"
 #include "core/latency/latencyclock.h"
 #include "core/latency/latencycollector.h"
+
+#include "core/events/marketevent.h"
+#include "core/events/signalevent.h"
+#include "core/events/orderevent.h"
+#include "core/events/fillevent.h"
 
 class StrategyRunner final : public QObject {
     Q_OBJECT
@@ -62,5 +68,11 @@ private slots:
     void onCandleUpdated(Candle c);
 
 private:
-    void handleSignal(const StrategySignal& s, const Candle& closed, LatencyTimestamp& latency);
+    void handleSignal(SignalEvent& signalEvent, const Candle& closed);
+    void handleMarketEvent(MarketEvent& event);
+    MarketEvent makeMarketEvent(MarketEventType type, const Candle& candle) const;
+    std::optional<OrderEvent> buildOrderEvent(const SignalEvent& signalEvent, const Candle& candle, LatencyTimestamp& latency);
+    FillEvent executeOrderEvent(const OrderEvent& orderEvent, double markPrice);
+    void handleFillEvent(FillEvent& fillEvent);
+
 };

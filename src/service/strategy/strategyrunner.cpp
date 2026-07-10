@@ -96,27 +96,10 @@ void StrategyRunner::onCandleClosed(Candle c)
 {
     if (!running_ || !strategy_ || !ctx_.series) return;
 
-    LatencyTimestamp latency;
+    MarketEvent marketEvent = makeMarketEvent(MarketEventType::CandleClosed, c);
 
-    latency.receivedNs = LatencyClock::nowNs();
-    const auto signal = strategy_->onCandleClosed(ctx_, c);
-    latency.strategyDoneNs = LatencyClock::nowNs();
+    handleMarketEvent(marketEvent);
 
-    for (const auto& s : signal) {
-        if (s.type == StrategySignalType::None) continue;
-
-        qCDebug(logStrategy) << "Closed signal type=" << static_cast<int>(s.type)
-                             << " symbol=" << s.symbolId
-                             << " tf=" << toUiString(s.tf)
-                             << " reason=" << s.reason;
-
-        handleSignal(s, c, latency);
-        emit signal_signalGenerated(s);
-    }
-
-    latencyCollector_.recordTickToStrategy(latency);
-
-    // Можно оставить и тут тоже, чтобы на закрытии свечи журнал точно обновился
     if (journal_) {
         journal_->onPriceUpdate(ctx_.symbolId, c.close_, riskSettings_.feePct);
     }
@@ -126,95 +109,155 @@ void StrategyRunner::onCandleUpdated(Candle c)
 {
     if (!running_ || !strategy_ || !ctx_.series) return;
 
-    LatencyTimestamp latency;
+    MarketEvent marketEvent = makeMarketEvent(MarketEventType::CandleUpdated, c);
 
-    latency.receivedNs = LatencyClock::nowNs();
-    const auto signal = strategy_->onCandleUpdated(ctx_, c);
-    latency.strategyDoneNs = LatencyClock::nowNs();
-
-    for (const auto& s : signal) {
-        if (s.type == StrategySignalType::None) continue;
-
-            qCDebug(logStrategyTicks) << "Update signal type=" << static_cast<int>(s.type)
-                                      << " symbol=" << s.symbolId
-                                      << " tf=" << toUiString(s.tf)
-                                      << " reason=" << s.reason;
-
-        handleSignal(s, c, latency);
-        emit signal_signalGenerated(s);
-    }
-
-    latencyCollector_.recordTickToStrategy(latency);
+    handleMarketEvent(marketEvent);
 
     if (journal_) {
         journal_->onPriceUpdate(ctx_.symbolId, c.close_, riskSettings_.feePct);
     }
 }
 
-void StrategyRunner::handleSignal(const StrategySignal& s, const Candle& closed, LatencyTimestamp& latency)
+void StrategyRunner::handleSignal(SignalEvent& signalEvent, const Candle& closed)
 {
     if (!risk_ || !exec_ || !journal_) return;
 
-    const double markPrice = closed.close_;
-    if (markPrice <= 0.0) return;
+    const StrategySignal& s = signalEvent.signal;
+    LatencyTimestamp& latency = signalEvent.latency;
 
-    const bool hasOpen = journal_->hasOpen(s.symbolId);
-    const TradeSide openSide = hasOpen ? journal_->openSide(s.symbolId) : TradeSide::Buy;
+    std::optional<OrderEvent> orderEvent = buildOrderEvent(signalEvent, closed, latency);
+    if (!orderEvent.has_value()) return;
+
+    FillEvent fillEvent = executeOrderEvent(orderEvent.value(), closed.close_);
+    handleFillEvent(fillEvent);
+
+    signalEvent.latency = fillEvent.latency;
+}
+
+MarketEvent  StrategyRunner::makeMarketEvent(MarketEventType type, const Candle& candle) const
+{
+    MarketEvent event;
+    event.candle = candle;
+    event.type = type;
+    event.symbolId = ctx_.symbolId;
+    event.timeframe = ctx_.tf;
+    return event;
+}
+
+void StrategyRunner::handleMarketEvent(MarketEvent& event)
+{
+    std::vector<StrategySignal> signal;
+
+    if (event.type == MarketEventType::CandleClosed)  {
+        event.latency.receivedNs = LatencyClock::nowNs();
+        signal = strategy_->onCandleClosed(ctx_, event.candle);
+        event.latency.strategyDoneNs = LatencyClock::nowNs();
+    } else if (event.type == MarketEventType::CandleUpdated) {
+        event.latency.receivedNs = LatencyClock::nowNs();
+        signal = strategy_->onCandleUpdated(ctx_, event.candle);
+        event.latency.strategyDoneNs = LatencyClock::nowNs();
+    } else {
+        return; // заглушка
+    }
+
+    for (const auto& s : signal) {
+        if (s.type == StrategySignalType::None) continue;
+
+        SignalEvent signalEvent;
+        signalEvent.signal = s;
+        signalEvent.latency = event.latency;
+
+        qCDebug(logStrategyTicks) << "Update signal type=" << static_cast<int>(s.type)
+                                  << " symbol=" << s.symbolId
+                                  << " tf=" << toUiString(s.tf)
+                                  << " reason=" << s.reason;
+
+        handleSignal(signalEvent, event.candle);
+        event.latency = signalEvent.latency;
+        emit signal_signalGenerated(signalEvent.signal);
+    }
+
+    latencyCollector_.recordTickToStrategy(event.latency);
+}
+
+std::optional<OrderEvent> StrategyRunner::buildOrderEvent(const SignalEvent& signalEvent,
+                                                          const Candle& candle,
+                                                          LatencyTimestamp& latency)
+{
+    const double markPrice = candle.close_;
+    if (markPrice <= 0.0) return std::nullopt;
+
+    const bool hasOpen = journal_->hasOpen(signalEvent.signal.symbolId);
+    const TradeSide openSide = hasOpen ? journal_->openSide(signalEvent.signal.symbolId) : TradeSide::Buy;
 
     // Build order from signal
     Order o = risk_->buildOrder(
-        s,
+        signalEvent.signal,
         riskSettings_,
         markPrice,
         journal_->equity(),
         hasOpen,
         openSide
-    );
+        );
 
     latency.orderCreatedNs = LatencyClock::nowNs();
 
     // RiskManager can return empty order
-    if (o.symbol.isEmpty()) return;
+    if (o.symbol.isEmpty()) return std::nullopt;
 
     // For Exit: close full qty
     if (o.reduceOnly) {
         o.qty = journal_->openQty(o.symbol);
     }
 
-    if (o.qty <= 0.0) return;
+    if (o.qty <= 0.0) return std::nullopt;
 
-    // Demo fill
-    Fill f = exec_->executeMarket(o, markPrice, riskSettings_);
+    OrderEvent orderEvent;
+    orderEvent.type = OrderEventType::Created;
+    orderEvent.order = o;
+    orderEvent.latency = latency;
 
-    // For OPEN fills, calculate fixed TP/SL levels from config
-    if (!f.reduceOnly && cfg_.fixedExit.enabled) {
+    return orderEvent;
+}
+
+FillEvent StrategyRunner::executeOrderEvent(const OrderEvent& orderEvent, double markPrice)
+{
+    FillEvent fillEvent;
+    fillEvent.fill = exec_->executeMarket(orderEvent.order, markPrice, riskSettings_);
+    fillEvent.latency = orderEvent.latency;
+    return fillEvent;
+}
+
+void StrategyRunner::handleFillEvent(FillEvent& fillEvent)
+{
+    if (!fillEvent.fill.reduceOnly && cfg_.fixedExit.enabled) {
         const double tpFrac = static_cast<double>(cfg_.fixedExit.tpBps) / 10000.0;
         const double slFrac = static_cast<double>(cfg_.fixedExit.slBps) / 10000.0;
 
-        if (f.side == TradeSide::Buy) {
-            f.tpPrice = f.price * (1.0 + tpFrac);
-            f.slPrice = f.price * (1.0 - slFrac);
+        if (fillEvent.fill.side == TradeSide::Buy) {
+            fillEvent.fill.tpPrice = fillEvent.fill.price * (1.0 + tpFrac);
+            fillEvent.fill.slPrice = fillEvent.fill.price * (1.0 - slFrac);
         } else {
-            f.tpPrice = f.price * (1.0 - tpFrac);
-            f.slPrice = f.price * (1.0 + slFrac);
+            fillEvent.fill.tpPrice = fillEvent.fill.price * (1.0 - tpFrac);
+            fillEvent.fill.slPrice = fillEvent.fill.price * (1.0 + slFrac);
         }
     }
 
     // Journal updates TradesModel + stats
-    journal_->onFill(f);
+    journal_->onFill(fillEvent.fill);
 
-    latency.fillHandledNs = LatencyClock::nowNs();
-    latencyCollector_.recordStrategyToOrder(latency);
-    latencyCollector_.recordOrderToFill(latency);
+    fillEvent.latency.fillHandledNs = LatencyClock::nowNs();
+    latencyCollector_.recordStrategyToOrder(fillEvent.latency);
+    latencyCollector_.recordOrderToFill(fillEvent.latency);
 
     // Optional debug each fill
-    qCDebug(logStrategy) << "Fill sym=" << f.symbol
-                         << " side=" << (f.side == TradeSide::Buy ? "Buy" : "Sell")
-                         << " qty=" << f.qty
-                         << " price=" << f.price
-                         << " fee=" << f.fee
-                         << " reduceOnly=" << f.reduceOnly
-                         << " tp=" << f.tpPrice
-                         << " sl=" << f.slPrice
+    qCDebug(logStrategy) << "Fill sym=" << fillEvent.fill.symbol
+                         << " side=" << (fillEvent.fill.side == TradeSide::Buy ? "Buy" : "Sell")
+                         << " qty=" << fillEvent.fill.qty
+                         << " price=" << fillEvent.fill.price
+                         << " fee=" << fillEvent.fill.fee
+                         << " reduceOnly=" << fillEvent.fill.reduceOnly
+                         << " tp=" << fillEvent.fill.tpPrice
+                         << " sl=" << fillEvent.fill.slPrice
                          << " equity=" << journal_->equity();
 }
