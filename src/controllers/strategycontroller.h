@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include <cstdint>
 #include "ui/models/tradesmodel.h"
 #include "domain/strategy/strategyconfig.h"
 #include "service/marketdataservice.h"
@@ -9,6 +10,8 @@
 #include "domain/risk/riskmanager.h"
 #include "service/execution/demoexecutionservice.h"
 #include "service/trade/tradejournal.h"
+
+#include "core/events/tradeevent.h"
 
 namespace Ui {
     class MainWindow;
@@ -26,6 +29,8 @@ class StrategyController final : public QObject {
     RiskManager* risk_ = nullptr;
     DemoExecutionService* demoExec_ = nullptr;
     TradeJournal* journal_ = nullptr;
+
+    std::uint64_t tradeUiSessionId_ = 0;
 
     bool running_ = false;
     StrategyConfig cfg_;
@@ -49,4 +54,7 @@ private:
 
     void showLevelsForSignal(const StrategySignal& s);
     void clearChartLevels();
+
+    void connectTradeJournalToUi();
+    void applyTradeEvent(const TradeEvent& event, std::uint64_t sessionId);
 };

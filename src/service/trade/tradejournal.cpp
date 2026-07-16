@@ -7,12 +7,8 @@ TradeJournal::TradeJournal(double startEquityUsdt) : startEquity_(startEquityUsd
     equity_(startEquityUsdt), peakEquity_(startEquityUsdt) {
 }
 
-void TradeJournal::setTradeAddedCallback(TradeAddedCallback cb) {
-    onTradeAdded_ = std::move(cb);
-}
-
-void TradeJournal::setTradeUpdatedCallback(TradeUpdatedCallback cb) {
-    onTradeUpdated_ = std::move(cb);
+void TradeJournal::setTradeEventCallback(TradeEventCallback cb) {
+    onTradeEvent_ = std::move(cb);
 }
 
 bool TradeJournal::hasOpen(const QString& symbol) const {
@@ -61,8 +57,12 @@ void TradeJournal::onFill(const Fill& f) {
         trades_.push_back(t);
         const int row = static_cast<int>(trades_.size()) - 1;
         openRowBySymbol_.insert(f.symbol, row);
-        if (onTradeAdded_) {
-            onTradeAdded_(t);
+        if (onTradeEvent_) {
+            TradeEvent event;
+            event.type = TradeEventType::Added;
+            event.row = row;
+            event.trade = t;
+            onTradeEvent_(event);
         }
         return;
     }
@@ -108,8 +108,12 @@ void TradeJournal::onFill(const Fill& f) {
     t.status = TradeStatus::Closed;
 
     trades_[row] = t;
-    if (onTradeUpdated_) {
-        onTradeUpdated_(row, t);
+    if (onTradeEvent_) {
+        TradeEvent event;
+        event.type = TradeEventType::Closed;
+        event.row = row;
+        event.trade = t;
+        onTradeEvent_(event);
     }
     openRowBySymbol_.remove(f.symbol);
 
@@ -167,7 +171,11 @@ void TradeJournal::onPriceUpdate(const QString& symbol, double markPrice, double
     t.pnl = unrealizedNet;
 
     trades_[row] = t;
-    if (onTradeUpdated_) {
-        onTradeUpdated_(row, t);
+    if (onTradeEvent_) {
+        TradeEvent event;
+        event.type = TradeEventType::Updated;
+        event.row = row;
+        event.trade = t;
+        onTradeEvent_(event);
     }
 }

@@ -179,34 +179,20 @@ void StrategyController::ensureDemoPipeline() {
     }
     if (!journal_) {
         journal_ = new TradeJournal(1000.0);
-        journal_->setTradeAddedCallback([this](const TradeRecord& trade){
-            tradesModel_->appendTrade(trade);
-        });
-        journal_->setTradeUpdatedCallback([this](int row, const TradeRecord& trade){
-            tradesModel_->updateTrade(row, trade);
-        });
+        connectTradeJournalToUi();
     }
 }
 
 void StrategyController::resetDemoSession() {
+    ++tradeUiSessionId_;
     tradesModel_->clear();
 
-    if (journal_) {
-        delete journal_;
-        journal_ = nullptr;
-    }
-
+    delete journal_;
     journal_ = new TradeJournal(1000.0);
-    journal_->setTradeAddedCallback([this](const TradeRecord& trade){
-        tradesModel_->appendTrade(trade);
-    });
-    journal_->setTradeUpdatedCallback([this](int row, const TradeRecord& trade){
-        tradesModel_->updateTrade(row, trade);
-    });
 
-    if (runner_) {
-        runner_->setTradeJournal(journal_);
-    }
+    connectTradeJournalToUi();
+    runner_->setTradeJournal(journal_);
+
     clearChartLevels();
 }
 
@@ -244,7 +230,30 @@ void StrategyController::showLevelsForSignal(const StrategySignal& s) {
             return;
         }
     }
-
     qCDebug(logStrategyUi) << "No open trade found for symbol" << s.symbolId;
+}
+
+void StrategyController::connectTradeJournalToUi() {
+    const std::uint64_t sessionId = tradeUiSessionId_;
+    journal_->setTradeEventCallback(
+        [this, sessionId](const TradeEvent& event) {
+            QMetaObject::invokeMethod(this, [this, event, sessionId]{
+                applyTradeEvent(event, sessionId);
+            }, Qt::QueuedConnection);
+        });
+}
+
+void StrategyController::applyTradeEvent(const TradeEvent& event, std::uint64_t sessionId) {
+    if (sessionId != tradeUiSessionId_ || !tradesModel_) return;
+
+    switch(event.type) {
+    case TradeEventType::Added:
+        tradesModel_->appendTrade(event.trade);
+        break;
+    case TradeEventType::Updated:
+    case TradeEventType::Closed:
+        tradesModel_->updateTrade(event.row, event.trade);
+        break;
+    }
 }
 

@@ -4,6 +4,7 @@
 #include <functional>
 #include <vector>
 #include "domain/order/fill.h"
+#include "core/events/tradeevent.h"
 
 struct TradeReport final {
     double equity = 0.0;
@@ -18,13 +19,11 @@ struct TradeReport final {
 
 class TradeJournal final {
 public:
-    using TradeAddedCallback = std::function<void (const TradeRecord&)>;
-    using TradeUpdatedCallback = std::function<void (int, const TradeRecord&)>;
+    using TradeEventCallback = std::function<void (const TradeEvent&)>;
 
     explicit TradeJournal(double startEquityUsdt);
 
-    void setTradeAddedCallback(TradeAddedCallback cb);
-    void setTradeUpdatedCallback(TradeUpdatedCallback cb);
+    void setTradeEventCallback(TradeEventCallback cb);
 
     bool hasOpen(const QString& symbol) const;
     TradeSide openSide(const QString& symbol) const;
@@ -41,8 +40,7 @@ public:
 private:
     std::vector<TradeRecord> trades_;
 
-    TradeAddedCallback onTradeAdded_;
-    TradeUpdatedCallback onTradeUpdated_;
+    TradeEventCallback onTradeEvent_;
 
     // open trade row by symbol
     QHash<QString, int> openRowBySymbol_;

@@ -267,19 +267,12 @@ namespace {
     void testTradeJournalOwnsState() {
         TradeJournal journal(1000.0);
 
-        int addedCount = 0;
-        int updatedCount = 0;
-        TradeRecord lastAdded;
-        TradeRecord lastUpdated;
+        int eventCount = 0;
+        TradeEvent lastEvent;
 
-        journal.setTradeAddedCallback([&](const TradeRecord& trade) {
-            ++addedCount;
-            lastAdded = trade;
-        });
-
-        journal.setTradeUpdatedCallback([&](int, const TradeRecord& trade) {
-            ++updatedCount;
-            lastUpdated = trade;
+        journal.setTradeEventCallback([&](const TradeEvent& event) {
+            ++eventCount;
+            lastEvent = event;
         });
 
         Fill open;
@@ -293,16 +286,20 @@ namespace {
 
         journal.onFill(open);
 
-        require(addedCount == 1, "TradeJournal emits add callback on open fill");
+        require(eventCount == 1, "TradeJournal emits one event on open fill");
+        require(lastEvent.type == TradeEventType::Added, "TradeJournal emits Added event on open fill");
+        require(lastEvent.row == 0, "TradeJournal emits opened trade row");
         require(journal.hasOpen("ETHUSDT"), "TradeJournal tracks open position");
         require(journal.openSide("ETHUSDT") == TradeSide::Buy, "TradeJournal returns open side from owned state");
         requireNear(journal.openQty("ETHUSDT"), 0.5, 1e-9, "TradeJournal returns open qty from owned state");
-        require(lastAdded.symbol == "ETHUSDT", "TradeJournal callback receives opened trade");
+        require(lastEvent.trade.symbol == "ETHUSDT", "TradeJournal event contains opened trade");
 
         journal.onPriceUpdate("ETHUSDT", 2010.0, 0.06);
 
-        require(updatedCount == 1, "TradeJournal emits update callback on price update");
-        require(lastUpdated.status == TradeStatus::Open, "TradeJournal keeps trade open after price update");
+        require(eventCount == 2, "TradeJournal emits second event on price update");
+        require(lastEvent.type == TradeEventType::Updated, "TradeJournal emits Updated event on price update");
+        require(lastEvent.row == 0, "TradeJournal emits updated trade row");
+        require(lastEvent.trade.status == TradeStatus::Open, "TradeJournal keeps trade open after price update");
 
         Fill close;
         close.time = QDateTime::fromMSecsSinceEpoch(2000);
@@ -316,8 +313,10 @@ namespace {
         journal.onFill(close);
 
         require(!journal.hasOpen("ETHUSDT"), "TradeJournal clears open position after close fill");
-        require(updatedCount == 2, "TradeJournal emits update callback on close fill");
-        require(lastUpdated.status == TradeStatus::Closed, "TradeJournal closes trade in owned state");
+        require(eventCount == 3, "TradeJournal emits third event on close fill");
+        require(lastEvent.type == TradeEventType::Closed, "TradeJournal emits Closed event on close fill");
+        require(lastEvent.row == 0, "TradeJournal emits closed trade row");
+        require(lastEvent.trade.status == TradeStatus::Closed, "TradeJournal closes trade in owned state");
 
         const TradeReport report = journal.report();
         require(report.closedTrades == 1, "TradeJournal reports one closed trade");
@@ -456,6 +455,23 @@ namespace {
         LatencyStatsSnapshot empty;
         require(formatLatencyStats(empty) == "count=0", "Latency formatter keeps empty snapshot compact");
     }
+
+    void testLatencyStatsCapacity() {
+        LatencyStats stats{2};
+        stats.addSample(10);
+        stats.addSample(20);
+        stats.addSample(30);
+        require(stats.snapshot().maxNs == 20, "LatencyStats max is 20, not 30");
+        require(stats.snapshot().count == 2, "LatencyStats count is 2, like a capacity");
+        stats.clear();
+        require(stats.snapshot().count == 0, "LatencyStats is empty");
+        stats.addSample(20);
+        stats.addSample(40);
+        stats.addSample(50);
+        require(stats.snapshot().maxNs == 40, "LatencyStats max is 40, not 50");
+        require(stats.snapshot().count == 2, "LatencyStats count is 2, like a capacity");
+        require(stats.snapshot().minNs == 20, "LatencyStats min is 20");
+    }
 }
 
 int main() {
@@ -479,6 +495,7 @@ int main() {
     testLatencyCollectorZeroTimestamp();
     testLatencyClock();
     testFormatter();
+    testLatencyStatsCapacity();
 
     std::cout << "All TradeSoft tests passed\n";
     return 0;

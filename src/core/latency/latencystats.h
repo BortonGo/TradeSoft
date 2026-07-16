@@ -19,6 +19,7 @@ struct LatencyStatsSnapshot final {
 
 class LatencyStats final {
     std::vector<std::uint64_t> samples_;
+    std::size_t capacity_{};
 
     std::uint64_t percentile(std::size_t p) const {
         if (p > 100.0) throw std::out_of_range("p > 100");
@@ -34,10 +35,19 @@ class LatencyStats final {
     }
 
 public:
+
+    explicit LatencyStats(std::size_t maxSamples = 0) {
+        if (maxSamples > 0) {
+            capacity_ = maxSamples;
+            samples_.reserve(maxSamples);
+        }
+    }
+
     void reserve(std::size_t capacity) {
         samples_.reserve(capacity);
     }
     void addSample(std::uint64_t latencyNs) {
+        if (capacity_ != 0 && samples_.size() == capacity_) return;
         samples_.push_back(latencyNs);
     }
     void clear() {

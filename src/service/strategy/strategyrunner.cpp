@@ -77,9 +77,11 @@ void StrategyRunner::stop() {
                             << " maxDD=" << r.maxDrawdown;
     }
 
-    qCInfo(logLatency) << "Latency tick-to-strategy: " << formatLatencyStats(latencyCollector_.snapshot().tickToStrategy);
-    qCInfo(logLatency) << "Latency strategy-to-order: " << formatLatencyStats(latencyCollector_.snapshot().strategyToOrder);
-    qCInfo(logLatency) << "Latency order-to-fill: " << formatLatencyStats(latencyCollector_.snapshot().orderToFill);
+    const auto snapshot = latencyCollector_.snapshot();
+
+    qCInfo(logLatency) << "Latency tick-to-strategy: " << formatLatencyStats(snapshot.tickToStrategy);
+    qCInfo(logLatency) << "Latency strategy-to-order: " << formatLatencyStats(snapshot.strategyToOrder);
+    qCInfo(logLatency) << "Latency order-to-fill: " << formatLatencyStats(snapshot.orderToFill);
 
     qCInfo(logStrategy) << "Stop";
 }
