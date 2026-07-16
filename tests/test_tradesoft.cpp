@@ -472,6 +472,37 @@ namespace {
         require(stats.snapshot().count == 2, "LatencyStats count is 2, like a capacity");
         require(stats.snapshot().minNs == 20, "LatencyStats min is 20");
     }
+
+    void testEmaStateMatchesBatchEma() {
+        const std::vector<Candle> candles = {
+            candle(1.0), candle(2.0), candle(3.0),
+            candle(4.0), candle(5.0), candle(6.0)
+        };
+        const auto batch = EMA::calculate(candles, 3);
+
+        EmaState stream{3};
+        for (std::size_t i = 0; i < candles.size(); ++i) {
+            const auto streamed = stream.update(candles[i].close_);
+
+            if (i < 2) {
+                require(!streamed.has_value(), "stream EMA is warming up");
+            } else {
+                require(streamed.has_value(), "stream EMA is ready");
+                requireNear(*streamed, batch[i], 1e-9,
+                            "stream EMA matches batch EMA");
+            }
+        }
+
+        stream.reset();
+        require(!stream.isReady(), "reset makes stream EMA not ready");
+        require(!stream.value().has_value(), "reset clears stream EMA value");
+        require(!stream.update(6.0).has_value(), "stream EMA warms up again after reset");
+
+        EmaState invalid{0};
+        require(!invalid.isReady(), "invalid EMA is not ready");
+        require(!invalid.update(1.0).has_value(), "invalid EMA update has no value");
+        require(!invalid.value().has_value(), "invalid EMA has no current value");
+    }
 }
 
 int main() {
@@ -496,6 +527,7 @@ int main() {
     testLatencyClock();
     testFormatter();
     testLatencyStatsCapacity();
+    testEmaStateMatchesBatchEma();
 
     std::cout << "All TradeSoft tests passed\n";
     return 0;

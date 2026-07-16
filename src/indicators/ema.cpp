@@ -1,8 +1,7 @@
 #include "ema.h"
 #include <limits>
 
-std::vector<double> EMA::calculate(const std::vector<Candle>& candles, int period)
-{
+std::vector<double> EMA::calculate(const std::vector<Candle>& candles, int period) {
     const int n = candles.size();
     std::vector<double> out(n, std::numeric_limits<double>::quiet_NaN());
     if (n < period || period <= 0) return out;
@@ -23,4 +22,42 @@ std::vector<double> EMA::calculate(const std::vector<Candle>& candles, int perio
     }
 
     return out;
+}
+
+EmaState::EmaState(int period) : period_(period) {}
+
+void EmaState::reset() {
+    warmupCount_ = 0;
+    warmupSum_ = 0.0;
+    currentEma_.reset();
+}
+
+std::optional<double> EmaState::update(double price) {
+    if (period_ <= 0) {
+        return std::nullopt;
+    }
+
+    if (!currentEma_) {
+        ++warmupCount_;
+        warmupSum_ += price;
+
+        if (warmupCount_ < period_) {
+            return std::nullopt;
+        }
+
+        currentEma_ = warmupSum_ / period_;
+        return currentEma_;
+    }
+
+    const double k = 2.0 / (period_ + 1.0);
+    *currentEma_ += k * (price - *currentEma_);
+    return currentEma_;
+}
+
+bool EmaState::isReady() const noexcept {
+    return currentEma_.has_value();
+}
+
+std::optional<double> EmaState::value() const {
+    return currentEma_;
 }
